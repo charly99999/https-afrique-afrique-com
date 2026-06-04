@@ -4,15 +4,13 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { SUB_PRICES, BOOST_PRICES, type SubPlan } from "@/data/pricing";
 
-function getOriginFromHeaders(headers?: Headers): string {
-  const forwardedProto = headers?.get("x-forwarded-proto");
-  const forwardedHost = headers?.get("x-forwarded-host");
-  const host = forwardedHost ?? headers?.get("host");
-
-  if (host) {
-    return `${forwardedProto ?? "https"}://${host}`;
-  }
-
+async function getServerOrigin(): Promise<string> {
+  try {
+    const mod = await import("@tanstack/react-start/server");
+    const proto = mod.getRequestHeader("x-forwarded-proto");
+    const host = mod.getRequestHeader("x-forwarded-host") ?? mod.getRequestHeader("host");
+    if (host) return `${proto ?? "https"}://${host}`;
+  } catch { /* no-op */ }
   return process.env.PUBLIC_SITE_URL
     ?? `https://project--${process.env.SUPABASE_PROJECT_ID ?? "app"}.lovable.app`;
 }
