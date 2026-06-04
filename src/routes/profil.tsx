@@ -1,6 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { MobileShell } from "@/components/MobileShell";
-import { Settings, BarChart3, Store, CreditCard, Bell, LogIn } from "lucide-react";
+import { Settings, BarChart3, Store, CreditCard, Bell, LogIn, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/profil")({
   head: () => ({ meta: [{ title: "Mon profil — Afrique-business" }] }),
@@ -8,26 +11,45 @@ export const Route = createFileRoute("/profil")({
 });
 
 function ProfilPage() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleSignOut() {
+    const { error } = await supabase.auth.signOut();
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Déconnecté");
+      navigate({ to: "/" });
+    }
+  }
+
+  const initial = (user?.user_metadata?.display_name || user?.email || "?").charAt(0).toUpperCase();
+  const name = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Visiteur";
+
   return (
     <MobileShell>
       <div className="px-5 pt-6">
         <div className="flex items-center gap-4">
           <div className="grid size-16 place-items-center rounded-full bg-brand-green/10 font-display text-2xl italic text-brand-green">
-            ?
+            {initial}
           </div>
           <div className="flex-1">
-            <p className="text-sm font-bold">Visiteur</p>
-            <p className="text-xs text-muted-foreground">Connectez-vous pour publier</p>
+            <p className="text-sm font-bold">{name}</p>
+            <p className="text-xs text-muted-foreground">
+              {user ? user.email : "Connectez-vous pour publier"}
+            </p>
           </div>
         </div>
 
-        <Link
-          to="/auth"
-          className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-brand-green py-3 text-sm font-bold text-primary-foreground"
-        >
-          <LogIn className="size-4" />
-          Se connecter / S'inscrire
-        </Link>
+        {!loading && !user && (
+          <Link
+            to="/auth"
+            className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-brand-green py-3 text-sm font-bold text-primary-foreground"
+          >
+            <LogIn className="size-4" />
+            Se connecter / S'inscrire
+          </Link>
+        )}
 
         <div className="mt-8 space-y-2">
           <Row icon={<Store className="size-4" />} label="Mes annonces" />
@@ -49,6 +71,16 @@ function ProfilPage() {
             Boutique avancée, catalogue, 3 boosts/mois offerts.
           </p>
         </Link>
+
+        {user && (
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-border py-3 text-sm font-bold text-muted-foreground hover:bg-muted"
+          >
+            <LogOut className="size-4" /> Se déconnecter
+          </button>
+        )}
       </div>
     </MobileShell>
   );
