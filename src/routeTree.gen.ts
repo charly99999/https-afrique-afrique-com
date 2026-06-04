@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PublierRouteImport } from './routes/publier'
 import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as ParametresRouteImport } from './routes/parametres'
 import { Route as MonAbonnementRouteImport } from './routes/mon-abonnement'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MesStatistiquesRouteImport } from './routes/mes-statistiques'
@@ -32,6 +33,11 @@ const PublierRoute = PublierRouteImport.update({
 const ProfilRoute = ProfilRouteImport.update({
   id: '/profil',
   path: '/profil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParametresRoute = ParametresRouteImport.update({
+  id: '/parametres',
+  path: '/parametres',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MonAbonnementRoute = MonAbonnementRouteImport.update({
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/mes-statistiques': typeof MesStatistiquesRoute
   '/messages': typeof MessagesRoute
   '/mon-abonnement': typeof MonAbonnementRoute
+  '/parametres': typeof ParametresRoute
   '/profil': typeof ProfilRoute
   '/publier': typeof PublierRoute
   '/annonces/$id': typeof AnnoncesIdRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/mes-statistiques': typeof MesStatistiquesRoute
   '/messages': typeof MessagesRoute
   '/mon-abonnement': typeof MonAbonnementRoute
+  '/parametres': typeof ParametresRoute
   '/profil': typeof ProfilRoute
   '/publier': typeof PublierRoute
   '/annonces/$id': typeof AnnoncesIdRoute
@@ -137,6 +145,7 @@ export interface FileRoutesById {
   '/mes-statistiques': typeof MesStatistiquesRoute
   '/messages': typeof MessagesRoute
   '/mon-abonnement': typeof MonAbonnementRoute
+  '/parametres': typeof ParametresRoute
   '/profil': typeof ProfilRoute
   '/publier': typeof PublierRoute
   '/annonces/$id': typeof AnnoncesIdRoute
@@ -155,6 +164,7 @@ export interface FileRouteTypes {
     | '/mes-statistiques'
     | '/messages'
     | '/mon-abonnement'
+    | '/parametres'
     | '/profil'
     | '/publier'
     | '/annonces/$id'
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/mes-statistiques'
     | '/messages'
     | '/mon-abonnement'
+    | '/parametres'
     | '/profil'
     | '/publier'
     | '/annonces/$id'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/mes-statistiques'
     | '/messages'
     | '/mon-abonnement'
+    | '/parametres'
     | '/profil'
     | '/publier'
     | '/annonces/$id'
@@ -204,6 +216,7 @@ export interface RootRouteChildren {
   MesStatistiquesRoute: typeof MesStatistiquesRoute
   MessagesRoute: typeof MessagesRoute
   MonAbonnementRoute: typeof MonAbonnementRoute
+  ParametresRoute: typeof ParametresRoute
   ProfilRoute: typeof ProfilRoute
   PublierRoute: typeof PublierRoute
   AnnoncesIdRoute: typeof AnnoncesIdRoute
@@ -226,6 +239,13 @@ declare module '@tanstack/react-router' {
       path: '/profil'
       fullPath: '/profil'
       preLoaderRoute: typeof ProfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parametres': {
+      id: '/parametres'
+      path: '/parametres'
+      fullPath: '/parametres'
+      preLoaderRoute: typeof ParametresRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mon-abonnement': {
@@ -324,6 +344,7 @@ const rootRouteChildren: RootRouteChildren = {
   MesStatistiquesRoute: MesStatistiquesRoute,
   MessagesRoute: MessagesRoute,
   MonAbonnementRoute: MonAbonnementRoute,
+  ParametresRoute: ParametresRoute,
   ProfilRoute: ProfilRoute,
   PublierRoute: PublierRoute,
   AnnoncesIdRoute: AnnoncesIdRoute,
