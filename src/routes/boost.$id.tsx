@@ -6,6 +6,7 @@ import { MobileShell } from "@/components/MobileShell";
 import { Rocket, Check, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { startBoostPayment } from "@/lib/paydunya.functions";
+import { redirectToCheckout } from "@/lib/redirect-checkout";
 import { BOOST_PRICES, type BoostDays } from "@/data/pricing";
 import { resolveListingImages } from "@/lib/listing-images";
 
