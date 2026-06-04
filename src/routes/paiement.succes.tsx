@@ -93,9 +93,13 @@ function SuccessPage() {
           .maybeSingle();
         let nextStatus = data?.status ?? "pending";
         if (nextStatus === "pending" && tries >= 2) {
+          const accessToken = sess.session?.access_token;
           const response = await fetch("/paiement/succes", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+            },
             body: JSON.stringify({ paymentId: id }),
           });
           const payload = await response.json().catch(() => null) as { status?: "pending" | "completed" | "failed" | "cancelled" } | null;
