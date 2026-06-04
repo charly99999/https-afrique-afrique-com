@@ -7,6 +7,7 @@ import { Rocket, Check, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { startBoostPayment } from "@/lib/paydunya.functions";
 import { BOOST_PRICES, type BoostDays } from "@/data/pricing";
+import { resolveListingImages } from "@/lib/listing-images";
 
 export const Route = createFileRoute("/boost/$id")({
   head: () => ({ meta: [{ title: "Booster mon annonce — Afrique-business" }] }),
@@ -25,7 +26,11 @@ function BoostPage() {
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(id);
     if (!isUuid) { setInfo({ title: "Annonce démo", city: "—", cover: null }); return; }
     supabase.from("listings").select("title, city, cover_url").eq("id", id).maybeSingle()
-      .then(({ data }) => setInfo(data ? { title: data.title, city: data.city, cover: data.cover_url } : null));
+      .then(async ({ data }) => {
+        if (!data) return setInfo(null);
+        const resolved = await resolveListingImages([data.cover_url]);
+        setInfo({ title: data.title, city: data.city, cover: data.cover_url ? (resolved.get(data.cover_url) ?? data.cover_url) : null });
+      });
   }, [id]);
 
   async function handleBoost(days: BoostDays) {

@@ -6,6 +6,7 @@ import { MobileShell } from "@/components/MobileShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { formatFcfa } from "@/data/catalog";
+import { resolveListingImages } from "@/lib/listing-images";
 
 const searchSchema = z.object({
   listing: z.string().uuid().optional(),
@@ -105,7 +106,9 @@ function ConversationsList({ userId }: { userId: string }) {
         const nameById = new Map((profs as { id: string; display_name: string | null }[] | null)?.map((p) => [p.id, p.display_name ?? "Utilisateur"]) ?? []);
         for (const c of map.values()) c.other_name = nameById.get(c.other_id) ?? "Utilisateur";
       }
-      setConvos(Array.from(map.values()));
+      const convos = Array.from(map.values());
+      const resolved = await resolveListingImages(convos.map((c) => c.listing_cover));
+      setConvos(convos.map((c) => ({ ...c, listing_cover: c.listing_cover ? (resolved.get(c.listing_cover) ?? c.listing_cover) : null })));
     }
     load();
     const ch = supabase.channel("messages-list")
@@ -175,7 +178,10 @@ function Thread({ userId, listingId, otherId }: { userId: string; listingId: str
       ]);
       if (cancelled) return;
       setMessages((msgs ?? []) as Message[]);
-      if (lst) setListing({ title: lst.title, price: Number(lst.price_fcfa), cover: lst.cover_url });
+      if (lst) {
+        const resolvedCover = await resolveListingImages([lst.cover_url]);
+        setListing({ title: lst.title, price: Number(lst.price_fcfa), cover: lst.cover_url ? (resolvedCover.get(lst.cover_url) ?? lst.cover_url) : null });
+      }
       const profRow = prof as { display_name?: string | null } | null;
       if (profRow?.display_name) setOtherName(profRow.display_name);
       // mark unread as read
