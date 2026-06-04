@@ -32,8 +32,8 @@ function PublierPage() {
   const [city, setCity] = useState(COUNTRIES[0].cities[0]);
   const [submitting, setSubmitting] = useState(false);
 
-  if (loading) return <MobileShell><div className="p-10 text-center text-sm text-muted-foreground">…</div></MobileShell>;
-  if (!user) {
+  if (loading || !user) {
+    if (loading) return <MobileShell><div className="p-10 text-center text-sm text-muted-foreground">…</div></MobileShell>;
     return (
       <MobileShell>
         <div className="px-6 py-20 text-center">
@@ -44,6 +44,7 @@ function PublierPage() {
       </MobileShell>
     );
   }
+  const currentUser = user;
 
   const cities = COUNTRIES.find((c) => c.code === country)?.cities ?? [];
   const subs = CATEGORIES.find((c) => c.slug === category)?.sub ?? [];

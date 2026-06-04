@@ -6,7 +6,7 @@ import watchImg from "@/assets/listing-watch.jpg";
 import studioImg from "@/assets/listing-studio.jpg";
 
 export type CountryCode =
-  | "CI" | "SN" | "ML" | "BF" | "BJ" | "TG" | "NE" | "GN" | "CM" | "CG" | "GA";
+  | "CI" | "SN" | "ML" | "BF" | "BJ" | "TG" | "NE" | "GN" | "CM" | "CD" | "GA";
 
 export const COUNTRIES: { code: CountryCode; name: string; flag: string; cities: string[] }[] = [
   { code: "CI", name: "Côte d'Ivoire", flag: "🇨🇮", cities: ["Abidjan", "Cocody", "Yopougon", "Bouaké", "San-Pédro", "Yamoussoukro"] },
@@ -18,7 +18,7 @@ export const COUNTRIES: { code: CountryCode; name: string; flag: string; cities:
   { code: "NE", name: "Niger", flag: "🇳🇪", cities: ["Niamey", "Zinder", "Maradi"] },
   { code: "GN", name: "Guinée", flag: "🇬🇳", cities: ["Conakry", "Kankan", "Labé"] },
   { code: "CM", name: "Cameroun", flag: "🇨🇲", cities: ["Yaoundé", "Douala", "Bafoussam", "Garoua"] },
-  { code: "CG", name: "Congo", flag: "🇨🇬", cities: ["Brazzaville", "Pointe-Noire"] },
+  { code: "CD", name: "RD Congo", flag: "🇨🇩", cities: ["Kinshasa", "Lubumbashi", "Goma", "Bukavu"] },
   { code: "GA", name: "Gabon", flag: "🇬🇦", cities: ["Libreville", "Port-Gentil"] },
 ];
 
