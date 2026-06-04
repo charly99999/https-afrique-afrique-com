@@ -111,7 +111,7 @@ function ConversationsList({ userId }: { userId: string }) {
       setConvos(convos.map((c) => ({ ...c, listing_cover: c.listing_cover ? (resolved.get(c.listing_cover) ?? c.listing_cover) : null })));
     }
     load();
-    const ch = supabase.channel(`messages-list-${userId}`)
+    const ch = supabase.channel(`messages:list:${userId}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, load)
       .subscribe();
     return () => { cancelled = true; supabase.removeChannel(ch); };
