@@ -250,6 +250,3 @@ function ContactBar({ listing, onMessage, isOwn }: { listing: DbListing; onMessa
     </div>
   );
 }
-    </MobileShell>
-  );
-}
