@@ -3,14 +3,16 @@ import { useEffect, useState } from "react";
 import { MobileShell } from "@/components/MobileShell";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { confirmPaydunyaInvoice } from "@/lib/paydunya.server";
-import { finalizePaydunyaPayment } from "@/lib/paydunya-activation.server";
 
 export const Route = createFileRoute("/paiement/succes")({
   head: () => ({ meta: [{ title: "Paiement reçu — Afrique-business" }] }),
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const [{ confirmPaydunyaInvoice }, { finalizePaydunyaPayment }] = await Promise.all([
+          import("@/lib/paydunya.server"),
+          import("@/lib/paydunya-activation.server"),
+        ]);
         const body = await request.json().catch(() => null) as { paymentId?: string } | null;
         const paymentId = body?.paymentId;
         if (!paymentId) return Response.json({ ok: false, error: "paymentId manquant" }, { status: 400 });

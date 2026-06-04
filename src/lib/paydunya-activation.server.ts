@@ -29,14 +29,22 @@ async function activatePayment(payment: PaymentRow) {
 
     const expires = new Date(Date.now() + plan.days * 86400 * 1000).toISOString();
 
-    await supabaseAdmin.from("subscriptions").upsert({
-      user_id: payment.user_id,
-      plan: payment.related_plan as never,
-      amount_fcfa: payment.amount_fcfa,
-      expires_at: expires,
-      payment_id: payment.id,
-      active: true,
-    }, { onConflict: "payment_id" });
+    const { data: existingSubscription } = await supabaseAdmin
+      .from("subscriptions")
+      .select("id")
+      .eq("payment_id", payment.id)
+      .maybeSingle();
+
+    if (!existingSubscription) {
+      await supabaseAdmin.from("subscriptions").insert({
+        user_id: payment.user_id,
+        plan: payment.related_plan as never,
+        amount_fcfa: payment.amount_fcfa,
+        expires_at: expires,
+        payment_id: payment.id,
+        active: true,
+      });
+    }
 
     await supabaseAdmin.from("profiles")
       .update({ account_type: plan.tier, account_expires_at: expires })
@@ -46,14 +54,22 @@ async function activatePayment(payment: PaymentRow) {
   if (payment.kind === "boost" && payment.related_listing_id && payment.boost_days) {
     const expires = new Date(Date.now() + payment.boost_days * 86400 * 1000).toISOString();
 
-    await supabaseAdmin.from("boosts").upsert({
-      user_id: payment.user_id,
-      listing_id: payment.related_listing_id,
-      days: payment.boost_days,
-      amount_fcfa: payment.amount_fcfa,
-      expires_at: expires,
-      payment_id: payment.id,
-    }, { onConflict: "payment_id" });
+    const { data: existingBoost } = await supabaseAdmin
+      .from("boosts")
+      .select("id")
+      .eq("payment_id", payment.id)
+      .maybeSingle();
+
+    if (!existingBoost) {
+      await supabaseAdmin.from("boosts").insert({
+        user_id: payment.user_id,
+        listing_id: payment.related_listing_id,
+        days: payment.boost_days,
+        amount_fcfa: payment.amount_fcfa,
+        expires_at: expires,
+        payment_id: payment.id,
+      });
+    }
 
     await supabaseAdmin.from("listings")
       .update({ boosted_until: expires })
