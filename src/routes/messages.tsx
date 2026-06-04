@@ -176,7 +176,8 @@ function Thread({ userId, listingId, otherId }: { userId: string; listingId: str
       if (cancelled) return;
       setMessages((msgs ?? []) as Message[]);
       if (lst) setListing({ title: lst.title, price: Number(lst.price_fcfa), cover: lst.cover_url });
-      if (prof?.display_name) setOtherName(prof.display_name);
+      const profRow = prof as { display_name?: string | null } | null;
+      if (profRow?.display_name) setOtherName(profRow.display_name);
       // mark unread as read
       const unread = (msgs ?? []).filter((m) => m.recipient_id === userId && !m.read_at).map((m) => m.id);
       if (unread.length) await supabase.from("messages").update({ read_at: new Date().toISOString() }).in("id", unread);

@@ -56,7 +56,8 @@ export const startSubscriptionPayment = createServerFn({ method: "POST" })
       callbackUrl: `${origin}/api/public/paydunya-ipn`,
     });
 
-    await supabase.from("payments").update({
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("payments").update({
       provider_token: invoice.token ?? null,
       provider_invoice_url: invoice.invoiceUrl ?? null,
       provider_response: (invoice.raw as object as never) ?? null,
