@@ -47,7 +47,7 @@ export const Route = createFileRoute("/api/public/paydunya-ipn")({
           .update({
             status: newStatus,
             provider_token: token || null,
-            provider_response: data as object,
+            provider_response: data as object as never,
             completed_at: newStatus === "completed" ? new Date().toISOString() : null,
           })
           .eq("id", paymentId)

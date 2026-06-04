@@ -59,7 +59,7 @@ export const startSubscriptionPayment = createServerFn({ method: "POST" })
     await supabase.from("payments").update({
       provider_token: invoice.token ?? null,
       provider_invoice_url: invoice.invoiceUrl ?? null,
-      provider_response: (invoice.raw as object) ?? null,
+      provider_response: (invoice.raw as object as never) ?? null,
       status: invoice.ok ? "pending" : "failed",
     }).eq("id", payment.id);
 
@@ -121,7 +121,7 @@ export const startBoostPayment = createServerFn({ method: "POST" })
     await supabase.from("payments").update({
       provider_token: invoice.token ?? null,
       provider_invoice_url: invoice.invoiceUrl ?? null,
-      provider_response: (invoice.raw as object) ?? null,
+      provider_response: (invoice.raw as object as never) ?? null,
       status: invoice.ok ? "pending" : "failed",
     }).eq("id", payment.id);
 
