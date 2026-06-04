@@ -1,47 +1,53 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 import { MobileShell } from "@/components/MobileShell";
-import { getListing } from "@/data/catalog";
-import { Rocket, Check } from "lucide-react";
+import { Rocket, Check, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { startBoostPayment } from "@/lib/paydunya.functions";
+import { BOOST_PRICES, type BoostDays } from "@/data/pricing";
 
 export const Route = createFileRoute("/boost/$id")({
-  loader: ({ params }) => {
-    const listing = getListing(params.id);
-    if (!listing) throw notFound();
-    return { listing };
-  },
   head: () => ({ meta: [{ title: "Booster mon annonce — Afrique-business" }] }),
-  notFoundComponent: () => (
-    <MobileShell>
-      <div className="px-6 py-20 text-center">
-        <h1 className="font-display text-2xl italic">Annonce introuvable</h1>
-      </div>
-    </MobileShell>
-  ),
-  errorComponent: ({ error, reset }) => (
-    <MobileShell>
-      <div className="px-6 py-20 text-center">
-        <h1 className="font-display text-2xl italic">Erreur</h1>
-        <p className="mt-2 text-xs text-muted-foreground">{error.message}</p>
-        <button onClick={reset} className="mt-4 rounded-xl bg-brand-green px-5 py-2 text-sm font-bold text-primary-foreground">Réessayer</button>
-      </div>
-    </MobileShell>
-  ),
   component: BoostPage,
 });
 
-const PACKS = [
-  { days: 1, price: 500 },
-  { days: 3, price: 1_200 },
-  { days: 7, price: 2_500 },
-  { days: 30, price: 8_000 },
-];
+const PACKS: { days: BoostDays }[] = [{ days: 1 }, { days: 3 }, { days: 7 }, { days: 30 }];
 
 function BoostPage() {
-  const { listing } = Route.useLoaderData();
+  const { id } = useParams({ from: "/boost/$id" });
+  const startBoost = useServerFn(startBoostPayment);
+  const [loadingDays, setLoadingDays] = useState<BoostDays | null>(null);
+  const [info, setInfo] = useState<{ title: string; city: string; cover: string | null } | null>(null);
+
+  useEffect(() => {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(id);
+    if (!isUuid) { setInfo({ title: "Annonce démo", city: "—", cover: null }); return; }
+    supabase.from("listings").select("title, city, cover_url").eq("id", id).maybeSingle()
+      .then(({ data }) => setInfo(data ? { title: data.title, city: data.city, cover: data.cover_url } : null));
+  }, [id]);
+
+  async function handleBoost(days: BoostDays) {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(id)) {
+      toast.error("Le boost n'est disponible que sur vos annonces réelles");
+      return;
+    }
+    setLoadingDays(days);
+    try {
+      const res = await startBoost({ data: { listingId: id, days } });
+      if (!res.ok || !res.invoiceUrl) throw new Error(res.error ?? "Erreur");
+      window.location.href = res.invoiceUrl;
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erreur");
+      setLoadingDays(null);
+    }
+  }
+
   return (
     <MobileShell>
       <header className="border-b border-border px-5 pb-5 pt-6">
-        <Link to="/annonces/$id" params={{ id: listing.id }} className="text-xs font-bold uppercase tracking-widest text-brand-green">
+        <Link to="/annonces/$id" params={{ id }} className="text-xs font-bold uppercase tracking-widest text-brand-green">
           ← Retour à l'annonce
         </Link>
         <div className="mt-3 flex items-center gap-3">
@@ -51,40 +57,41 @@ function BoostPage() {
       </header>
 
       <section className="px-5 py-6">
-        <div className="mb-6 flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
-          <img src={listing.image} alt="" className="size-14 rounded-xl object-cover" />
-          <div className="flex-1">
-            <p className="line-clamp-1 text-sm font-bold">{listing.title}</p>
-            <p className="text-xs text-muted-foreground">{listing.city}</p>
+        {info && (
+          <div className="mb-6 flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
+            {info.cover ? <img src={info.cover} alt="" className="size-14 rounded-xl object-cover" /> : <div className="size-14 rounded-xl bg-muted" />}
+            <div className="flex-1">
+              <p className="line-clamp-1 text-sm font-bold">{info.title}</p>
+              <p className="text-xs text-muted-foreground">{info.city}</p>
+            </div>
           </div>
-        </div>
+        )}
 
         <h2 className="mb-3 text-xs font-extrabold uppercase tracking-widest text-muted-foreground">
           Choisissez votre formule boost
         </h2>
 
         <div className="space-y-3">
-          {PACKS.map((p) => (
-            <button
-              key={p.days}
-              type="button"
-              className="flex w-full items-center gap-4 rounded-2xl border-2 border-border bg-card p-4 text-left transition hover:border-brand-green"
-            >
-              <div className="grid size-12 place-items-center rounded-xl bg-brand-gold/10 font-mono text-lg font-bold text-brand-gold">
-                {p.days}j
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-bold">
-                  {p.days} {p.days > 1 ? "jours" : "jour"} en tête de liste
+          {PACKS.map(({ days }) => {
+            const price = BOOST_PRICES[days];
+            const isLoading = loadingDays === days;
+            return (
+              <button key={days} type="button" disabled={loadingDays !== null} onClick={() => handleBoost(days)}
+                className="flex w-full items-center gap-4 rounded-2xl border-2 border-border bg-card p-4 text-left transition hover:border-brand-green disabled:opacity-60">
+                <div className="grid size-12 place-items-center rounded-xl bg-brand-gold/10 font-mono text-lg font-bold text-brand-gold">
+                  {days}j
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold">{days} {days > 1 ? "jours" : "jour"} en tête de liste</p>
+                  <p className="text-xs text-muted-foreground">Badge Boosté, priorité dans les recherches</p>
+                </div>
+                <p className="font-mono text-base font-bold">
+                  {isLoading ? <Loader2 className="size-4 animate-spin" /> : new Intl.NumberFormat("fr-FR").format(price).replaceAll(",", ".")}
+                  <span className="ml-1 text-[10px] font-normal text-muted-foreground">FCFA</span>
                 </p>
-                <p className="text-xs text-muted-foreground">Badge Boosté, priorité dans les recherches</p>
-              </div>
-              <p className="font-mono text-base font-bold">
-                {new Intl.NumberFormat("fr-FR").format(p.price).replaceAll(",", ".")}
-                <span className="ml-1 text-[10px] font-normal text-muted-foreground">FCFA</span>
-              </p>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
 
         <div className="mt-8 rounded-2xl bg-accent/30 p-4 text-xs text-muted-foreground">
