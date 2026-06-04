@@ -1,10 +1,12 @@
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Phone, MessageCircle, Flag, Rocket, ShieldCheck, MapPin } from "lucide-react";
+import { ArrowLeft, Phone, MessageCircle, Flag, Rocket, ShieldCheck, MapPin, Heart } from "lucide-react";
 import { getListing, formatFcfa, LISTINGS } from "@/data/catalog";
 import { MobileShell } from "@/components/MobileShell";
 import { ListingCard } from "@/components/ListingCard";
 import { fetchListing, fetchPhotos, type DbListing } from "@/lib/listings-client";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/annonces/$id")({
   head: () => ({ meta: [{ title: "Annonce — Afrique-business" }] }),
@@ -30,9 +32,13 @@ export const Route = createFileRoute("/annonces/$id")({
 
 function ListingDetail() {
   const { id } = useParams({ from: "/annonces/$id" });
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [listing, setListing] = useState<DbListing | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isFav, setIsFav] = useState(false);
+  const [reporting, setReporting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -60,6 +66,44 @@ function ListingDetail() {
     return () => { cancelled = true; };
   }, [id]);
 
+  useEffect(() => {
+    if (!user || !listing?.id) return;
+    let cancelled = false;
+    supabase.from("favorites").select("listing_id").eq("user_id", user.id).eq("listing_id", listing.id).maybeSingle()
+      .then(({ data }) => { if (!cancelled) setIsFav(!!data); });
+    return () => { cancelled = true; };
+  }, [user, listing?.id]);
+
+  async function toggleFav() {
+    if (!user) { navigate({ to: "/auth" }); return; }
+    if (!listing) return;
+    if (isFav) {
+      await supabase.from("favorites").delete().eq("user_id", user.id).eq("listing_id", listing.id);
+      setIsFav(false);
+    } else {
+      await supabase.from("favorites").insert({ user_id: user.id, listing_id: listing.id });
+      setIsFav(true);
+    }
+  }
+
+  async function reportListing() {
+    if (!user) { navigate({ to: "/auth" }); return; }
+    if (!listing || reporting) return;
+    const reason = window.prompt("Pourquoi signaler cette annonce ?");
+    if (!reason?.trim()) return;
+    setReporting(true);
+    await supabase.from("reports").insert({ listing_id: listing.id, reporter_id: user.id, reason: reason.trim() });
+    setReporting(false);
+    alert("Merci, le signalement a été envoyé à la modération.");
+  }
+
+  async function startConversation() {
+    if (!listing) return;
+    if (!user) { navigate({ to: "/auth" }); return; }
+    if (!listing.ownerId || listing.ownerId === user.id) return;
+    navigate({ to: "/messages", search: { listing: listing.id, to: listing.ownerId } });
+  }
+
   if (loading) {
     return <MobileShell><div className="p-10 text-center text-sm text-muted-foreground">Chargement…</div></MobileShell>;
   }
@@ -85,10 +129,14 @@ function ListingDetail() {
           className="absolute left-4 top-4 grid size-10 place-items-center rounded-full bg-background/90 text-foreground shadow-soft backdrop-blur">
           <ArrowLeft className="size-5" />
         </Link>
-        <div className="absolute right-4 top-4 flex gap-2">
+        <div className="absolute right-4 top-4 flex items-center gap-2">
           {listing.boosted && <span className="pro-glow rounded-full bg-brand-gold px-3 py-1 text-[10px] font-extrabold uppercase">Boosté</span>}
           {listing.badge === "pro" && <span className="rounded-full bg-brand-green px-3 py-1 text-[10px] font-bold uppercase text-primary-foreground">Pro</span>}
           {listing.badge === "business" && <span className="rounded-full bg-foreground px-3 py-1 text-[10px] font-bold uppercase text-brand-gold">👑 Business</span>}
+          <button onClick={toggleFav} aria-label={isFav ? "Retirer des favoris" : "Ajouter aux favoris"}
+            className="grid size-10 place-items-center rounded-full bg-background/90 text-foreground shadow-soft backdrop-blur transition active:scale-95">
+            <Heart className={`size-5 transition ${isFav ? "fill-destructive text-destructive" : ""}`} />
+          </button>
         </div>
       </div>
 
@@ -143,7 +191,8 @@ function ListingDetail() {
         <Rocket className="size-4 text-brand-gold" /> Booster cette annonce
       </Link>
 
-      <button type="button" className="mx-5 mt-3 flex items-center gap-2 text-xs text-muted-foreground hover:text-destructive">
+      <button type="button" onClick={reportListing} disabled={reporting}
+        className="mx-5 mt-3 flex items-center gap-2 text-xs text-muted-foreground hover:text-destructive disabled:opacity-50">
         <Flag className="size-3.5" /> Signaler cette annonce
       </button>
 
@@ -158,17 +207,46 @@ function ListingDetail() {
         </section>
       )}
 
+      <ContactBar listing={listing} onMessage={startConversation} isOwn={!!user && listing.ownerId === user.id} />
+    </MobileShell>
+  );
+}
+
+function ContactBar({ listing, onMessage, isOwn }: { listing: DbListing; onMessage: () => void; isOwn: boolean }) {
+  if (isOwn) {
+    return (
       <div className="fixed inset-x-0 bottom-[88px] z-40 mx-auto max-w-[440px] px-5">
-        <div className="flex gap-2 rounded-2xl bg-background/95 p-2 shadow-soft ring-1 ring-border backdrop-blur">
-          <a href="tel:+2250000000000" className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-green py-3 text-sm font-bold text-primary-foreground">
+        <div className="rounded-2xl bg-accent/40 p-3 text-center text-xs font-bold text-muted-foreground ring-1 ring-border">
+          Ceci est votre annonce
+        </div>
+      </div>
+    );
+  }
+  const phone = listing.sellerPhone?.replace(/[^\d+]/g, "");
+  const wa = listing.sellerWhatsapp?.replace(/[^\d]/g, "");
+  return (
+    <div className="fixed inset-x-0 bottom-[88px] z-40 mx-auto max-w-[440px] px-5">
+      <div className="flex gap-2 rounded-2xl bg-background/95 p-2 shadow-soft ring-1 ring-border backdrop-blur">
+        {phone ? (
+          <a href={`tel:${phone}`} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-green py-3 text-sm font-bold text-primary-foreground">
             <Phone className="size-4" /> Appeler
           </a>
-          <a href="https://wa.me/2250000000000" target="_blank" rel="noreferrer"
+        ) : (
+          <button onClick={onMessage} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-green py-3 text-sm font-bold text-primary-foreground">
+            <MessageCircle className="size-4" /> Message
+          </button>
+        )}
+        {wa ? (
+          <a href={`https://wa.me/${wa}`} target="_blank" rel="noreferrer"
             className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-foreground py-3 text-sm font-bold text-brand-gold">
             <MessageCircle className="size-4" /> WhatsApp
           </a>
-        </div>
+        ) : (
+          <button onClick={onMessage} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-foreground py-3 text-sm font-bold text-brand-gold">
+            <MessageCircle className="size-4" /> Discuter
+          </button>
+        )}
       </div>
-    </MobileShell>
+    </div>
   );
 }
