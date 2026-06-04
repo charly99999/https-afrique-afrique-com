@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { formatFcfa } from "@/data/catalog";
 import { toast } from "sonner";
+import { resolveListingImages } from "@/lib/listing-images";
 
 export const Route = createFileRoute("/mes-annonces")({
   head: () => ({ meta: [{ title: "Mes annonces — Afrique-business" }] }),
@@ -26,7 +27,9 @@ function MyListingsPage() {
     const { data } = await supabase.from("listings")
       .select("id, title, price_fcfa, status, cover_url, created_at, boosted_until, views_count")
       .eq("owner_id", user.id).order("created_at", { ascending: false });
-    setRows((data as Row[] | null) ?? []);
+    const rows = (data as Row[] | null) ?? [];
+    const resolved = await resolveListingImages(rows.map((row) => row.cover_url));
+    setRows(rows.map((row) => ({ ...row, cover_url: row.cover_url ? (resolved.get(row.cover_url) ?? row.cover_url) : null })));
   }
 
   useEffect(() => { load(); }, [user]);
@@ -52,10 +55,13 @@ function MyListingsPage() {
 
   return (
     <MobileShell>
-      <header className="border-b border-border px-5 pb-5 pt-6">
+      <header className="border-b border-border bg-[linear-gradient(180deg,color-mix(in_oklab,var(--color-brand-green)_8%,white),transparent)] px-5 pb-5 pt-6">
         <Link to="/profil" className="text-xs font-bold uppercase tracking-widest text-brand-green">← Profil</Link>
-        <div className="mt-3 flex items-center justify-between">
-          <h1 className="font-display text-2xl italic">Mes annonces</h1>
+        <div className="mt-4 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-green">Seller studio</p>
+            <h1 className="mt-2 font-display text-3xl">Mes annonces</h1>
+          </div>
           <Link to="/publier" className="flex items-center gap-1 rounded-xl bg-brand-green px-4 py-2 text-xs font-bold text-primary-foreground">
             <Plus className="size-3.5" /> Nouvelle
           </Link>
@@ -70,7 +76,7 @@ function MyListingsPage() {
         {rows?.map((r) => {
           const boosted = r.boosted_until && new Date(r.boosted_until) > new Date();
           return (
-            <article key={r.id} className="flex gap-3 rounded-2xl border border-border bg-card p-3">
+            <article key={r.id} className="flex gap-3 rounded-2xl border border-border bg-card p-3 shadow-[0_10px_30px_-20px_color-mix(in_oklab,var(--color-brand-green)_35%,transparent)]">
               <Link to="/annonces/$id" params={{ id: r.id }} className="shrink-0">
                 {r.cover_url
                   ? <img src={r.cover_url} alt="" className="size-20 rounded-xl object-cover" />

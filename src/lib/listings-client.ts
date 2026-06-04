@@ -3,6 +3,7 @@
 // Téléphone/whatsapp uniquement via RPC `get_listing_contact` (réservé aux utilisateurs connectés).
 import { supabase } from "@/integrations/supabase/client";
 import type { CountryCode, SellerBadge } from "@/data/catalog";
+import { resolveListingImage, resolveListingImages } from "@/lib/listing-images";
 
 export type DbListing = {
   id: string;
@@ -61,6 +62,7 @@ export async function fetchListings(country: CountryCode): Promise<DbListing[]> 
   const profiles = await fetchPublicProfiles(
     Array.from(new Set(data.map((r) => r.owner_id).filter(Boolean) as string[]))
   );
+  const resolvedImages = await resolveListingImages(data.map((r) => r.cover_url));
 
   return data.map((r) => {
     const prof = r.owner_id ? profiles.get(r.owner_id) : undefined;
@@ -73,7 +75,7 @@ export async function fetchListings(country: CountryCode): Promise<DbListing[]> 
       subCategory: r.subcategory_slug ?? undefined,
       country: r.country as CountryCode,
       city: r.city,
-      image: r.cover_url ?? "/placeholder.svg",
+      image: r.cover_url ? (resolvedImages.get(r.cover_url) ?? r.cover_url) : "/placeholder.svg",
       boosted: r.boosted_until ? new Date(r.boosted_until) > new Date() : false,
       badge: tier === "pro" || tier === "business" ? tier : "gratuit",
       seller: prof?.display_name ?? "Vendeur",
@@ -110,6 +112,8 @@ export async function fetchListing(id: string): Promise<DbListing | null> {
     whatsapp = row?.whatsapp ?? row?.phone ?? undefined;
   }
 
+  const image = await resolveListingImage(data.cover_url);
+
   return {
     id: data.id,
     title: data.title,
@@ -118,7 +122,7 @@ export async function fetchListing(id: string): Promise<DbListing | null> {
     subCategory: data.subcategory_slug ?? undefined,
     country: data.country as CountryCode,
     city: data.city,
-    image: data.cover_url ?? "/placeholder.svg",
+    image: image ?? "/placeholder.svg",
     boosted: data.boosted_until ? new Date(data.boosted_until) > new Date() : false,
     badge: tier === "pro" || tier === "business" ? tier : "gratuit",
     seller: prof?.display_name ?? "Vendeur",
@@ -133,5 +137,7 @@ export async function fetchListing(id: string): Promise<DbListing | null> {
 export async function fetchPhotos(listingId: string): Promise<string[]> {
   const { data } = await supabase.from("listing_photos")
     .select("url, position").eq("listing_id", listingId).order("position");
-  return data?.map((p) => p.url) ?? [];
+  if (!data?.length) return [];
+  const resolved = await resolveListingImages(data.map((p) => p.url));
+  return data.map((p) => resolved.get(p.url) ?? p.url);
 }

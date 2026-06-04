@@ -6,6 +6,7 @@ import { MobileShell } from "@/components/MobileShell";
 import { CATEGORIES, COUNTRIES, type CountryCode } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { resolveListingImage } from "@/lib/listing-images";
 
 export const Route = createFileRoute("/publier")({
   head: () => ({ meta: [{ title: "Publier une annonce — Afrique-business" }] }),
@@ -97,8 +98,7 @@ function PublierPage() {
           cacheControl: "31536000", upsert: false, contentType: file.type,
         });
         if (upErr) throw upErr;
-        const { data: pub } = supabase.storage.from("listings").getPublicUrl(path);
-        photoRows.push({ listing_id: listing.id, url: pub.publicUrl, position: i });
+        photoRows.push({ listing_id: listing.id, url: path, position: i });
       }
 
       if (photoRows.length) {

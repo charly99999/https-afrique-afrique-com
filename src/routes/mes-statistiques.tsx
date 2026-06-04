@@ -4,6 +4,7 @@ import { MobileShell } from "@/components/MobileShell";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { BarChart3, Eye, Heart, MessageCircle, Rocket, Megaphone } from "lucide-react";
+import { resolveListingImages } from "@/lib/listing-images";
 
 export const Route = createFileRoute("/mes-statistiques")({
   head: () => ({ meta: [{ title: "Mes statistiques — Afrique-business" }] }),
@@ -53,8 +54,14 @@ function StatsPage() {
         unreadMessages: msgCount.count ?? 0,
         activeBoosts: boostCount.count ?? 0,
       });
-      setTopListings([...ls].sort((a, b) => (b.views_count ?? 0) - (a.views_count ?? 0)).slice(0, 5)
-        .map((l) => ({ id: l.id, title: l.title, views_count: l.views_count ?? 0, cover_url: l.cover_url })));
+      const top = [...ls].sort((a, b) => (b.views_count ?? 0) - (a.views_count ?? 0)).slice(0, 5);
+      const resolved = await resolveListingImages(top.map((l) => l.cover_url));
+      setTopListings(top.map((l) => ({
+        id: l.id,
+        title: l.title,
+        views_count: l.views_count ?? 0,
+        cover_url: l.cover_url ? (resolved.get(l.cover_url) ?? l.cover_url) : null,
+      })));
     })();
     return () => { cancelled = true; };
   }, [user]);
@@ -73,9 +80,9 @@ function StatsPage() {
 
   return (
     <MobileShell>
-      <header className="border-b border-border px-5 pb-5 pt-6">
+      <header className="border-b border-border bg-[linear-gradient(180deg,color-mix(in_oklab,var(--color-brand-gold)_10%,white),transparent)] px-5 pb-5 pt-6">
         <Link to="/profil" className="text-xs font-bold uppercase tracking-widest text-brand-green">← Profil</Link>
-        <h1 className="mt-3 font-display text-3xl italic">Mes statistiques</h1>
+        <h1 className="mt-3 font-display text-3xl">Mes statistiques</h1>
         <p className="mt-1 text-sm text-muted-foreground">Performance globale de votre activité.</p>
       </header>
 

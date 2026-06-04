@@ -44,24 +44,29 @@ function ListingDetail() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      // Tente DB ; sinon fallback démo
-      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(id);
-      if (isUuid) {
-        const l = await fetchListing(id);
-        if (cancelled) return;
-        if (l) {
-          setListing(l);
-          const ph = await fetchPhotos(id);
-          if (!cancelled) setPhotos(ph);
-          setLoading(false);
-          return;
+      try {
+        // Tente DB ; sinon fallback démo
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(id);
+        if (isUuid) {
+          const l = await fetchListing(id);
+          if (cancelled) return;
+          if (l) {
+            setListing(l);
+            const ph = await fetchPhotos(id).catch(() => []);
+            if (!cancelled) setPhotos(ph);
+            setLoading(false);
+            return;
+          }
         }
-      }
-      const demo = getListing(id);
-      if (!cancelled) {
-        setListing(demo ? (demo as unknown as DbListing) : null);
-        setPhotos(demo ? [demo.image] : []);
-        setLoading(false);
+
+        const demo = getListing(id);
+        if (!cancelled) {
+          setListing(demo ? (demo as unknown as DbListing) : null);
+          setPhotos(demo ? [demo.image] : []);
+          setLoading(false);
+        }
+      } catch {
+        if (!cancelled) setLoading(false);
       }
     })();
     return () => { cancelled = true; };

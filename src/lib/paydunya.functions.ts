@@ -4,8 +4,15 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { SUB_PRICES, BOOST_PRICES, type SubPlan } from "@/data/pricing";
 
-function getOrigin(): string {
-  // Fallback : URL preview/published — l'utilisateur revient via returnUrl.
+function getOriginFromHeaders(headers?: Headers): string {
+  const forwardedProto = headers?.get("x-forwarded-proto");
+  const forwardedHost = headers?.get("x-forwarded-host");
+  const host = forwardedHost ?? headers?.get("host");
+
+  if (host) {
+    return `${forwardedProto ?? "https"}://${host}`;
+  }
+
   return process.env.PUBLIC_SITE_URL
     ?? `https://project--${process.env.SUPABASE_PROJECT_ID ?? "app"}.lovable.app`;
 }
@@ -13,6 +20,7 @@ function getOrigin(): string {
 export const startSubscriptionPayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({
+    origin: z.string().url(),
     plan: z.enum([
       "pro_monthly","pro_quarterly","pro_yearly",
       "business_monthly","business_quarterly","business_yearly",
@@ -23,7 +31,7 @@ export const startSubscriptionPayment = createServerFn({ method: "POST" })
     const plan = SUB_PRICES[data.plan as SubPlan];
 
     const { createPaydunyaInvoice } = await import("./paydunya.server");
-    const origin = getOrigin();
+    const origin = data.origin || getOriginFromHeaders();
 
     // Crée le paiement pending
     const { data: payment, error: payErr } = await supabase
@@ -71,6 +79,7 @@ export const startSubscriptionPayment = createServerFn({ method: "POST" })
 export const startBoostPayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({
+    origin: z.string().url(),
     listingId: z.string().uuid(),
     days: z.union([z.literal(1), z.literal(3), z.literal(7), z.literal(30)]),
   }).parse(input))
@@ -100,7 +109,7 @@ export const startBoostPayment = createServerFn({ method: "POST" })
     if (payErr || !payment) return { ok: false, error: payErr?.message ?? "Erreur DB" };
 
     const { createPaydunyaInvoice } = await import("./paydunya.server");
-    const origin = getOrigin();
+    const origin = data.origin || getOriginFromHeaders();
 
     const invoice = await createPaydunyaInvoice({
       totalAmount: amount,

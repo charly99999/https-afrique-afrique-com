@@ -497,6 +497,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      normalize_listings_bucket_path: {
+        Args: { _url: string }
+        Returns: string
+      }
     }
     Enums: {
       account_type: "free" | "pro" | "business"
