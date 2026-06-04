@@ -52,8 +52,16 @@ function ProfilPage() {
         )}
 
         <div className="mt-8 space-y-2">
-          <Row icon={<Store className="size-4" />} label="Mes annonces" />
-          <Row icon={<CreditCard className="size-4" />} label="Mon abonnement" />
+          <Link to="/mes-annonces" className="flex w-full items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-left text-sm font-medium transition hover:bg-muted">
+            <span className="grid size-8 place-items-center rounded-lg bg-muted text-brand-green"><Store className="size-4" /></span>
+            <span className="flex-1">Mes annonces</span>
+            <span className="text-muted-foreground">→</span>
+          </Link>
+          <Link to="/abonnements" className="flex w-full items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-left text-sm font-medium transition hover:bg-muted">
+            <span className="grid size-8 place-items-center rounded-lg bg-muted text-brand-green"><CreditCard className="size-4" /></span>
+            <span className="flex-1">Mon abonnement</span>
+            <span className="text-muted-foreground">→</span>
+          </Link>
           <Row icon={<BarChart3 className="size-4" />} label="Mes statistiques" />
           <Row icon={<Bell className="size-4" />} label="Notifications" />
           <Row icon={<Settings className="size-4" />} label="Paramètres" />
