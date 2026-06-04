@@ -119,7 +119,8 @@ export const startBoostPayment = createServerFn({ method: "POST" })
       callbackUrl: `${origin}/api/public/paydunya-ipn`,
     });
 
-    await supabase.from("payments").update({
+    const { supabaseAdmin: adminB } = await import("@/integrations/supabase/client.server");
+    await adminB.from("payments").update({
       provider_token: invoice.token ?? null,
       provider_invoice_url: invoice.invoiceUrl ?? null,
       provider_response: (invoice.raw as object as never) ?? null,
