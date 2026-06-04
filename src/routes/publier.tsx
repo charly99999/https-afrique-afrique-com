@@ -104,8 +104,7 @@ function PublierPage() {
       if (photoRows.length) {
         const { error: phErr } = await supabase.from("listing_photos").insert(photoRows);
         if (phErr) throw phErr;
-        const signedCover = await resolveListingImage(photoRows[0].url);
-        await supabase.from("listings").update({ cover_url: signedCover ?? photoRows[0].url }).eq("id", listing.id);
+        await supabase.from("listings").update({ cover_url: photoRows[0].url }).eq("id", listing.id);
       }
 
       toast.success("Annonce publiée !");
