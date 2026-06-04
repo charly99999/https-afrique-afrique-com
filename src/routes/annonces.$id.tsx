@@ -32,9 +32,13 @@ export const Route = createFileRoute("/annonces/$id")({
 
 function ListingDetail() {
   const { id } = useParams({ from: "/annonces/$id" });
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [listing, setListing] = useState<DbListing | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isFav, setIsFav] = useState(false);
+  const [reporting, setReporting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
