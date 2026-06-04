@@ -191,7 +191,8 @@ function ListingDetail() {
         <Rocket className="size-4 text-brand-gold" /> Booster cette annonce
       </Link>
 
-      <button type="button" className="mx-5 mt-3 flex items-center gap-2 text-xs text-muted-foreground hover:text-destructive">
+      <button type="button" onClick={reportListing} disabled={reporting}
+        className="mx-5 mt-3 flex items-center gap-2 text-xs text-muted-foreground hover:text-destructive disabled:opacity-50">
         <Flag className="size-3.5" /> Signaler cette annonce
       </button>
 
@@ -206,17 +207,49 @@ function ListingDetail() {
         </section>
       )}
 
+      <ContactBar listing={listing} onMessage={startConversation} isOwn={!!user && listing.ownerId === user.id} />
+    </MobileShell>
+  );
+}
+
+function ContactBar({ listing, onMessage, isOwn }: { listing: DbListing; onMessage: () => void; isOwn: boolean }) {
+  if (isOwn) {
+    return (
       <div className="fixed inset-x-0 bottom-[88px] z-40 mx-auto max-w-[440px] px-5">
-        <div className="flex gap-2 rounded-2xl bg-background/95 p-2 shadow-soft ring-1 ring-border backdrop-blur">
-          <a href="tel:+2250000000000" className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-green py-3 text-sm font-bold text-primary-foreground">
+        <div className="rounded-2xl bg-accent/40 p-3 text-center text-xs font-bold text-muted-foreground ring-1 ring-border">
+          Ceci est votre annonce
+        </div>
+      </div>
+    );
+  }
+  const phone = listing.sellerPhone?.replace(/[^\d+]/g, "");
+  const wa = listing.sellerWhatsapp?.replace(/[^\d]/g, "");
+  return (
+    <div className="fixed inset-x-0 bottom-[88px] z-40 mx-auto max-w-[440px] px-5">
+      <div className="flex gap-2 rounded-2xl bg-background/95 p-2 shadow-soft ring-1 ring-border backdrop-blur">
+        {phone ? (
+          <a href={`tel:${phone}`} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-green py-3 text-sm font-bold text-primary-foreground">
             <Phone className="size-4" /> Appeler
           </a>
-          <a href="https://wa.me/2250000000000" target="_blank" rel="noreferrer"
+        ) : (
+          <button onClick={onMessage} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-green py-3 text-sm font-bold text-primary-foreground">
+            <MessageCircle className="size-4" /> Message
+          </button>
+        )}
+        {wa ? (
+          <a href={`https://wa.me/${wa}`} target="_blank" rel="noreferrer"
             className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-foreground py-3 text-sm font-bold text-brand-gold">
             <MessageCircle className="size-4" /> WhatsApp
           </a>
-        </div>
+        ) : (
+          <button onClick={onMessage} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-foreground py-3 text-sm font-bold text-brand-gold">
+            <MessageCircle className="size-4" /> Discuter
+          </button>
+        )}
       </div>
+    </div>
+  );
+}
     </MobileShell>
   );
 }
