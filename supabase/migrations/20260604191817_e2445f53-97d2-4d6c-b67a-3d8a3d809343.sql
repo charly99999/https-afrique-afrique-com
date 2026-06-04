@@ -1,0 +1,1 @@
+CREATE POLICY "payments_self_insert" ON public.payments FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
