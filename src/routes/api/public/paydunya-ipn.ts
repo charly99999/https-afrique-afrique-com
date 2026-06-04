@@ -1,7 +1,7 @@
 // Webhook IPN payDunya — appelé après chaque paiement.
 // Vérifie le hash SHA512 de la clé master puis confirme la transaction.
 import { createFileRoute } from "@tanstack/react-router";
-import { createHash } from "crypto";
+import { createHash, timingSafeEqual } from "crypto";
 
 export const Route = createFileRoute("/api/public/paydunya-ipn")({
   server: {
@@ -27,8 +27,11 @@ export const Route = createFileRoute("/api/public/paydunya-ipn")({
         const data = (body.data ?? body) as Record<string, unknown>;
         const receivedHash = String((data as { hash?: string }).hash ?? "");
         const expectedHash = createHash("sha512").update(masterKey).digest("hex");
-        if (!receivedHash || receivedHash !== expectedHash) {
-          return new Response("Invalid signature", { status: 401 });
+        // Comparaison à temps constant (anti timing-attack)
+        const recBuf = Buffer.from(receivedHash, "hex");
+        const expBuf = Buffer.from(expectedHash, "hex");
+        if (recBuf.length !== expBuf.length || !timingSafeEqual(recBuf, expBuf)) {
+          return new Response("Unauthorized", { status: 401 });
         }
 
         const status = String((data as { status?: string }).status ?? "").toLowerCase();

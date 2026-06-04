@@ -16,15 +16,28 @@ function SuccessPage() {
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
     if (!id) return;
-    let tries = 0;
-    const i = setInterval(async () => {
-      tries++;
-      const { data } = await supabase.from("payments").select("status").eq("id", id).maybeSingle();
-      if (data?.status === "completed") { setStatus("completed"); clearInterval(i); }
-      else if (data?.status === "failed" || data?.status === "cancelled") { setStatus("failed"); clearInterval(i); }
-      else if (tries > 20) clearInterval(i);
-    }, 1500);
-    return () => clearInterval(i);
+    let cancelled = false;
+    let intervalId: ReturnType<typeof setInterval> | undefined;
+    (async () => {
+      const { data: sess } = await supabase.auth.getSession();
+      const uid = sess.session?.user.id;
+      if (!uid) { setStatus("failed"); return; }
+      let tries = 0;
+      intervalId = setInterval(async () => {
+        if (cancelled) return;
+        tries++;
+        const { data } = await supabase
+          .from("payments")
+          .select("status")
+          .eq("id", id)
+          .eq("user_id", uid)
+          .maybeSingle();
+        if (data?.status === "completed") { setStatus("completed"); clearInterval(intervalId); }
+        else if (data?.status === "failed" || data?.status === "cancelled") { setStatus("failed"); clearInterval(intervalId); }
+        else if (tries > 20) clearInterval(intervalId);
+      }, 1500);
+    })();
+    return () => { cancelled = true; if (intervalId) clearInterval(intervalId); };
   }, []);
 
   return (
