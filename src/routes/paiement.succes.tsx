@@ -3,9 +3,45 @@ import { useEffect, useState } from "react";
 import { MobileShell } from "@/components/MobileShell";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { confirmPaydunyaInvoice } from "@/lib/paydunya.server";
+import { finalizePaydunyaPayment } from "@/lib/paydunya-activation.server";
 
 export const Route = createFileRoute("/paiement/succes")({
   head: () => ({ meta: [{ title: "Paiement reçu — Afrique-business" }] }),
+  server: {
+    handlers: {
+      POST: async ({ request }) => {
+        const body = await request.json().catch(() => null) as { paymentId?: string } | null;
+        const paymentId = body?.paymentId;
+        if (!paymentId) return Response.json({ ok: false, error: "paymentId manquant" }, { status: 400 });
+
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data: payment } = await supabaseAdmin
+          .from("payments")
+          .select("id, status, provider_token")
+          .eq("id", paymentId)
+          .maybeSingle();
+
+        if (!payment) return Response.json({ ok: false, error: "Paiement introuvable" }, { status: 404 });
+        if (payment.status === "completed") return Response.json({ ok: true, status: "completed" });
+        if (!payment.provider_token) return Response.json({ ok: true, status: payment.status });
+
+        const confirmation = await confirmPaydunyaInvoice(payment.provider_token);
+        if (!confirmation.ok || !confirmation.status) {
+          return Response.json({ ok: true, status: payment.status });
+        }
+
+        const result = await finalizePaydunyaPayment({
+          paymentId,
+          providerToken: payment.provider_token,
+          status: confirmation.status,
+          raw: (confirmation.raw as Record<string, unknown> | null) ?? {},
+        });
+
+        return Response.json({ ok: true, status: result.status });
+      },
+    },
+  },
   component: SuccessPage,
 });
 
@@ -32,8 +68,19 @@ function SuccessPage() {
           .eq("id", id)
           .eq("user_id", uid)
           .maybeSingle();
-        if (data?.status === "completed") { setStatus("completed"); clearInterval(intervalId); }
-        else if (data?.status === "failed" || data?.status === "cancelled") { setStatus("failed"); clearInterval(intervalId); }
+        let nextStatus = data?.status ?? "pending";
+        if (nextStatus === "pending" && tries >= 2) {
+          const response = await fetch("/paiement/succes", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ paymentId: id }),
+          });
+          const payload = await response.json().catch(() => null) as { status?: "pending" | "completed" | "failed" | "cancelled" } | null;
+          nextStatus = payload?.status ?? nextStatus;
+        }
+
+        if (nextStatus === "completed") { setStatus("completed"); clearInterval(intervalId); }
+        else if (nextStatus === "failed" || nextStatus === "cancelled") { setStatus("failed"); clearInterval(intervalId); }
         else if (tries > 20) clearInterval(intervalId);
       }, 1500);
     })();
