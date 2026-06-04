@@ -189,7 +189,7 @@ function Thread({ userId, listingId, otherId }: { userId: string; listingId: str
       if (unread.length) await supabase.from("messages").update({ read_at: new Date().toISOString() }).in("id", unread);
     }
     load();
-    const ch = supabase.channel(`thread-${listingId}-${otherId}`)
+    const ch = supabase.channel(`thread-${userId}-${listingId}-${otherId}`)
       .on("postgres_changes",
         { event: "INSERT", schema: "public", table: "messages", filter: `listing_id=eq.${listingId}` },
         (payload) => {
