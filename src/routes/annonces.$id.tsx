@@ -66,6 +66,44 @@ function ListingDetail() {
     return () => { cancelled = true; };
   }, [id]);
 
+  useEffect(() => {
+    if (!user || !listing?.id) return;
+    let cancelled = false;
+    supabase.from("favorites").select("listing_id").eq("user_id", user.id).eq("listing_id", listing.id).maybeSingle()
+      .then(({ data }) => { if (!cancelled) setIsFav(!!data); });
+    return () => { cancelled = true; };
+  }, [user, listing?.id]);
+
+  async function toggleFav() {
+    if (!user) { navigate({ to: "/auth" }); return; }
+    if (!listing) return;
+    if (isFav) {
+      await supabase.from("favorites").delete().eq("user_id", user.id).eq("listing_id", listing.id);
+      setIsFav(false);
+    } else {
+      await supabase.from("favorites").insert({ user_id: user.id, listing_id: listing.id });
+      setIsFav(true);
+    }
+  }
+
+  async function reportListing() {
+    if (!user) { navigate({ to: "/auth" }); return; }
+    if (!listing || reporting) return;
+    const reason = window.prompt("Pourquoi signaler cette annonce ?");
+    if (!reason?.trim()) return;
+    setReporting(true);
+    await supabase.from("reports").insert({ listing_id: listing.id, reporter_id: user.id, reason: reason.trim() });
+    setReporting(false);
+    alert("Merci, le signalement a été envoyé à la modération.");
+  }
+
+  async function startConversation() {
+    if (!listing) return;
+    if (!user) { navigate({ to: "/auth" }); return; }
+    if (!listing.ownerId || listing.ownerId === user.id) return;
+    navigate({ to: "/messages", search: { listing: listing.id, to: listing.ownerId } });
+  }
+
   if (loading) {
     return <MobileShell><div className="p-10 text-center text-sm text-muted-foreground">Chargement…</div></MobileShell>;
   }
