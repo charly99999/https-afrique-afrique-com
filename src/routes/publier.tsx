@@ -71,7 +71,7 @@ function PublierPage() {
       const { data: listing, error: insErr } = await supabase
         .from("listings")
         .insert({
-          owner_id: user.id,
+          owner_id: currentUser.id,
           title: title.trim(),
           description: description.trim(),
           price_fcfa: Math.max(0, Number(price.replace(/\D/g, "")) || 0),
@@ -92,7 +92,7 @@ function PublierPage() {
       for (let i = 0; i < photos.length; i++) {
         const file = photos[i].file;
         const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-        const path = `${user.id}/${listing.id}/${Date.now()}-${i}.${ext}`;
+        const path = `${currentUser.id}/${listing.id}/${Date.now()}-${i}.${ext}`;
         const { error: upErr } = await supabase.storage.from("listings").upload(path, file, {
           cacheControl: "31536000", upsert: false, contentType: file.type,
         });
