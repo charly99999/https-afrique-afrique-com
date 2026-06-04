@@ -9,12 +9,54 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PublierRouteImport } from './routes/publier'
+import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as MessagesRouteImport } from './routes/messages'
+import { Route as ExplorerRouteImport } from './routes/explorer'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AbonnementsRouteImport } from './routes/abonnements'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BoostIdRouteImport } from './routes/boost.$id'
 import { Route as AnnoncesIdRouteImport } from './routes/annonces.$id'
 
+const PublierRoute = PublierRouteImport.update({
+  id: '/publier',
+  path: '/publier',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilRoute = ProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MessagesRoute = MessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExplorerRoute = ExplorerRouteImport.update({
+  id: '/explorer',
+  path: '/explorer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AbonnementsRoute = AbonnementsRouteImport.update({
+  id: '/abonnements',
+  path: '/abonnements',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoostIdRoute = BoostIdRouteImport.update({
+  id: '/boost/$id',
+  path: '/boost/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnnoncesIdRoute = AnnoncesIdRouteImport.update({
@@ -25,37 +67,142 @@ const AnnoncesIdRoute = AnnoncesIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/abonnements': typeof AbonnementsRoute
+  '/auth': typeof AuthRoute
+  '/explorer': typeof ExplorerRoute
+  '/messages': typeof MessagesRoute
+  '/profil': typeof ProfilRoute
+  '/publier': typeof PublierRoute
   '/annonces/$id': typeof AnnoncesIdRoute
+  '/boost/$id': typeof BoostIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/abonnements': typeof AbonnementsRoute
+  '/auth': typeof AuthRoute
+  '/explorer': typeof ExplorerRoute
+  '/messages': typeof MessagesRoute
+  '/profil': typeof ProfilRoute
+  '/publier': typeof PublierRoute
   '/annonces/$id': typeof AnnoncesIdRoute
+  '/boost/$id': typeof BoostIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/abonnements': typeof AbonnementsRoute
+  '/auth': typeof AuthRoute
+  '/explorer': typeof ExplorerRoute
+  '/messages': typeof MessagesRoute
+  '/profil': typeof ProfilRoute
+  '/publier': typeof PublierRoute
   '/annonces/$id': typeof AnnoncesIdRoute
+  '/boost/$id': typeof BoostIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/annonces/$id'
+  fullPaths:
+    | '/'
+    | '/abonnements'
+    | '/auth'
+    | '/explorer'
+    | '/messages'
+    | '/profil'
+    | '/publier'
+    | '/annonces/$id'
+    | '/boost/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/annonces/$id'
-  id: '__root__' | '/' | '/annonces/$id'
+  to:
+    | '/'
+    | '/abonnements'
+    | '/auth'
+    | '/explorer'
+    | '/messages'
+    | '/profil'
+    | '/publier'
+    | '/annonces/$id'
+    | '/boost/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/abonnements'
+    | '/auth'
+    | '/explorer'
+    | '/messages'
+    | '/profil'
+    | '/publier'
+    | '/annonces/$id'
+    | '/boost/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AbonnementsRoute: typeof AbonnementsRoute
+  AuthRoute: typeof AuthRoute
+  ExplorerRoute: typeof ExplorerRoute
+  MessagesRoute: typeof MessagesRoute
+  ProfilRoute: typeof ProfilRoute
+  PublierRoute: typeof PublierRoute
   AnnoncesIdRoute: typeof AnnoncesIdRoute
+  BoostIdRoute: typeof BoostIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/publier': {
+      id: '/publier'
+      path: '/publier'
+      fullPath: '/publier'
+      preLoaderRoute: typeof PublierRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profil': {
+      id: '/profil'
+      path: '/profil'
+      fullPath: '/profil'
+      preLoaderRoute: typeof ProfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/messages': {
+      id: '/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof MessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/explorer': {
+      id: '/explorer'
+      path: '/explorer'
+      fullPath: '/explorer'
+      preLoaderRoute: typeof ExplorerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/abonnements': {
+      id: '/abonnements'
+      path: '/abonnements'
+      fullPath: '/abonnements'
+      preLoaderRoute: typeof AbonnementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/boost/$id': {
+      id: '/boost/$id'
+      path: '/boost/$id'
+      fullPath: '/boost/$id'
+      preLoaderRoute: typeof BoostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/annonces/$id': {
@@ -70,7 +217,14 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AbonnementsRoute: AbonnementsRoute,
+  AuthRoute: AuthRoute,
+  ExplorerRoute: ExplorerRoute,
+  MessagesRoute: MessagesRoute,
+  ProfilRoute: ProfilRoute,
+  PublierRoute: PublierRoute,
   AnnoncesIdRoute: AnnoncesIdRoute,
+  BoostIdRoute: BoostIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
