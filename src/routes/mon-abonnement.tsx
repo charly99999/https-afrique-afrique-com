@@ -86,7 +86,7 @@ function SubscriptionPage() {
           </div>
 
           {tier === "gratuit" ? (
-            <p className={`mt-4 text-sm ${tier === "business" ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+            <p className="mt-4 text-sm text-muted-foreground">
               Vous utilisez la formule gratuite. Passez Pro ou Business pour débloquer plus de fonctionnalités.
             </p>
           ) : (
