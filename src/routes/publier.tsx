@@ -6,6 +6,7 @@ import { MobileShell } from "@/components/MobileShell";
 import { CATEGORIES, COUNTRIES, type CountryCode } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { resolveListingImage } from "@/lib/listing-images";
 
 export const Route = createFileRoute("/publier")({
   head: () => ({ meta: [{ title: "Publier une annonce — Afrique-business" }] }),
@@ -97,14 +98,14 @@ function PublierPage() {
           cacheControl: "31536000", upsert: false, contentType: file.type,
         });
         if (upErr) throw upErr;
-        const { data: pub } = supabase.storage.from("listings").getPublicUrl(path);
-        photoRows.push({ listing_id: listing.id, url: pub.publicUrl, position: i });
+        photoRows.push({ listing_id: listing.id, url: path, position: i });
       }
 
       if (photoRows.length) {
         const { error: phErr } = await supabase.from("listing_photos").insert(photoRows);
         if (phErr) throw phErr;
-        await supabase.from("listings").update({ cover_url: photoRows[0].url }).eq("id", listing.id);
+        const signedCover = await resolveListingImage(photoRows[0].url);
+        await supabase.from("listings").update({ cover_url: signedCover ?? photoRows[0].url }).eq("id", listing.id);
       }
 
       toast.success("Annonce publiée !");
