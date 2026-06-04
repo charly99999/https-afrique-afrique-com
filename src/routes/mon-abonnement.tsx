@@ -53,7 +53,7 @@ function SubscriptionPage() {
     );
   }
 
-  const tier = profile?.account_type ?? "gratuit";
+  const tier: string = profile?.account_type ?? "gratuit";
   const expiresAt = profile?.account_expires_at;
   const isActive = expiresAt ? new Date(expiresAt) > new Date() : false;
   const daysLeft = expiresAt ? Math.max(0, Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 86400000)) : 0;
