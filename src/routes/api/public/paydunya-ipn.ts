@@ -72,9 +72,9 @@ export const Route = createFileRoute("/api/public/paydunya-ipn")({
               payment_id: payment.id,
               active: true,
             });
-            // Met à jour le tier du profil
+            // Met à jour le type de compte du profil
             await supabaseAdmin.from("profiles")
-              .update({ tier: plan.tier, tier_until: expires })
+              .update({ account_type: plan.tier, account_expires_at: expires })
               .eq("id", payment.user_id);
           }
         } else if (payment.kind === "boost" && payment.related_listing_id && payment.boost_days) {
