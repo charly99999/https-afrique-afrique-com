@@ -1,10 +1,12 @@
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Phone, MessageCircle, Flag, Rocket, ShieldCheck, MapPin } from "lucide-react";
+import { ArrowLeft, Phone, MessageCircle, Flag, Rocket, ShieldCheck, MapPin, Heart } from "lucide-react";
 import { getListing, formatFcfa, LISTINGS } from "@/data/catalog";
 import { MobileShell } from "@/components/MobileShell";
 import { ListingCard } from "@/components/ListingCard";
 import { fetchListing, fetchPhotos, type DbListing } from "@/lib/listings-client";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/annonces/$id")({
   head: () => ({ meta: [{ title: "Annonce — Afrique-business" }] }),
