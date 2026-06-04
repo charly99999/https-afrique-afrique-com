@@ -16,6 +16,9 @@ export type DbListing = {
   seller: string;
   postedAt: string;
   description: string;
+  ownerId?: string;
+  sellerPhone?: string;
+  sellerWhatsapp?: string;
 };
 
 function timeAgo(iso: string): string {
