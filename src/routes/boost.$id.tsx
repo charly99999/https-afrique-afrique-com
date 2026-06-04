@@ -6,6 +6,7 @@ import { MobileShell } from "@/components/MobileShell";
 import { Rocket, Check, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { startBoostPayment } from "@/lib/paydunya.functions";
+import { redirectToCheckout } from "@/lib/redirect-checkout";
 import { BOOST_PRICES, type BoostDays } from "@/data/pricing";
 import { resolveListingImages } from "@/lib/listing-images";
 
@@ -41,9 +42,11 @@ function BoostPage() {
     setLoadingDays(days);
     try {
       const res = await startBoost({ data: { listingId: id, days, origin: window.location.origin } });
-      if (!res.ok || !res.invoiceUrl) throw new Error(res.error ?? "Erreur");
-      window.location.href = res.invoiceUrl;
+      console.log("[paydunya] startBoostPayment:", res);
+      if (!res?.ok || !res.invoiceUrl) throw new Error(res?.error ?? "Erreur");
+      redirectToCheckout(res.invoiceUrl);
     } catch (e) {
+      console.error("[paydunya] erreur boost:", e);
       toast.error(e instanceof Error ? e.message : "Erreur");
       setLoadingDays(null);
     }

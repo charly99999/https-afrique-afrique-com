@@ -6,6 +6,7 @@ import { MobileShell } from "@/components/MobileShell";
 import { Check, Sparkles, Crown, Loader2 } from "lucide-react";
 import { SUB_PRICES, type SubPlan } from "@/data/pricing";
 import { startSubscriptionPayment } from "@/lib/paydunya.functions";
+import { redirectToCheckout } from "@/lib/redirect-checkout";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/abonnements")({
@@ -61,10 +62,12 @@ function PlansPage() {
     setLoadingPlan(plan);
     try {
       const res = await startPayment({ data: { plan, origin: window.location.origin } });
-      if (!res.ok || !res.invoiceUrl) throw new Error(res.error ?? "Erreur paiement");
-      window.location.href = res.invoiceUrl;
+      console.log("[paydunya] startSubscriptionPayment:", res);
+      if (!res?.ok || !res.invoiceUrl) throw new Error(res?.error ?? "Erreur paiement");
+      redirectToCheckout(res.invoiceUrl);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erreur");
+      console.error("[paydunya] erreur:", err);
+      toast.error(err instanceof Error ? err.message : "Erreur paiement");
       setLoadingPlan(null);
     }
   }

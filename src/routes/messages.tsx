@@ -111,7 +111,7 @@ function ConversationsList({ userId }: { userId: string }) {
       setConvos(convos.map((c) => ({ ...c, listing_cover: c.listing_cover ? (resolved.get(c.listing_cover) ?? c.listing_cover) : null })));
     }
     load();
-    const ch = supabase.channel("messages-list")
+    const ch = supabase.channel(`messages-list-${userId}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, load)
       .subscribe();
     return () => { cancelled = true; supabase.removeChannel(ch); };
@@ -189,7 +189,7 @@ function Thread({ userId, listingId, otherId }: { userId: string; listingId: str
       if (unread.length) await supabase.from("messages").update({ read_at: new Date().toISOString() }).in("id", unread);
     }
     load();
-    const ch = supabase.channel(`thread-${listingId}-${otherId}`)
+    const ch = supabase.channel(`thread-${userId}-${listingId}-${otherId}`)
       .on("postgres_changes",
         { event: "INSERT", schema: "public", table: "messages", filter: `listing_id=eq.${listingId}` },
         (payload) => {
