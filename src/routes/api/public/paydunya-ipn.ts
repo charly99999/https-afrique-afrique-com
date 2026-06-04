@@ -3,6 +3,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createHash, timingSafeEqual } from "crypto";
 
+const COMPLETED_STATUSES = new Set(["completed", "complete", "paid", "approved", "success", "successful"]);
+const CANCELLED_STATUSES = new Set(["cancelled", "canceled", "expired"]);
+
 export const Route = createFileRoute("/api/public/paydunya-ipn")({
   server: {
     handlers: {
@@ -44,7 +47,11 @@ export const Route = createFileRoute("/api/public/paydunya-ipn")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        const newStatus = status === "completed" ? "completed" : status === "cancelled" ? "cancelled" : "failed";
+        const newStatus = COMPLETED_STATUSES.has(status)
+          ? "completed"
+          : CANCELLED_STATUSES.has(status)
+            ? "cancelled"
+            : "failed";
         const { data: payment } = await supabaseAdmin
           .from("payments")
           .update({
@@ -54,6 +61,7 @@ export const Route = createFileRoute("/api/public/paydunya-ipn")({
             completed_at: newStatus === "completed" ? new Date().toISOString() : null,
           })
           .eq("id", paymentId)
+          .neq("status", "completed")
           .select("*")
           .single();
 
