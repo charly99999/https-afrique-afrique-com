@@ -12,10 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as PublierRouteImport } from './routes/publier'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as MessagesRouteImport } from './routes/messages'
+import { Route as MesAnnoncesRouteImport } from './routes/mes-annonces'
 import { Route as ExplorerRouteImport } from './routes/explorer'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AbonnementsRouteImport } from './routes/abonnements'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PaiementSuccesRouteImport } from './routes/paiement.succes'
 import { Route as BoostIdRouteImport } from './routes/boost.$id'
 import { Route as AnnoncesIdRouteImport } from './routes/annonces.$id'
 import { Route as ApiPublicPaydunyaIpnRouteImport } from './routes/api/public/paydunya-ipn'
@@ -33,6 +35,11 @@ const ProfilRoute = ProfilRouteImport.update({
 const MessagesRoute = MessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MesAnnoncesRoute = MesAnnoncesRouteImport.update({
+  id: '/mes-annonces',
+  path: '/mes-annonces',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExplorerRoute = ExplorerRouteImport.update({
@@ -53,6 +60,11 @@ const AbonnementsRoute = AbonnementsRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaiementSuccesRoute = PaiementSuccesRouteImport.update({
+  id: '/paiement/succes',
+  path: '/paiement/succes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BoostIdRoute = BoostIdRouteImport.update({
@@ -76,11 +88,13 @@ export interface FileRoutesByFullPath {
   '/abonnements': typeof AbonnementsRoute
   '/auth': typeof AuthRoute
   '/explorer': typeof ExplorerRoute
+  '/mes-annonces': typeof MesAnnoncesRoute
   '/messages': typeof MessagesRoute
   '/profil': typeof ProfilRoute
   '/publier': typeof PublierRoute
   '/annonces/$id': typeof AnnoncesIdRoute
   '/boost/$id': typeof BoostIdRoute
+  '/paiement/succes': typeof PaiementSuccesRoute
   '/api/public/paydunya-ipn': typeof ApiPublicPaydunyaIpnRoute
 }
 export interface FileRoutesByTo {
@@ -88,11 +102,13 @@ export interface FileRoutesByTo {
   '/abonnements': typeof AbonnementsRoute
   '/auth': typeof AuthRoute
   '/explorer': typeof ExplorerRoute
+  '/mes-annonces': typeof MesAnnoncesRoute
   '/messages': typeof MessagesRoute
   '/profil': typeof ProfilRoute
   '/publier': typeof PublierRoute
   '/annonces/$id': typeof AnnoncesIdRoute
   '/boost/$id': typeof BoostIdRoute
+  '/paiement/succes': typeof PaiementSuccesRoute
   '/api/public/paydunya-ipn': typeof ApiPublicPaydunyaIpnRoute
 }
 export interface FileRoutesById {
@@ -101,11 +117,13 @@ export interface FileRoutesById {
   '/abonnements': typeof AbonnementsRoute
   '/auth': typeof AuthRoute
   '/explorer': typeof ExplorerRoute
+  '/mes-annonces': typeof MesAnnoncesRoute
   '/messages': typeof MessagesRoute
   '/profil': typeof ProfilRoute
   '/publier': typeof PublierRoute
   '/annonces/$id': typeof AnnoncesIdRoute
   '/boost/$id': typeof BoostIdRoute
+  '/paiement/succes': typeof PaiementSuccesRoute
   '/api/public/paydunya-ipn': typeof ApiPublicPaydunyaIpnRoute
 }
 export interface FileRouteTypes {
@@ -115,11 +133,13 @@ export interface FileRouteTypes {
     | '/abonnements'
     | '/auth'
     | '/explorer'
+    | '/mes-annonces'
     | '/messages'
     | '/profil'
     | '/publier'
     | '/annonces/$id'
     | '/boost/$id'
+    | '/paiement/succes'
     | '/api/public/paydunya-ipn'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -127,11 +147,13 @@ export interface FileRouteTypes {
     | '/abonnements'
     | '/auth'
     | '/explorer'
+    | '/mes-annonces'
     | '/messages'
     | '/profil'
     | '/publier'
     | '/annonces/$id'
     | '/boost/$id'
+    | '/paiement/succes'
     | '/api/public/paydunya-ipn'
   id:
     | '__root__'
@@ -139,11 +161,13 @@ export interface FileRouteTypes {
     | '/abonnements'
     | '/auth'
     | '/explorer'
+    | '/mes-annonces'
     | '/messages'
     | '/profil'
     | '/publier'
     | '/annonces/$id'
     | '/boost/$id'
+    | '/paiement/succes'
     | '/api/public/paydunya-ipn'
   fileRoutesById: FileRoutesById
 }
@@ -152,11 +176,13 @@ export interface RootRouteChildren {
   AbonnementsRoute: typeof AbonnementsRoute
   AuthRoute: typeof AuthRoute
   ExplorerRoute: typeof ExplorerRoute
+  MesAnnoncesRoute: typeof MesAnnoncesRoute
   MessagesRoute: typeof MessagesRoute
   ProfilRoute: typeof ProfilRoute
   PublierRoute: typeof PublierRoute
   AnnoncesIdRoute: typeof AnnoncesIdRoute
   BoostIdRoute: typeof BoostIdRoute
+  PaiementSuccesRoute: typeof PaiementSuccesRoute
   ApiPublicPaydunyaIpnRoute: typeof ApiPublicPaydunyaIpnRoute
 }
 
@@ -181,6 +207,13 @@ declare module '@tanstack/react-router' {
       path: '/messages'
       fullPath: '/messages'
       preLoaderRoute: typeof MessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mes-annonces': {
+      id: '/mes-annonces'
+      path: '/mes-annonces'
+      fullPath: '/mes-annonces'
+      preLoaderRoute: typeof MesAnnoncesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/explorer': {
@@ -209,6 +242,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/paiement/succes': {
+      id: '/paiement/succes'
+      path: '/paiement/succes'
+      fullPath: '/paiement/succes'
+      preLoaderRoute: typeof PaiementSuccesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/boost/$id': {
@@ -240,11 +280,13 @@ const rootRouteChildren: RootRouteChildren = {
   AbonnementsRoute: AbonnementsRoute,
   AuthRoute: AuthRoute,
   ExplorerRoute: ExplorerRoute,
+  MesAnnoncesRoute: MesAnnoncesRoute,
   MessagesRoute: MessagesRoute,
   ProfilRoute: ProfilRoute,
   PublierRoute: PublierRoute,
   AnnoncesIdRoute: AnnoncesIdRoute,
   BoostIdRoute: BoostIdRoute,
+  PaiementSuccesRoute: PaiementSuccesRoute,
   ApiPublicPaydunyaIpnRoute: ApiPublicPaydunyaIpnRoute,
 }
 export const routeTree = rootRouteImport
