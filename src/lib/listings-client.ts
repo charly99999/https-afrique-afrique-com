@@ -70,13 +70,14 @@ export async function fetchListing(id: string): Promise<DbListing | null> {
     .from("listings")
     .select(`
       id, title, description, price_fcfa, category_slug, subcategory_slug,
-      country, city, cover_url, boosted_until, published_at, created_at,
-      profiles:owner_id ( display_name, account_type )
+      country, city, cover_url, boosted_until, published_at, created_at, owner_id,
+      profiles:owner_id ( display_name, account_type, phone, whatsapp )
     `)
     .eq("id", id)
     .maybeSingle();
   if (error || !data) return null;
-  const tier = (data.profiles as { account_type?: string } | null)?.account_type as SellerBadge | undefined;
+  const prof = data.profiles as { account_type?: string; display_name?: string; phone?: string; whatsapp?: string } | null;
+  const tier = prof?.account_type as SellerBadge | undefined;
   return {
     id: data.id,
     title: data.title,
@@ -88,9 +89,12 @@ export async function fetchListing(id: string): Promise<DbListing | null> {
     image: data.cover_url ?? "/placeholder.svg",
     boosted: data.boosted_until ? new Date(data.boosted_until) > new Date() : false,
     badge: tier === "pro" || tier === "business" ? tier : "gratuit",
-    seller: (data.profiles as { display_name?: string } | null)?.display_name ?? "Vendeur",
+    seller: prof?.display_name ?? "Vendeur",
     postedAt: timeAgo(data.published_at ?? data.created_at),
     description: data.description,
+    ownerId: data.owner_id,
+    sellerPhone: prof?.phone ?? undefined,
+    sellerWhatsapp: prof?.whatsapp ?? prof?.phone ?? undefined,
   };
 }
 
