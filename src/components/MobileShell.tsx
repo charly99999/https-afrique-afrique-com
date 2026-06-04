@@ -8,12 +8,13 @@ export function MobileShell({ children }: { children: ReactNode }) {
   const isActive = (p: string) => (p === "/" ? path === "/" : path.startsWith(p));
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,color-mix(in_oklab,var(--color-brand-green)_5%,white),color-mix(in_oklab,var(--color-brand-gold)_6%,white))]">
-      <main className="mx-auto min-h-screen max-w-[440px] bg-background pb-28 shadow-[0_32px_90px_-36px_color-mix(in_oklab,var(--color-brand-green)_28%,transparent)] ring-1 ring-border/60">
+    <div className="min-h-screen bg-[color-mix(in_oklab,var(--color-brand-green)_4%,var(--color-surface))]">
+      <main className="mx-auto min-h-screen max-w-[440px] bg-background pb-28 shadow-[var(--shadow-luxury)] ring-1 ring-border/60">
         {children}
       </main>
 
-      <nav className="fixed bottom-0 left-1/2 z-50 w-full max-w-[440px] -translate-x-1/2 border-t border-border bg-background/92 px-6 pb-7 pt-3 backdrop-blur-xl">
+      <nav className="fixed bottom-0 left-1/2 z-50 w-full max-w-[440px] -translate-x-1/2 border-t border-border/70 bg-background/85 px-8 pb-6 pt-3 backdrop-blur-xl">
+
         <div className="flex items-center justify-between">
           <NavItem to="/" icon={<Home className="size-5" />} label="Accueil" active={isActive("/")} />
           <NavItem to="/explorer" icon={<Search className="size-5" />} label="Explorer" active={isActive("/explorer")} />
