@@ -78,6 +78,7 @@ function ConversationsList({ userId }: { userId: string }) {
       const map = new Map<string, Conversation>();
       const otherIds = new Set<string>();
       for (const m of data) {
+        if (!m.listing_id) continue;
         const other = m.sender_id === userId ? m.recipient_id : m.sender_id;
         const key = `${m.listing_id}::${other}`;
         otherIds.add(other);
