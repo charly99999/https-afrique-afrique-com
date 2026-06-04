@@ -4,15 +4,13 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { SUB_PRICES, BOOST_PRICES, type SubPlan } from "@/data/pricing";
 
-function getOriginFromHeaders(headers?: Headers): string {
-  const forwardedProto = headers?.get("x-forwarded-proto");
-  const forwardedHost = headers?.get("x-forwarded-host");
-  const host = forwardedHost ?? headers?.get("host");
-
-  if (host) {
-    return `${forwardedProto ?? "https"}://${host}`;
-  }
-
+async function getServerOrigin(): Promise<string> {
+  try {
+    const mod = await import("@tanstack/react-start/server");
+    const proto = mod.getRequestHeader("x-forwarded-proto");
+    const host = mod.getRequestHeader("x-forwarded-host") ?? mod.getRequestHeader("host");
+    if (host) return `${proto ?? "https"}://${host}`;
+  } catch { /* no-op */ }
   return process.env.PUBLIC_SITE_URL
     ?? `https://project--${process.env.SUPABASE_PROJECT_ID ?? "app"}.lovable.app`;
 }
@@ -31,7 +29,8 @@ export const startSubscriptionPayment = createServerFn({ method: "POST" })
     const plan = SUB_PRICES[data.plan as SubPlan];
 
     const { createPaydunyaInvoice } = await import("./paydunya.server");
-    const origin = data.origin || getOriginFromHeaders();
+    const userOrigin = data.origin;
+    const serverOrigin = await getServerOrigin();
 
     // Crée le paiement pending
     const { data: payment, error: payErr } = await supabase
@@ -59,9 +58,9 @@ export const startSubscriptionPayment = createServerFn({ method: "POST" })
         description: `Accès ${plan.tier} pendant ${plan.days} jours`,
       }],
       customData: { payment_id: payment.id, user_id: userId, kind: "subscription", plan: data.plan },
-      returnUrl: `${origin}/paiement/succes?id=${payment.id}`,
-      cancelUrl: `${origin}/abonnements`,
-      callbackUrl: `${origin}/api/public/paydunya-ipn`,
+      returnUrl: `${userOrigin}/paiement/succes?id=${payment.id}`,
+      cancelUrl: `${userOrigin}/abonnements`,
+      callbackUrl: `${serverOrigin}/api/public/paydunya-ipn`,
     });
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -109,7 +108,8 @@ export const startBoostPayment = createServerFn({ method: "POST" })
     if (payErr || !payment) return { ok: false, error: payErr?.message ?? "Erreur DB" };
 
     const { createPaydunyaInvoice } = await import("./paydunya.server");
-    const origin = data.origin || getOriginFromHeaders();
+    const userOrigin = data.origin;
+    const serverOrigin = await getServerOrigin();
 
     const invoice = await createPaydunyaInvoice({
       totalAmount: amount,
@@ -123,9 +123,9 @@ export const startBoostPayment = createServerFn({ method: "POST" })
       }],
       customData: { payment_id: payment.id, user_id: userId, kind: "boost",
         listing_id: data.listingId, days: data.days },
-      returnUrl: `${origin}/paiement/succes?id=${payment.id}`,
-      cancelUrl: `${origin}/annonces/${data.listingId}`,
-      callbackUrl: `${origin}/api/public/paydunya-ipn`,
+      returnUrl: `${userOrigin}/paiement/succes?id=${payment.id}`,
+      cancelUrl: `${userOrigin}/annonces/${data.listingId}`,
+      callbackUrl: `${serverOrigin}/api/public/paydunya-ipn`,
     });
 
     const { supabaseAdmin: adminB } = await import("@/integrations/supabase/client.server");

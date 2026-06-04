@@ -17,12 +17,33 @@ export const Route = createFileRoute("/paiement/succes")({
         const paymentId = body?.paymentId;
         if (!paymentId) return Response.json({ ok: false, error: "paymentId manquant" }, { status: 400 });
 
+        // Require authenticated caller and verify ownership
+        const authHeader = request.headers.get("authorization") ?? request.headers.get("Authorization");
+        if (!authHeader?.toLowerCase().startsWith("bearer ")) {
+          return Response.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+        }
+        const token = authHeader.slice(7).trim();
+        const { createClient } = await import("@supabase/supabase-js");
+        const supaUser = createClient(
+          process.env.SUPABASE_URL!,
+          process.env.SUPABASE_PUBLISHABLE_KEY!,
+          { global: { headers: { Authorization: `Bearer ${token}` } } },
+        );
+        const { data: userData, error: userErr } = await supaUser.auth.getUser(token);
+        if (userErr || !userData?.user) {
+          return Response.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+        }
+        const callerId = userData.user.id;
+
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data: payment } = await supabaseAdmin
           .from("payments")
-          .select("id, status, provider_token")
+          .select("id, status, provider_token, user_id")
           .eq("id", paymentId)
           .maybeSingle();
+
+        if (!payment) return Response.json({ ok: false, error: "Paiement introuvable" }, { status: 404 });
+        if (payment.user_id !== callerId) return Response.json({ ok: false, error: "Forbidden" }, { status: 403 });
 
         if (!payment) return Response.json({ ok: false, error: "Paiement introuvable" }, { status: 404 });
         if (payment.status === "completed") return Response.json({ ok: true, status: "completed" });
@@ -72,9 +93,13 @@ function SuccessPage() {
           .maybeSingle();
         let nextStatus = data?.status ?? "pending";
         if (nextStatus === "pending" && tries >= 2) {
+          const accessToken = sess.session?.access_token;
           const response = await fetch("/paiement/succes", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+            },
             body: JSON.stringify({ paymentId: id }),
           });
           const payload = await response.json().catch(() => null) as { status?: "pending" | "completed" | "failed" | "cancelled" } | null;
