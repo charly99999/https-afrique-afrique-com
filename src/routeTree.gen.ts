@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PublierRouteImport } from './routes/publier'
 import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as MonAbonnementRouteImport } from './routes/mon-abonnement'
 import { Route as MessagesRouteImport } from './routes/messages'
+import { Route as MesStatistiquesRouteImport } from './routes/mes-statistiques'
 import { Route as MesAnnoncesRouteImport } from './routes/mes-annonces'
 import { Route as ExplorerRouteImport } from './routes/explorer'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -32,9 +34,19 @@ const ProfilRoute = ProfilRouteImport.update({
   path: '/profil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MonAbonnementRoute = MonAbonnementRouteImport.update({
+  id: '/mon-abonnement',
+  path: '/mon-abonnement',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MessagesRoute = MessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MesStatistiquesRoute = MesStatistiquesRouteImport.update({
+  id: '/mes-statistiques',
+  path: '/mes-statistiques',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MesAnnoncesRoute = MesAnnoncesRouteImport.update({
@@ -89,7 +101,9 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/explorer': typeof ExplorerRoute
   '/mes-annonces': typeof MesAnnoncesRoute
+  '/mes-statistiques': typeof MesStatistiquesRoute
   '/messages': typeof MessagesRoute
+  '/mon-abonnement': typeof MonAbonnementRoute
   '/profil': typeof ProfilRoute
   '/publier': typeof PublierRoute
   '/annonces/$id': typeof AnnoncesIdRoute
@@ -103,7 +117,9 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/explorer': typeof ExplorerRoute
   '/mes-annonces': typeof MesAnnoncesRoute
+  '/mes-statistiques': typeof MesStatistiquesRoute
   '/messages': typeof MessagesRoute
+  '/mon-abonnement': typeof MonAbonnementRoute
   '/profil': typeof ProfilRoute
   '/publier': typeof PublierRoute
   '/annonces/$id': typeof AnnoncesIdRoute
@@ -118,7 +134,9 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/explorer': typeof ExplorerRoute
   '/mes-annonces': typeof MesAnnoncesRoute
+  '/mes-statistiques': typeof MesStatistiquesRoute
   '/messages': typeof MessagesRoute
+  '/mon-abonnement': typeof MonAbonnementRoute
   '/profil': typeof ProfilRoute
   '/publier': typeof PublierRoute
   '/annonces/$id': typeof AnnoncesIdRoute
@@ -134,7 +152,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/explorer'
     | '/mes-annonces'
+    | '/mes-statistiques'
     | '/messages'
+    | '/mon-abonnement'
     | '/profil'
     | '/publier'
     | '/annonces/$id'
@@ -148,7 +168,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/explorer'
     | '/mes-annonces'
+    | '/mes-statistiques'
     | '/messages'
+    | '/mon-abonnement'
     | '/profil'
     | '/publier'
     | '/annonces/$id'
@@ -162,7 +184,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/explorer'
     | '/mes-annonces'
+    | '/mes-statistiques'
     | '/messages'
+    | '/mon-abonnement'
     | '/profil'
     | '/publier'
     | '/annonces/$id'
@@ -177,7 +201,9 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ExplorerRoute: typeof ExplorerRoute
   MesAnnoncesRoute: typeof MesAnnoncesRoute
+  MesStatistiquesRoute: typeof MesStatistiquesRoute
   MessagesRoute: typeof MessagesRoute
+  MonAbonnementRoute: typeof MonAbonnementRoute
   ProfilRoute: typeof ProfilRoute
   PublierRoute: typeof PublierRoute
   AnnoncesIdRoute: typeof AnnoncesIdRoute
@@ -202,11 +228,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mon-abonnement': {
+      id: '/mon-abonnement'
+      path: '/mon-abonnement'
+      fullPath: '/mon-abonnement'
+      preLoaderRoute: typeof MonAbonnementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/messages': {
       id: '/messages'
       path: '/messages'
       fullPath: '/messages'
       preLoaderRoute: typeof MessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mes-statistiques': {
+      id: '/mes-statistiques'
+      path: '/mes-statistiques'
+      fullPath: '/mes-statistiques'
+      preLoaderRoute: typeof MesStatistiquesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mes-annonces': {
@@ -281,7 +321,9 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ExplorerRoute: ExplorerRoute,
   MesAnnoncesRoute: MesAnnoncesRoute,
+  MesStatistiquesRoute: MesStatistiquesRoute,
   MessagesRoute: MessagesRoute,
+  MonAbonnementRoute: MonAbonnementRoute,
   ProfilRoute: ProfilRoute,
   PublierRoute: PublierRoute,
   AnnoncesIdRoute: AnnoncesIdRoute,

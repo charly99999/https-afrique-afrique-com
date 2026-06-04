@@ -101,8 +101,8 @@ function ConversationsList({ userId }: { userId: string }) {
       }
       if (otherIds.size) {
         const { data: profs } = await supabase
-          .from("profiles").select("id, display_name").in("id", Array.from(otherIds));
-        const nameById = new Map(profs?.map((p) => [p.id, p.display_name ?? "Utilisateur"]) ?? []);
+          .from("public_profiles" as never).select("id, display_name").in("id", Array.from(otherIds));
+        const nameById = new Map((profs as { id: string; display_name: string | null }[] | null)?.map((p) => [p.id, p.display_name ?? "Utilisateur"]) ?? []);
         for (const c of map.values()) c.other_name = nameById.get(c.other_id) ?? "Utilisateur";
       }
       setConvos(Array.from(map.values()));
@@ -171,12 +171,13 @@ function Thread({ userId, listingId, otherId }: { userId: string; listingId: str
           .or(`and(sender_id.eq.${userId},recipient_id.eq.${otherId}),and(sender_id.eq.${otherId},recipient_id.eq.${userId})`)
           .order("created_at", { ascending: true }),
         supabase.from("listings").select("title, price_fcfa, cover_url").eq("id", listingId).maybeSingle(),
-        supabase.from("profiles").select("display_name").eq("id", otherId).maybeSingle(),
+        supabase.from("public_profiles" as never).select("display_name").eq("id", otherId).maybeSingle(),
       ]);
       if (cancelled) return;
       setMessages((msgs ?? []) as Message[]);
       if (lst) setListing({ title: lst.title, price: Number(lst.price_fcfa), cover: lst.cover_url });
-      if (prof?.display_name) setOtherName(prof.display_name);
+      const profRow = prof as { display_name?: string | null } | null;
+      if (profRow?.display_name) setOtherName(profRow.display_name);
       // mark unread as read
       const unread = (msgs ?? []).filter((m) => m.recipient_id === userId && !m.read_at).map((m) => m.id);
       if (unread.length) await supabase.from("messages").update({ read_at: new Date().toISOString() }).in("id", unread);
