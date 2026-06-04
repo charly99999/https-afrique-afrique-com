@@ -1,0 +1,1 @@
+CREATE POLICY "payments_self_update" ON public.payments FOR UPDATE TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
