@@ -129,10 +129,14 @@ function ListingDetail() {
           className="absolute left-4 top-4 grid size-10 place-items-center rounded-full bg-background/90 text-foreground shadow-soft backdrop-blur">
           <ArrowLeft className="size-5" />
         </Link>
-        <div className="absolute right-4 top-4 flex gap-2">
+        <div className="absolute right-4 top-4 flex items-center gap-2">
           {listing.boosted && <span className="pro-glow rounded-full bg-brand-gold px-3 py-1 text-[10px] font-extrabold uppercase">Boosté</span>}
           {listing.badge === "pro" && <span className="rounded-full bg-brand-green px-3 py-1 text-[10px] font-bold uppercase text-primary-foreground">Pro</span>}
           {listing.badge === "business" && <span className="rounded-full bg-foreground px-3 py-1 text-[10px] font-bold uppercase text-brand-gold">👑 Business</span>}
+          <button onClick={toggleFav} aria-label={isFav ? "Retirer des favoris" : "Ajouter aux favoris"}
+            className="grid size-10 place-items-center rounded-full bg-background/90 text-foreground shadow-soft backdrop-blur transition active:scale-95">
+            <Heart className={`size-5 transition ${isFav ? "fill-destructive text-destructive" : ""}`} />
+          </button>
         </div>
       </div>
 
