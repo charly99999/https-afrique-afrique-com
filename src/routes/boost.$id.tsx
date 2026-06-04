@@ -35,7 +35,7 @@ function BoostPage() {
     }
     setLoadingDays(days);
     try {
-      const res = await startBoost({ data: { listingId: id, days } });
+      const res = await startBoost({ data: { listingId: id, days, origin: window.location.origin } });
       if (!res.ok || !res.invoiceUrl) throw new Error(res.error ?? "Erreur");
       window.location.href = res.invoiceUrl;
     } catch (e) {
