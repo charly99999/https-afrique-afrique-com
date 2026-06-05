@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Camera, X, ArrowLeft, Loader2 } from "lucide-react";
 import { MobileShell } from "@/components/MobileShell";
-import { CATEGORIES, COUNTRIES, type CountryCode } from "@/data/catalog";
+import { CATEGORIES, COUNTRIES, isFreeCategory, type CountryCode } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { resolveListingImage } from "@/lib/listing-images";
