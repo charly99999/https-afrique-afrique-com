@@ -11,9 +11,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ReportListingDialog } from "@/components/ReportListingDialog";
 import { VerifiedBadge, TrustChip, memberSinceLabel, type SellerStats } from "@/components/TrustBadge";
+import { ListingGallery } from "@/components/ListingGallery";
 
 export const Route = createFileRoute("/annonces/$id")({
-  head: () => ({ meta: [{ title: "Annonce — Afrique-business" }] }),
+  head: ({ params }) => ({
+    meta: [
+      { title: `Annonce ${params.id.slice(0, 8)} — Afrique-business` },
+      { name: "description", content: "Découvrez cette annonce sur Afrique-business, la marketplace panafricaine n°1." },
+      { property: "og:title", content: "Annonce — Afrique-business" },
+      { property: "og:type", content: "product" },
+      { property: "og:url", content: `https://afrique-afrique.com/annonces/${params.id}` },
+    ],
+    links: [{ rel: "canonical", href: `https://afrique-afrique.com/annonces/${params.id}` }],
+  }),
   notFoundComponent: () => (
     <MobileShell>
       <div className="px-6 py-20 text-center">
