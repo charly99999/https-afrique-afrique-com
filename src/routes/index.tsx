@@ -74,13 +74,30 @@ function HomePage() {
 
         <div className="hide-scrollbar mt-4 flex gap-2 overflow-x-auto pb-1">
           <CategoryChip active={activeCat === "all"} onClick={() => setActiveCat("all")}>Tous</CategoryChip>
-          {CATEGORIES.map((cat) => (
+          {CATEGORIES.slice(0, 6).map((cat) => (
             <CategoryChip key={cat.slug} active={activeCat === cat.slug} onClick={() => setActiveCat(cat.slug)}>
               <span className="mr-1">{cat.emoji}</span>{cat.name}
             </CategoryChip>
           ))}
         </div>
       </header>
+
+      {activeCat === "all" && (
+        <section className="mt-6 px-6">
+          <div className="grid grid-cols-4 gap-3">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat.slug}
+                onClick={() => setActiveCat(cat.slug)}
+                className="flex flex-col items-center gap-1.5 rounded-2xl border border-border bg-card p-3 transition active:scale-95 hover:border-brand-green/40"
+              >
+                <span className="text-2xl">{cat.emoji}</span>
+                <span className="text-center text-[10px] font-semibold leading-tight text-foreground/80">{cat.name}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       {boosted.length > 0 && (
         <section className="animate-fade-up mt-8 px-6">

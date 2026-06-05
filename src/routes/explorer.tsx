@@ -12,9 +12,11 @@ export const Route = createFileRoute("/explorer")({
 });
 
 const DEFAULT_COUNTRY: CountryCode = "CI";
+type CountryFilter = CountryCode | "ALL";
+type SortKey = "recent" | "price_asc" | "price_desc";
 
 function Explorer() {
-  const [country, setCountry] = useState<CountryCode>(DEFAULT_COUNTRY);
+  const [country, setCountry] = useState<CountryFilter>(DEFAULT_COUNTRY);
   const [items, setItems] = useState<DbListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
@@ -22,10 +24,11 @@ function Explorer() {
   const [category, setCategory] = useState<string>("");
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
+  const [sort, setSort] = useState<SortKey>("recent");
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
-    const saved = (typeof window !== "undefined" && localStorage.getItem("ab_country")) as CountryCode | null;
+    const saved = (typeof window !== "undefined" && localStorage.getItem("ab_country")) as CountryFilter | null;
     if (saved) setCountry(saved);
   }, []);
 
@@ -36,20 +39,31 @@ function Explorer() {
     return () => { cancelled = true; };
   }, [country]);
 
-  const cities = useMemo(() => COUNTRIES.find((c) => c.code === country)?.cities ?? [], [country]);
+  const cities = useMemo(
+    () => country === "ALL" ? [] : (COUNTRIES.find((c) => c.code === country)?.cities ?? []),
+    [country],
+  );
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     const min = minPrice ? Number(minPrice) : 0;
     const max = maxPrice ? Number(maxPrice) : Infinity;
-    return items.filter((l) => {
+    const arr = items.filter((l) => {
       if (needle && !`${l.title} ${l.description}`.toLowerCase().includes(needle)) return false;
       if (city && l.city !== city) return false;
       if (category && l.category !== category) return false;
       if (l.price < min || l.price > max) return false;
       return true;
     });
-  }, [items, q, city, category, minPrice, maxPrice]);
+    // Boostées toujours en tête, puis tri choisi
+    arr.sort((a, b) => {
+      if (!!b.boosted !== !!a.boosted) return b.boosted ? 1 : -1;
+      if (sort === "price_asc") return a.price - b.price;
+      if (sort === "price_desc") return b.price - a.price;
+      return 0; // recent (déjà ordonné par le fetch)
+    });
+    return arr;
+  }, [items, q, city, category, minPrice, maxPrice, sort]);
 
   const activeFilters = [city, category, minPrice, maxPrice].filter(Boolean).length;
 
@@ -83,6 +97,12 @@ function Explorer() {
         </div>
 
         <div className="hide-scrollbar mt-3 flex gap-2 overflow-x-auto">
+          <button onClick={() => { setCountry("ALL"); localStorage.setItem("ab_country", "ALL"); }}
+            className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold transition ${
+              country === "ALL" ? "border-brand-green bg-brand-green text-primary-foreground" : "border-border bg-background text-muted-foreground"
+            }`}>
+            🌍 Tous
+          </button>
           {COUNTRIES.map((c) => (
             <button key={c.code} onClick={() => { setCountry(c.code); localStorage.setItem("ab_country", c.code); }}
               className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold transition ${
@@ -101,7 +121,15 @@ function Explorer() {
           <p className="py-16 text-center text-sm text-muted-foreground">Aucune annonce ne correspond.</p>
         ) : (
           <>
-            <p className="mb-3 text-xs text-muted-foreground">{filtered.length} résultat{filtered.length > 1 ? "s" : ""}</p>
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">{filtered.length} résultat{filtered.length > 1 ? "s" : ""}</p>
+              <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)}
+                className="rounded-lg border border-border bg-background px-2 py-1 text-xs font-semibold">
+                <option value="recent">Plus récentes</option>
+                <option value="price_asc">Prix croissant</option>
+                <option value="price_desc">Prix décroissant</option>
+              </select>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               {filtered.map((l) => <ListingCard key={l.id} listing={l} />)}
             </div>
