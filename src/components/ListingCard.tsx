@@ -6,21 +6,29 @@ import { formatFcfa } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import type { DbListing } from "@/lib/listings-client";
 
-export function ListingCard({ listing }: { listing: Listing }) {
+type ListingItem = Listing | DbListing;
+
+export function ListingCard({ listing }: { listing: ListingItem }) {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [isFav, setIsFav] = useState(false);
+  const [isFav, setIsFav] = useState((listing as DbListing).isFavorite ?? false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!user) { setIsFav(false); return; }
-    let cancelled = false;
-    supabase.from("favorites").select("listing_id")
-      .eq("user_id", user.id).eq("listing_id", listing.id).maybeSingle()
-      .then(({ data }) => { if (!cancelled) setIsFav(!!data); });
-    return () => { cancelled = true; };
-  }, [user, listing.id]);
+    // If we have DbListing with isFavorite, we trust it on mount
+    if ("isFavorite" in listing && listing.isFavorite !== undefined) {
+      setIsFav(listing.isFavorite);
+    } else if (user) {
+      // Fallback only if not provided (N+1 scenario we want to avoid but keep for compatibility)
+      let cancelled = false;
+      supabase.from("favorites").select("listing_id")
+        .eq("user_id", user.id).eq("listing_id", listing.id).maybeSingle()
+        .then(({ data }) => { if (!cancelled) setIsFav(!!data); });
+      return () => { cancelled = true; };
+    }
+  }, [user, listing.id, (listing as DbListing).isFavorite]);
 
   async function toggleFav(e: React.MouseEvent) {
     e.preventDefault();
@@ -79,7 +87,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
       <h4 className="line-clamp-1 text-sm font-bold">{listing.title}</h4>
       <p className="mt-1 font-mono text-sm font-bold text-foreground">
         {formatFcfa(listing.price)}
-        {listing.priceSuffix && (
+        {"priceSuffix" in listing && listing.priceSuffix && (
           <span className="ml-1 text-[10px] font-normal text-muted-foreground">{listing.priceSuffix}</span>
         )}
       </p>
@@ -90,7 +98,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
   );
 }
 
-export function BoostedCard({ listing }: { listing: Listing }) {
+export function BoostedCard({ listing }: { listing: ListingItem }) {
   return (
     <Link
       to="/annonces/$id"

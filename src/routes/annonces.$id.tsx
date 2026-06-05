@@ -1,13 +1,14 @@
 import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Flag, Rocket, ShieldCheck, MapPin, Heart } from "lucide-react";
-import { getListing, formatFcfa, LISTINGS } from "@/data/catalog";
+import { formatFcfa } from "@/data/catalog";
 import { MobileShell } from "@/components/MobileShell";
 import { ListingCard } from "@/components/ListingCard";
 import { ContactBar } from "@/components/ContactBar";
-import { fetchListing, fetchPhotos, type DbListing } from "@/lib/listings-client";
+import { fetchListing, fetchPhotos, fetchSimilarListings, type DbListing } from "@/lib/listings-client";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/annonces/$id")({
   head: () => ({ meta: [{ title: "Annonce — Afrique-business" }] }),
@@ -37,58 +38,57 @@ function ListingDetail() {
   const { user } = useAuth();
   const [listing, setListing] = useState<DbListing | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
+  const [similar, setSimilar] = useState<DbListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFav, setIsFav] = useState(false);
   const [reporting, setReporting] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        // Tente DB ; sinon fallback démo
-        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(id);
-        if (isUuid) {
-          const l = await fetchListing(id);
-          if (cancelled) return;
-          if (l) {
-            setListing(l);
-            const ph = await fetchPhotos(id).catch(() => []);
-            if (!cancelled) setPhotos(ph);
-            setLoading(false);
-            return;
+        setLoading(true);
+        const l = await fetchListing(id, user?.id);
+        if (cancelled) return;
+        if (l) {
+          setListing(l);
+          setIsFav(l.isFavorite ?? false);
+          const [ph, sim] = await Promise.all([
+            fetchPhotos(id).catch(() => []),
+            fetchSimilarListings(l, 4, user?.id).catch(() => []),
+          ]);
+          if (!cancelled) {
+            setPhotos(ph);
+            setSimilar(sim);
           }
         }
-
-        const demo = getListing(id);
-        if (!cancelled) {
-          setListing(demo ? (demo as unknown as DbListing) : null);
-          setPhotos(demo ? [demo.image] : []);
-          setLoading(false);
-        }
-      } catch {
+        setLoading(false);
+      } catch (err) {
+        console.error("Error loading listing:", err);
         if (!cancelled) setLoading(false);
       }
     })();
     return () => { cancelled = true; };
-  }, [id]);
-
-  useEffect(() => {
-    if (!user || !listing?.id) return;
-    let cancelled = false;
-    supabase.from("favorites").select("listing_id").eq("user_id", user.id).eq("listing_id", listing.id).maybeSingle()
-      .then(({ data }) => { if (!cancelled) setIsFav(!!data); });
-    return () => { cancelled = true; };
-  }, [user, listing?.id]);
+  }, [id, user?.id]);
 
   async function toggleFav() {
     if (!user) { navigate({ to: "/auth" }); return; }
-    if (!listing) return;
-    if (isFav) {
-      await supabase.from("favorites").delete().eq("user_id", user.id).eq("listing_id", listing.id);
-      setIsFav(false);
-    } else {
-      await supabase.from("favorites").insert({ user_id: user.id, listing_id: listing.id });
-      setIsFav(true);
+    if (!listing || busy) return;
+    setBusy(true);
+    try {
+      if (isFav) {
+        await supabase.from("favorites").delete().eq("user_id", user.id).eq("listing_id", listing.id);
+        setIsFav(false);
+      } else {
+        const { error } = await supabase.from("favorites").insert({ user_id: user.id, listing_id: listing.id });
+        if (error) throw error;
+        setIsFav(true);
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur favoris");
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -98,9 +98,14 @@ function ListingDetail() {
     const reason = window.prompt("Pourquoi signaler cette annonce ?");
     if (!reason?.trim()) return;
     setReporting(true);
-    await supabase.from("reports").insert({ listing_id: listing.id, reporter_id: user.id, reason: reason.trim() });
-    setReporting(false);
-    alert("Merci, le signalement a été envoyé à la modération.");
+    try {
+      await supabase.from("reports").insert({ listing_id: listing.id, reporter_id: user.id, reason: reason.trim() });
+      toast.success("Merci, le signalement a été envoyé à la modération.");
+    } catch (err) {
+      toast.error("Erreur lors de l'envoi du signalement.");
+    } finally {
+      setReporting(false);
+    }
   }
 
   async function startConversation() {
@@ -125,7 +130,6 @@ function ListingDetail() {
   }
 
   const cover = photos[0] ?? listing.image;
-  const similar = LISTINGS.filter((l) => l.id !== listing.id && l.category === listing.category).slice(0, 4);
 
   return (
     <MobileShell>
@@ -140,7 +144,7 @@ function ListingDetail() {
           {listing.badge === "pro" && <span className="rounded-full bg-brand-green px-3 py-1 text-[10px] font-bold uppercase text-primary-foreground">Pro</span>}
           {listing.badge === "business" && <span className="rounded-full bg-foreground px-3 py-1 text-[10px] font-bold uppercase text-brand-gold">👑 Business</span>}
           <button onClick={toggleFav} aria-label={isFav ? "Retirer des favoris" : "Ajouter aux favoris"}
-            className="grid size-10 place-items-center rounded-full bg-background/90 text-foreground shadow-soft backdrop-blur transition active:scale-95">
+            className="grid size-10 place-items-center rounded-full bg-background/90 text-foreground shadow-soft backdrop-blur transition active:scale-95 disabled:opacity-50">
             <Heart className={`size-5 transition ${isFav ? "fill-destructive text-destructive" : ""}`} />
           </button>
         </div>
@@ -203,12 +207,12 @@ function ListingDetail() {
       </button>
 
       {similar.length > 0 && (
-        <section className="mt-10 px-5">
+        <section className="mt-10 px-5 pb-10">
           <h2 className="mb-4 flex items-center gap-3 text-sm font-extrabold uppercase tracking-tight">
             <span className="h-[2px] w-6 bg-brand-green" /> Annonces Similaires
           </h2>
           <div className="grid grid-cols-2 gap-4">
-            {similar.map((l) => <ListingCard key={l.id} listing={l} />)}
+            {similar.map((l) => <ListingCard key={l.id} listing={l as any} />)}
           </div>
         </section>
       )}
@@ -217,4 +221,3 @@ function ListingDetail() {
     </MobileShell>
   );
 }
-
