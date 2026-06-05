@@ -1,9 +1,49 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Heart, BadgeCheck } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { Listing } from "@/data/catalog";
 import { formatFcfa } from "@/data/catalog";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 export function ListingCard({ listing }: { listing: Listing }) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [isFav, setIsFav] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!user) { setIsFav(false); return; }
+    let cancelled = false;
+    supabase.from("favorites").select("listing_id")
+      .eq("user_id", user.id).eq("listing_id", listing.id).maybeSingle()
+      .then(({ data }) => { if (!cancelled) setIsFav(!!data); });
+    return () => { cancelled = true; };
+  }, [user, listing.id]);
+
+  async function toggleFav(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) { navigate({ to: "/auth" }); return; }
+    if (busy) return;
+    setBusy(true);
+    try {
+      if (isFav) {
+        await supabase.from("favorites").delete().eq("user_id", user.id).eq("listing_id", listing.id);
+        setIsFav(false);
+      } else {
+        const { error } = await supabase.from("favorites").insert({ user_id: user.id, listing_id: listing.id });
+        if (error) throw error;
+        setIsFav(true);
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur favoris");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <Link to="/annonces/$id" params={{ id: listing.id }} className="group flex flex-col">
       <div className="relative mb-3 aspect-square overflow-hidden rounded-2xl bg-muted">
@@ -15,11 +55,12 @@ export function ListingCard({ listing }: { listing: Listing }) {
         />
         <button
           type="button"
-          aria-label="Ajouter aux favoris"
-          onClick={(e) => e.preventDefault()}
-          className="absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-background/90 text-brand-green shadow-sm backdrop-blur transition hover:bg-background"
+          aria-label={isFav ? "Retirer des favoris" : "Ajouter aux favoris"}
+          onClick={toggleFav}
+          disabled={busy}
+          className="absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-background/90 text-brand-green shadow-sm backdrop-blur transition hover:bg-background disabled:opacity-60"
         >
-          <Heart className="size-4" />
+          <Heart className={`size-4 transition ${isFav ? "fill-destructive text-destructive" : ""}`} />
         </button>
         {listing.badge === "pro" && (
           <span className="absolute bottom-2 left-2 rounded bg-brand-green px-2 py-0.5 text-[9px] font-extrabold uppercase text-primary-foreground shadow-sm">
