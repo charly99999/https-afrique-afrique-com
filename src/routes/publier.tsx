@@ -65,7 +65,10 @@ function PublierPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (photos.length < MIN_PHOTOS) return toast.error(`${MIN_PHOTOS} photo minimum`);
-    if (!title.trim() || !description.trim() || !price) return toast.error("Champs requis");
+    const isFree = isFreeCategory(category);
+    if (!title.trim() || !description.trim()) return toast.error("Champs requis");
+    if (!isFree && !price) return toast.error("Prix requis");
+
 
     setSubmitting(true);
     let listingId: string | null = null;
