@@ -163,6 +163,7 @@ function PublierPage() {
       if (actErr) throw actErr;
 
       toast.success("Annonce publiée !");
+      clearDraft();
       navigate({ to: "/annonces/$id", params: { id: listing.id } });
     } catch (err) {
       // Rollback : supprimer fichiers uploadés et listing créé
