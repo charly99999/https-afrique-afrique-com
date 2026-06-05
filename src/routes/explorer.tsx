@@ -97,6 +97,12 @@ function Explorer() {
         </div>
 
         <div className="hide-scrollbar mt-3 flex gap-2 overflow-x-auto">
+          <button onClick={() => { setCountry("ALL"); localStorage.setItem("ab_country", "ALL"); }}
+            className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold transition ${
+              country === "ALL" ? "border-brand-green bg-brand-green text-primary-foreground" : "border-border bg-background text-muted-foreground"
+            }`}>
+            🌍 Tous
+          </button>
           {COUNTRIES.map((c) => (
             <button key={c.code} onClick={() => { setCountry(c.code); localStorage.setItem("ab_country", c.code); }}
               className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold transition ${
@@ -115,7 +121,15 @@ function Explorer() {
           <p className="py-16 text-center text-sm text-muted-foreground">Aucune annonce ne correspond.</p>
         ) : (
           <>
-            <p className="mb-3 text-xs text-muted-foreground">{filtered.length} résultat{filtered.length > 1 ? "s" : ""}</p>
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">{filtered.length} résultat{filtered.length > 1 ? "s" : ""}</p>
+              <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)}
+                className="rounded-lg border border-border bg-background px-2 py-1 text-xs font-semibold">
+                <option value="recent">Plus récentes</option>
+                <option value="price_asc">Prix croissant</option>
+                <option value="price_desc">Prix décroissant</option>
+              </select>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               {filtered.map((l) => <ListingCard key={l.id} listing={l} />)}
             </div>
