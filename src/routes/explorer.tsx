@@ -101,9 +101,37 @@ function Explorer() {
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
               placeholder="Rechercher une annonce…"
-              className="w-full rounded-2xl border border-border bg-background py-3 pl-10 pr-3 text-sm focus:border-brand-green focus:outline-none"
+              className="w-full rounded-2xl border border-border bg-background py-3 pl-10 pr-9 text-sm focus:border-brand-green focus:outline-none"
             />
+            {q && (
+              <button onClick={() => setQ("")} aria-label="Effacer"
+                className="absolute right-2 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-full text-muted-foreground hover:bg-muted">
+                <X className="size-4" />
+              </button>
+            )}
+            {searchFocused && history.length > 0 && q.trim().length === 0 && (
+              <div className="absolute left-0 right-0 top-full z-40 mt-1 rounded-2xl border border-border bg-background shadow-lg">
+                <div className="flex items-center justify-between px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Recherches récentes
+                  <button onMouseDown={(e) => { e.preventDefault(); clearHistory(); }} className="text-[10px] font-bold text-brand-green">Tout effacer</button>
+                </div>
+                {history.map((h) => (
+                  <div key={h} className="flex items-center justify-between px-3 py-2 hover:bg-muted">
+                    <button onMouseDown={(e) => { e.preventDefault(); setQ(h); }} className="flex flex-1 items-center gap-2 text-left text-sm">
+                      <Clock className="size-3.5 text-muted-foreground" />
+                      {h}
+                    </button>
+                    <button onMouseDown={(e) => { e.preventDefault(); removeHistory(h); }} aria-label="Supprimer"
+                      className="grid size-7 place-items-center rounded-full text-muted-foreground hover:bg-background">
+                      <X className="size-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <button onClick={() => setFiltersOpen(true)}
             className="relative grid size-12 place-items-center rounded-2xl border border-border bg-background">
