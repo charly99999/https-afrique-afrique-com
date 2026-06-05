@@ -20,6 +20,7 @@ import { Route as MonAbonnementRouteImport } from './routes/mon-abonnement'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MesStatistiquesRouteImport } from './routes/mes-statistiques'
 import { Route as MesAnnoncesRouteImport } from './routes/mes-annonces'
+import { Route as KycRouteImport } from './routes/kyc'
 import { Route as ExplorerRouteImport } from './routes/explorer'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AbonnementsRouteImport } from './routes/abonnements'
@@ -88,6 +89,11 @@ const MesAnnoncesRoute = MesAnnoncesRouteImport.update({
   path: '/mes-annonces',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KycRoute = KycRouteImport.update({
+  id: '/kyc',
+  path: '/kyc',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ExplorerRoute = ExplorerRouteImport.update({
   id: '/explorer',
   path: '/explorer',
@@ -144,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/abonnements': typeof AbonnementsRoute
   '/auth': typeof AuthRoute
   '/explorer': typeof ExplorerRoute
+  '/kyc': typeof KycRoute
   '/mes-annonces': typeof MesAnnoncesRoute
   '/mes-statistiques': typeof MesStatistiquesRoute
   '/messages': typeof MessagesRoute
@@ -167,6 +174,7 @@ export interface FileRoutesByTo {
   '/abonnements': typeof AbonnementsRoute
   '/auth': typeof AuthRoute
   '/explorer': typeof ExplorerRoute
+  '/kyc': typeof KycRoute
   '/mes-annonces': typeof MesAnnoncesRoute
   '/mes-statistiques': typeof MesStatistiquesRoute
   '/messages': typeof MessagesRoute
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/abonnements': typeof AbonnementsRoute
   '/auth': typeof AuthRoute
   '/explorer': typeof ExplorerRoute
+  '/kyc': typeof KycRoute
   '/mes-annonces': typeof MesAnnoncesRoute
   '/mes-statistiques': typeof MesStatistiquesRoute
   '/messages': typeof MessagesRoute
@@ -216,6 +225,7 @@ export interface FileRouteTypes {
     | '/abonnements'
     | '/auth'
     | '/explorer'
+    | '/kyc'
     | '/mes-annonces'
     | '/mes-statistiques'
     | '/messages'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/abonnements'
     | '/auth'
     | '/explorer'
+    | '/kyc'
     | '/mes-annonces'
     | '/mes-statistiques'
     | '/messages'
@@ -262,6 +273,7 @@ export interface FileRouteTypes {
     | '/abonnements'
     | '/auth'
     | '/explorer'
+    | '/kyc'
     | '/mes-annonces'
     | '/mes-statistiques'
     | '/messages'
@@ -286,6 +298,7 @@ export interface RootRouteChildren {
   AbonnementsRoute: typeof AbonnementsRoute
   AuthRoute: typeof AuthRoute
   ExplorerRoute: typeof ExplorerRoute
+  KycRoute: typeof KycRoute
   MesAnnoncesRoute: typeof MesAnnoncesRoute
   MesStatistiquesRoute: typeof MesStatistiquesRoute
   MessagesRoute: typeof MessagesRoute
@@ -383,6 +396,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MesAnnoncesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/kyc': {
+      id: '/kyc'
+      path: '/kyc'
+      fullPath: '/kyc'
+      preLoaderRoute: typeof KycRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/explorer': {
       id: '/explorer'
       path: '/explorer'
@@ -473,6 +493,7 @@ const rootRouteChildren: RootRouteChildren = {
   AbonnementsRoute: AbonnementsRoute,
   AuthRoute: AuthRoute,
   ExplorerRoute: ExplorerRoute,
+  KycRoute: KycRoute,
   MesAnnoncesRoute: MesAnnoncesRoute,
   MesStatistiquesRoute: MesStatistiquesRoute,
   MessagesRoute: MessagesRoute,
