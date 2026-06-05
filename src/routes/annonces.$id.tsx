@@ -169,14 +169,6 @@ function ListingDetail() {
     <MobileShell>
 
       <div className="relative">
-        <div
-          className="hide-scrollbar flex aspect-[4/5] w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden"
-          style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", touchAction: "pan-x" }}
-        >
-  return (
-    <MobileShell>
-
-      <div className="relative">
         <ListingGallery photos={gallery} alt={listing.title} />
         <Link to="/" aria-label="Retour"
           className="absolute left-4 top-4 z-10 grid size-10 place-items-center rounded-full bg-background/90 text-foreground shadow-soft backdrop-blur">
