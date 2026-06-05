@@ -1,12 +1,25 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { Camera, X, ArrowLeft, Loader2 } from "lucide-react";
+import { Camera, X, ArrowLeft, Loader2, Trash2 } from "lucide-react";
 import { MobileShell } from "@/components/MobileShell";
 import { CATEGORIES, COUNTRIES, isFreeCategory, type CountryCode } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { resolveListingImage } from "@/lib/listing-images";
+import { compressMany } from "@/lib/image-compress";
+import { useDraft } from "@/hooks/use-draft";
+
+const DRAFT_KEY = "ab_publier_draft_v1";
+type DraftShape = {
+  title: string; description: string; price: string; negotiable: boolean;
+  category: string; subCategory: string; country: CountryCode; city: string;
+};
+const INITIAL_DRAFT: DraftShape = {
+  title: "", description: "", price: "", negotiable: false,
+  category: CATEGORIES[0].slug, subCategory: "",
+  country: "CI", city: COUNTRIES[0].cities[0],
+};
 
 export const Route = createFileRoute("/publier")({
   head: () => ({ meta: [{ title: "Publier une annonce — Afrique-business" }] }),
