@@ -23,7 +23,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PaiementSuccesRouteImport } from './routes/paiement.succes'
 import { Route as BoutiqueOwnerIdRouteImport } from './routes/boutique.$ownerId'
 import { Route as BoostIdRouteImport } from './routes/boost.$id'
-import { Route as ApiRobotsDottxtRouteImport } from './routes/api/robots[.]txt'
 import { Route as AnnoncesIdRouteImport } from './routes/annonces.$id'
 import { Route as ApiPublicPaydunyaIpnRouteImport } from './routes/api/public/paydunya-ipn'
 import { Route as AnnoncesIdEditRouteImport } from './routes/annonces.$id.edit'
@@ -98,11 +97,6 @@ const BoostIdRoute = BoostIdRouteImport.update({
   path: '/boost/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiRobotsDottxtRoute = ApiRobotsDottxtRouteImport.update({
-  id: '/api/robots.txt',
-  path: '/api/robots.txt',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AnnoncesIdRoute = AnnoncesIdRouteImport.update({
   id: '/annonces/$id',
   path: '/annonces/$id',
@@ -132,7 +126,6 @@ export interface FileRoutesByFullPath {
   '/profil': typeof ProfilRoute
   '/publier': typeof PublierRoute
   '/annonces/$id': typeof AnnoncesIdRouteWithChildren
-  '/api/robots.txt': typeof ApiRobotsDottxtRoute
   '/boost/$id': typeof BoostIdRoute
   '/boutique/$ownerId': typeof BoutiqueOwnerIdRoute
   '/paiement/succes': typeof PaiementSuccesRoute
@@ -152,7 +145,6 @@ export interface FileRoutesByTo {
   '/profil': typeof ProfilRoute
   '/publier': typeof PublierRoute
   '/annonces/$id': typeof AnnoncesIdRouteWithChildren
-  '/api/robots.txt': typeof ApiRobotsDottxtRoute
   '/boost/$id': typeof BoostIdRoute
   '/boutique/$ownerId': typeof BoutiqueOwnerIdRoute
   '/paiement/succes': typeof PaiementSuccesRoute
@@ -173,7 +165,6 @@ export interface FileRoutesById {
   '/profil': typeof ProfilRoute
   '/publier': typeof PublierRoute
   '/annonces/$id': typeof AnnoncesIdRouteWithChildren
-  '/api/robots.txt': typeof ApiRobotsDottxtRoute
   '/boost/$id': typeof BoostIdRoute
   '/boutique/$ownerId': typeof BoutiqueOwnerIdRoute
   '/paiement/succes': typeof PaiementSuccesRoute
@@ -195,7 +186,6 @@ export interface FileRouteTypes {
     | '/profil'
     | '/publier'
     | '/annonces/$id'
-    | '/api/robots.txt'
     | '/boost/$id'
     | '/boutique/$ownerId'
     | '/paiement/succes'
@@ -215,7 +205,6 @@ export interface FileRouteTypes {
     | '/profil'
     | '/publier'
     | '/annonces/$id'
-    | '/api/robots.txt'
     | '/boost/$id'
     | '/boutique/$ownerId'
     | '/paiement/succes'
@@ -235,7 +224,6 @@ export interface FileRouteTypes {
     | '/profil'
     | '/publier'
     | '/annonces/$id'
-    | '/api/robots.txt'
     | '/boost/$id'
     | '/boutique/$ownerId'
     | '/paiement/succes'
@@ -256,7 +244,6 @@ export interface RootRouteChildren {
   ProfilRoute: typeof ProfilRoute
   PublierRoute: typeof PublierRoute
   AnnoncesIdRoute: typeof AnnoncesIdRouteWithChildren
-  ApiRobotsDottxtRoute: typeof ApiRobotsDottxtRoute
   BoostIdRoute: typeof BoostIdRoute
   BoutiqueOwnerIdRoute: typeof BoutiqueOwnerIdRoute
   PaiementSuccesRoute: typeof PaiementSuccesRoute
@@ -363,13 +350,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BoostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/robots.txt': {
-      id: '/api/robots.txt'
-      path: '/api/robots.txt'
-      fullPath: '/api/robots.txt'
-      preLoaderRoute: typeof ApiRobotsDottxtRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/annonces/$id': {
       id: '/annonces/$id'
       path: '/annonces/$id'
@@ -419,7 +399,6 @@ const rootRouteChildren: RootRouteChildren = {
   ProfilRoute: ProfilRoute,
   PublierRoute: PublierRoute,
   AnnoncesIdRoute: AnnoncesIdRouteWithChildren,
-  ApiRobotsDottxtRoute: ApiRobotsDottxtRoute,
   BoostIdRoute: BoostIdRoute,
   BoutiqueOwnerIdRoute: BoutiqueOwnerIdRoute,
   PaiementSuccesRoute: PaiementSuccesRoute,
@@ -428,3 +407,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
