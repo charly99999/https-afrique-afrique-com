@@ -7,7 +7,17 @@ import { CATEGORIES, COUNTRIES, formatFcfa, type CountryCode } from "@/data/cata
 import { fetchListings, type DbListing } from "@/lib/listings-client";
 
 export const Route = createFileRoute("/explorer")({
-  head: () => ({ meta: [{ title: "Explorer — Afrique-business" }] }),
+  head: () => ({
+    meta: [
+      { title: "Explorer toutes les annonces — Afrique-business" },
+      { name: "description", content: "Parcourez des milliers d'annonces vérifiées en Afrique francophone : véhicules, immobilier, emploi, services, mode et plus. Filtres par pays, ville et catégorie." },
+      { property: "og:title", content: "Explorer — Afrique-business" },
+      { property: "og:description", content: "Toutes les annonces de l'Afrique francophone, filtrées par pays et catégorie." },
+      { property: "og:url", content: "https://afrique-afrique.com/explorer" },
+    ],
+    links: [{ rel: "canonical", href: "https://afrique-afrique.com/explorer" }],
+  }),
+
   component: Explorer,
 });
 
