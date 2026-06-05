@@ -9,6 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SitemapStaticDotxmlRouteImport } from './routes/sitemap-static[.]xml'
+import { Route as SitemapCountryCodeDotxmlRouteImport } from './routes/sitemap-country-$code[.]xml'
+import { Route as SitemapCategorySlugDotxmlRouteImport } from './routes/sitemap-category-$slug[.]xml'
 import { Route as PublierRouteImport } from './routes/publier'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as ParametresRouteImport } from './routes/parametres'
@@ -27,6 +31,28 @@ import { Route as AnnoncesIdRouteImport } from './routes/annonces.$id'
 import { Route as ApiPublicPaydunyaIpnRouteImport } from './routes/api/public/paydunya-ipn'
 import { Route as AnnoncesIdEditRouteImport } from './routes/annonces.$id.edit'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapStaticDotxmlRoute = SitemapStaticDotxmlRouteImport.update({
+  id: '/sitemap-static.xml',
+  path: '/sitemap-static.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapCountryCodeDotxmlRoute =
+  SitemapCountryCodeDotxmlRouteImport.update({
+    id: '/sitemap-country-$code.xml',
+    path: '/sitemap-country-$code.xml',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const SitemapCategorySlugDotxmlRoute =
+  SitemapCategorySlugDotxmlRouteImport.update({
+    id: '/sitemap-category-$slug.xml',
+    path: '/sitemap-category-$slug.xml',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const PublierRoute = PublierRouteImport.update({
   id: '/publier',
   path: '/publier',
@@ -125,6 +151,10 @@ export interface FileRoutesByFullPath {
   '/parametres': typeof ParametresRoute
   '/profil': typeof ProfilRoute
   '/publier': typeof PublierRoute
+  '/sitemap-category-$slug.xml': typeof SitemapCategorySlugDotxmlRoute
+  '/sitemap-country-$code.xml': typeof SitemapCountryCodeDotxmlRoute
+  '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/annonces/$id': typeof AnnoncesIdRouteWithChildren
   '/boost/$id': typeof BoostIdRoute
   '/boutique/$ownerId': typeof BoutiqueOwnerIdRoute
@@ -144,6 +174,10 @@ export interface FileRoutesByTo {
   '/parametres': typeof ParametresRoute
   '/profil': typeof ProfilRoute
   '/publier': typeof PublierRoute
+  '/sitemap-category-$slug.xml': typeof SitemapCategorySlugDotxmlRoute
+  '/sitemap-country-$code.xml': typeof SitemapCountryCodeDotxmlRoute
+  '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/annonces/$id': typeof AnnoncesIdRouteWithChildren
   '/boost/$id': typeof BoostIdRoute
   '/boutique/$ownerId': typeof BoutiqueOwnerIdRoute
@@ -164,6 +198,10 @@ export interface FileRoutesById {
   '/parametres': typeof ParametresRoute
   '/profil': typeof ProfilRoute
   '/publier': typeof PublierRoute
+  '/sitemap-category-$slug.xml': typeof SitemapCategorySlugDotxmlRoute
+  '/sitemap-country-$code.xml': typeof SitemapCountryCodeDotxmlRoute
+  '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/annonces/$id': typeof AnnoncesIdRouteWithChildren
   '/boost/$id': typeof BoostIdRoute
   '/boutique/$ownerId': typeof BoutiqueOwnerIdRoute
@@ -185,6 +223,10 @@ export interface FileRouteTypes {
     | '/parametres'
     | '/profil'
     | '/publier'
+    | '/sitemap-category-$slug.xml'
+    | '/sitemap-country-$code.xml'
+    | '/sitemap-static.xml'
+    | '/sitemap.xml'
     | '/annonces/$id'
     | '/boost/$id'
     | '/boutique/$ownerId'
@@ -204,6 +246,10 @@ export interface FileRouteTypes {
     | '/parametres'
     | '/profil'
     | '/publier'
+    | '/sitemap-category-$slug.xml'
+    | '/sitemap-country-$code.xml'
+    | '/sitemap-static.xml'
+    | '/sitemap.xml'
     | '/annonces/$id'
     | '/boost/$id'
     | '/boutique/$ownerId'
@@ -223,6 +269,10 @@ export interface FileRouteTypes {
     | '/parametres'
     | '/profil'
     | '/publier'
+    | '/sitemap-category-$slug.xml'
+    | '/sitemap-country-$code.xml'
+    | '/sitemap-static.xml'
+    | '/sitemap.xml'
     | '/annonces/$id'
     | '/boost/$id'
     | '/boutique/$ownerId'
@@ -243,6 +293,10 @@ export interface RootRouteChildren {
   ParametresRoute: typeof ParametresRoute
   ProfilRoute: typeof ProfilRoute
   PublierRoute: typeof PublierRoute
+  SitemapCategorySlugDotxmlRoute: typeof SitemapCategorySlugDotxmlRoute
+  SitemapCountryCodeDotxmlRoute: typeof SitemapCountryCodeDotxmlRoute
+  SitemapStaticDotxmlRoute: typeof SitemapStaticDotxmlRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AnnoncesIdRoute: typeof AnnoncesIdRouteWithChildren
   BoostIdRoute: typeof BoostIdRoute
   BoutiqueOwnerIdRoute: typeof BoutiqueOwnerIdRoute
@@ -252,6 +306,34 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-static.xml': {
+      id: '/sitemap-static.xml'
+      path: '/sitemap-static.xml'
+      fullPath: '/sitemap-static.xml'
+      preLoaderRoute: typeof SitemapStaticDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-country-$code.xml': {
+      id: '/sitemap-country-$code.xml'
+      path: '/sitemap-country-$code.xml'
+      fullPath: '/sitemap-country-$code.xml'
+      preLoaderRoute: typeof SitemapCountryCodeDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-category-$slug.xml': {
+      id: '/sitemap-category-$slug.xml'
+      path: '/sitemap-category-$slug.xml'
+      fullPath: '/sitemap-category-$slug.xml'
+      preLoaderRoute: typeof SitemapCategorySlugDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/publier': {
       id: '/publier'
       path: '/publier'
@@ -398,6 +480,10 @@ const rootRouteChildren: RootRouteChildren = {
   ParametresRoute: ParametresRoute,
   ProfilRoute: ProfilRoute,
   PublierRoute: PublierRoute,
+  SitemapCategorySlugDotxmlRoute: SitemapCategorySlugDotxmlRoute,
+  SitemapCountryCodeDotxmlRoute: SitemapCountryCodeDotxmlRoute,
+  SitemapStaticDotxmlRoute: SitemapStaticDotxmlRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   AnnoncesIdRoute: AnnoncesIdRouteWithChildren,
   BoostIdRoute: BoostIdRoute,
   BoutiqueOwnerIdRoute: BoutiqueOwnerIdRoute,
