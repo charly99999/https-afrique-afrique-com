@@ -313,6 +313,50 @@ function PublierPage() {
           </label>
         </div>
 
+        {!isFreeCategory(category) && (
+          <div className="rounded-2xl border border-brand-green/30 bg-brand-green/5 p-3">
+            <button type="button" onClick={handleEstimate} disabled={estimating}
+              className="flex items-center gap-2 text-xs font-bold text-brand-green disabled:opacity-50">
+              {estimating ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" />}
+              Estimer le prix avec l'IA
+            </button>
+            {estimate && estimate.max > 0 && (
+              <div className="mt-2 space-y-1">
+                <p className="text-sm font-bold">
+                  Fourchette : {formatFcfa(estimate.min)} – {formatFcfa(estimate.max)}
+                  <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">{estimate.confidence}</span>
+                </p>
+                {estimate.note && <p className="text-[11px] text-muted-foreground">{estimate.note}</p>}
+                <div className="flex gap-2 pt-1">
+                  <button type="button" onClick={() => setPrice(String(estimate.min))} className="rounded-lg bg-background px-2 py-1 text-[11px] font-bold">Min</button>
+                  <button type="button" onClick={() => setPrice(String(Math.round((estimate.min + estimate.max) / 2)))} className="rounded-lg bg-background px-2 py-1 text-[11px] font-bold">Moyenne</button>
+                  <button type="button" onClick={() => setPrice(String(estimate.max))} className="rounded-lg bg-background px-2 py-1 text-[11px] font-bold">Max</button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {moderation && (
+          <div className={`rounded-2xl border-2 p-4 ${moderation.decision === "reject" ? "border-destructive/40 bg-destructive/10" : "border-amber-500/40 bg-amber-500/10"}`}>
+            <div className="flex items-start gap-2">
+              <ShieldAlert className={`mt-0.5 size-4 shrink-0 ${moderation.decision === "reject" ? "text-destructive" : "text-amber-600"}`} />
+              <div className="flex-1">
+                <p className="text-xs font-extrabold uppercase tracking-wider">
+                  {moderation.decision === "reject" ? "Publication refusée" : "Annonce à vérifier"}
+                </p>
+                <p className="mt-1 text-[12px] leading-relaxed">{moderation.reason}</p>
+                {moderation.decision === "review" && (
+                  <button type="button" onClick={() => { setBypassReview(true); setModeration(null); }}
+                    className="mt-2 rounded-lg bg-background px-3 py-1.5 text-[11px] font-bold">
+                    Publier quand même
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div>
           <Label>Catégorie</Label>
           <Select value={category} onChange={(v) => { setCategory(v); setSubCategory(""); }}
