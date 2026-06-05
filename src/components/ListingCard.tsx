@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Heart, BadgeCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Listing } from "@/data/catalog";
-import { formatFcfa } from "@/data/catalog";
+import { formatFcfa, isFreeCategory } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
