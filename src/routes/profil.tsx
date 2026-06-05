@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { MobileShell } from "@/components/MobileShell";
-import { Settings, BarChart3, Store, CreditCard, Bell, LogIn, LogOut } from "lucide-react";
+import { Settings, BarChart3, Store, CreditCard, Bell, LogIn, LogOut, MessageCircle } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -77,6 +77,24 @@ function ProfilPage() {
             <span className="flex-1">Notifications</span>
             <span className="text-muted-foreground">→</span>
           </Link>
+        </div>
+
+        <div className="mt-6 space-y-2">
+          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Aide & Support
+          </p>
+          <a
+            href="https://wa.me/2250565242349"
+            target="_blank"
+            rel="noreferrer"
+            className="flex w-full items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-left text-sm font-medium transition hover:bg-muted"
+          >
+            <span className="grid size-8 place-items-center rounded-lg bg-muted text-brand-green">
+              <MessageCircle className="size-4" />
+            </span>
+            <span className="flex-1">Contacter le support WhatsApp</span>
+            <span className="text-muted-foreground">→</span>
+          </a>
         </div>
 
         <Link

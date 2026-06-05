@@ -4,7 +4,7 @@ import { MobileShell } from "@/components/MobileShell";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, Save, LogOut, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, LogOut, Trash2, MessageCircle } from "lucide-react";
 
 export const Route = createFileRoute("/parametres")({
   head: () => ({ meta: [{ title: "Paramètres — Afrique-business" }] }),
@@ -218,6 +218,24 @@ function ParametresPage() {
           >
             <Trash2 className="size-4" /> Supprimer mon compte
           </button>
+        </div>
+
+        <div className="mt-8 space-y-2">
+          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Aide & Support
+          </p>
+          <a
+            href="https://wa.me/2250565242349"
+            target="_blank"
+            rel="noreferrer"
+            className="flex w-full items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-left text-sm font-medium transition hover:bg-muted"
+          >
+            <span className="grid size-8 place-items-center rounded-lg bg-muted text-brand-green">
+              <MessageCircle className="size-4" />
+            </span>
+            <span className="flex-1">Contacter le support WhatsApp</span>
+            <span className="text-muted-foreground">→</span>
+          </a>
         </div>
       </div>
     </MobileShell>
