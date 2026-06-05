@@ -54,6 +54,30 @@ function PublierPage() {
   const [submitting, setSubmitting] = useState(false);
   const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
   const [compressing, setCompressing] = useState(false);
+  const [moderation, setModeration] = useState<{ decision: "review" | "reject"; reason: string } | null>(null);
+  const [bypassReview, setBypassReview] = useState(false);
+  const [estimating, setEstimating] = useState(false);
+  const [estimate, setEstimate] = useState<{ min: number; max: number; confidence: string; note: string } | null>(null);
+  const moderateFn = useServerFn(moderateListing);
+  const estimateFn = useServerFn(estimatePrice);
+
+  async function handleEstimate() {
+    if (!title.trim() || !description.trim()) {
+      toast.error("Renseignez le titre et la description d'abord");
+      return;
+    }
+    setEstimating(true);
+    setEstimate(null);
+    try {
+      const res = await estimateFn({ data: { title: title.trim(), description: description.trim(), category, country } });
+      if (res.max === 0) toast.error(res.note || "Estimation indisponible");
+      else setEstimate(res);
+    } catch {
+      toast.error("Estimation IA échouée");
+    } finally {
+      setEstimating(false);
+    }
+  }
 
   if (loading || !user) {
     if (loading) return <MobileShell><div className="p-10 text-center text-sm text-muted-foreground">…</div></MobileShell>;
