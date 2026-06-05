@@ -170,11 +170,13 @@ function Thread({ userId, listingId, otherId }: { userId: string; listingId: str
   const [listing, setListing] = useState<{ title: string; price: number; cover: string | null } | null>(null);
   const [otherName, setOtherName] = useState("Utilisateur");
   const endRef = useRef<HTMLDivElement>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      const [{ data: msgs }, { data: lst }, { data: prof }] = await Promise.all([
+      setLoadError(null);
+      const [{ data: msgs, error: msgsError }, { data: lst }, { data: prof }] = await Promise.all([
         supabase.from("messages").select("*")
           .eq("listing_id", listingId)
           .or(`and(sender_id.eq.${userId},recipient_id.eq.${otherId}),and(sender_id.eq.${otherId},recipient_id.eq.${userId})`)
@@ -183,6 +185,10 @@ function Thread({ userId, listingId, otherId }: { userId: string; listingId: str
         supabase.from("public_profiles").select("display_name").eq("id", otherId).maybeSingle(),
       ]);
       if (cancelled) return;
+      if (msgsError) {
+        setLoadError(msgsError.message);
+        return;
+      }
       setMessages((msgs ?? []) as Message[]);
       if (lst) {
         const resolvedCover = await resolveListingImages([lst.cover_url]);
@@ -226,9 +232,14 @@ function Thread({ userId, listingId, otherId }: { userId: string; listingId: str
       listing_id: listingId, sender_id: userId, recipient_id: otherId, body: text,
     }).select().single();
     setSending(false);
-    if (!error && data) {
+    if (error) {
+      setLoadError(error.message);
+      return;
+    }
+    if (data) {
       setMessages((prev) => prev.some((x) => x.id === data.id) ? prev : [...prev, data as Message]);
       setBody("");
+      setLoadError(null);
     }
   }
 
@@ -248,6 +259,11 @@ function Thread({ userId, listingId, otherId }: { userId: string; listingId: str
       </header>
 
       <div className="px-4 py-4 pb-28">
+        {loadError && (
+          <p className="mb-4 rounded-xl border border-destructive/20 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+            {loadError}
+          </p>
+        )}
         {messages.length === 0 && (
           <p className="py-10 text-center text-xs text-muted-foreground">Lancez la discussion 👋</p>
         )}
