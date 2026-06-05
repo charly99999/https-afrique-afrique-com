@@ -118,7 +118,16 @@ function ConversationsList({ userId }: { userId: string }) {
     
     load();
     const ch = supabase.channel(`messages:list:${userId}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, load)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages", filter: `recipient_id=eq.${userId}` },
+        load,
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages", filter: `sender_id=eq.${userId}` },
+        load,
+      )
       .subscribe();
     return () => { cancelled = true; supabase.removeChannel(ch); };
   }, [userId]);

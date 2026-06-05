@@ -235,6 +235,42 @@ export type Database = {
           },
         ]
       }
+      paydunya_ipn_logs: {
+        Row: {
+          error: string | null
+          http_status: number
+          id: string
+          invoice_token: string | null
+          paydunya_status: string | null
+          payload: Json | null
+          payment_id: string | null
+          received_at: string
+          signature_valid: boolean
+        }
+        Insert: {
+          error?: string | null
+          http_status: number
+          id?: string
+          invoice_token?: string | null
+          paydunya_status?: string | null
+          payload?: Json | null
+          payment_id?: string | null
+          received_at?: string
+          signature_valid?: boolean
+        }
+        Update: {
+          error?: string | null
+          http_status?: number
+          id?: string
+          invoice_token?: string | null
+          paydunya_status?: string | null
+          payload?: Json | null
+          payment_id?: string | null
+          received_at?: string
+          signature_valid?: boolean
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount_fcfa: number

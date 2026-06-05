@@ -12,18 +12,53 @@ import { toast } from "sonner";
 import { ReportListingDialog } from "@/components/ReportListingDialog";
 import { VerifiedBadge, TrustChip, memberSinceLabel, type SellerStats } from "@/components/TrustBadge";
 import { ListingGallery } from "@/components/ListingGallery";
+import { getListingSeo, type ListingSeo } from "@/lib/seo.functions";
+import type { Database } from "@/integrations/supabase/types";
+
+const SITE = "https://afrique-afrique.com";
+
+function truncate(s: string, n: number) {
+  const clean = s.replace(/\s+/g, " ").trim();
+  return clean.length <= n ? clean : clean.slice(0, n - 1).trimEnd() + "…";
+}
 
 export const Route = createFileRoute("/annonces/$id")({
-  head: ({ params }) => ({
-    meta: [
-      { title: `Annonce ${params.id.slice(0, 8)} — Afrique-business` },
-      { name: "description", content: "Découvrez cette annonce sur Afrique-business, la marketplace panafricaine n°1." },
-      { property: "og:title", content: "Annonce — Afrique-business" },
+  loader: async ({ params }): Promise<ListingSeo | null> => {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(params.id);
+    if (!isUuid) return null;
+    try {
+      return await getListingSeo({ data: { id: params.id } });
+    } catch {
+      return null;
+    }
+  },
+  head: ({ params, loaderData }) => {
+    const seo = loaderData as ListingSeo | null | undefined;
+    const url = `${SITE}/annonces/${params.id}`;
+    const title = seo
+      ? `${truncate(seo.title, 60)} — ${seo.city} | Afrique-business`
+      : `Annonce — Afrique-business`;
+    const description = seo
+      ? truncate(`${seo.title} à ${seo.city}, ${seo.country}. ${seo.description}`, 155)
+      : "Découvrez cette annonce sur Afrique-business, la marketplace panafricaine.";
+    const meta: Array<Record<string, string>> = [
+      { title },
+      { name: "description", content: description },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
       { property: "og:type", content: "product" },
-      { property: "og:url", content: `https://afrique-afrique.com/annonces/${params.id}` },
-    ],
-    links: [{ rel: "canonical", href: `https://afrique-afrique.com/annonces/${params.id}` }],
-  }),
+      { property: "og:url", content: url },
+    ];
+    if (seo?.cover) {
+      meta.push({ property: "og:image", content: seo.cover });
+      meta.push({ name: "twitter:image", content: seo.cover });
+      meta.push({ name: "twitter:card", content: "summary_large_image" });
+    }
+    return {
+      meta,
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   notFoundComponent: () => (
     <MobileShell>
       <div className="px-6 py-20 text-center">
@@ -91,11 +126,11 @@ function ListingDetail() {
           if (l.ownerId) {
             const [{ data: statsRow }, { data: prof }] = await Promise.all([
               supabase.rpc("get_seller_stats", { _seller_id: l.ownerId }).maybeSingle(),
-              supabase.from("public_profiles").select("verified").eq("id", l.ownerId).maybeSingle(),
+              supabase.from("public_profiles").select("verified").eq("id", l.ownerId).maybeSingle<Pick<Database["public"]["Views"]["public_profiles"]["Row"], "verified">>(),
             ]);
             if (!cancelled) {
               if (statsRow) setSellerStats(statsRow as SellerStats);
-              if (prof) setSellerVerified(!!(prof as any).verified);
+              if (prof) setSellerVerified(!!prof.verified);
             }
           }
         }

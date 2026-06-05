@@ -33,13 +33,35 @@ function matchCityFromCountry(countryCode: string, hintCity: string | null): str
   return partial ?? hintCity;
 }
 
+const CACHE_KEY = "ab.geo.cache.v1";
+const CACHE_TTL = 24 * 60 * 60_000; // 24h
+
+function readCache(): GeoResult | null {
+  if (typeof localStorage === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { at: number; data: GeoResult };
+    if (Date.now() - parsed.at > CACHE_TTL) return null;
+    return parsed.data;
+  } catch { return null; }
+}
+function writeCache(data: GeoResult) {
+  if (typeof localStorage === "undefined") return;
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), data })); } catch { /* quota */ }
+}
+
 export function useGeolocation() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<GeoResult | null>(null);
+  const [result, setResult] = useState<GeoResult | null>(() => readCache());
 
   const detect = useCallback(async (): Promise<GeoResult | null> => {
     setError(null);
+    // Cache hit : pas de requête Nominatim ni de prompt navigateur
+    const cached = readCache();
+    if (cached) { setResult(cached); return cached; }
+
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       setError("Géolocalisation non disponible");
       return null;
@@ -55,7 +77,7 @@ export function useGeolocation() {
       });
       const { latitude: lat, longitude: lng } = pos.coords;
 
-      // Reverse geocode via Nominatim (gratuit, sans clé)
+      // Reverse geocode via Nominatim (gratuit, sans clé) — appel unique grâce au cache
       let country: string | null = null;
       let city: string | null = null;
       try {
@@ -81,6 +103,7 @@ export function useGeolocation() {
       const matchedCity = country ? matchCityFromCountry(country, city) : city;
       const out: GeoResult = { country, city: matchedCity, lat, lng };
       setResult(out);
+      writeCache(out);
       return out;
     } catch (e: unknown) {
       const msg = e instanceof GeolocationPositionError
