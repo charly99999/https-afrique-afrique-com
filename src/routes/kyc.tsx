@@ -60,7 +60,7 @@ function KycPage() {
   }, [user, loading, navigate]);
 
   async function uploadFile(file: File, label: string): Promise<string> {
-    const compressed = await compressImage(file, { maxDim: 1600, quality: 0.82 }).catch(() => file);
+    const compressed = await compressImage(file).catch(() => file);
     const ext = (compressed.name.split(".").pop() || "jpg").toLowerCase();
     const path = `${user!.id}/${Date.now()}-${label}.${ext}`;
     const { error } = await supabase.storage.from("kyc").upload(path, compressed, { upsert: false, contentType: compressed.type || "image/jpeg" });
