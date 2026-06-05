@@ -36,16 +36,21 @@ function PublierPage() {
   const fileInput = useRef<HTMLInputElement>(null);
 
   const [photos, setPhotos] = useState<PhotoFile[]>([]);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [negotiable, setNegotiable] = useState(false);
-  const [category, setCategory] = useState(CATEGORIES[0].slug);
-  const [subCategory, setSubCategory] = useState("");
-  const [country, setCountry] = useState<CountryCode>("CI");
-  const [city, setCity] = useState(COUNTRIES[0].cities[0]);
+  const [draft, setDraft, clearDraft] = useDraft<DraftShape>(DRAFT_KEY, INITIAL_DRAFT);
+  const { title, description, price, negotiable, category, subCategory, country, city } = draft;
+  const setField = <K extends keyof DraftShape>(k: K, v: DraftShape[K]) =>
+    setDraft((d) => ({ ...d, [k]: v }));
+  const setTitle = (v: string) => setField("title", v);
+  const setDescription = (v: string) => setField("description", v);
+  const setPrice = (v: string) => setField("price", v);
+  const setNegotiable = (v: boolean) => setField("negotiable", v);
+  const setCategory = (v: string) => setField("category", v);
+  const setSubCategory = (v: string) => setField("subCategory", v);
+  const setCountry = (v: CountryCode) => setField("country", v);
+  const setCity = (v: string) => setField("city", v);
   const [submitting, setSubmitting] = useState(false);
   const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
+  const [compressing, setCompressing] = useState(false);
 
   if (loading || !user) {
     if (loading) return <MobileShell><div className="p-10 text-center text-sm text-muted-foreground">…</div></MobileShell>;
