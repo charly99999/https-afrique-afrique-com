@@ -64,7 +64,7 @@ function Explorer() {
   );
 
   const filtered = useMemo(() => {
-    const needle = q.trim().toLowerCase();
+    const needle = debouncedQ.trim().toLowerCase();
     const min = minPrice ? Number(minPrice) : 0;
     const max = maxPrice ? Number(maxPrice) : Infinity;
     const arr = items.filter((l) => {
@@ -74,15 +74,14 @@ function Explorer() {
       if (l.price < min || l.price > max) return false;
       return true;
     });
-    // Boostées toujours en tête, puis tri choisi
     arr.sort((a, b) => {
       if (!!b.boosted !== !!a.boosted) return b.boosted ? 1 : -1;
       if (sort === "price_asc") return a.price - b.price;
       if (sort === "price_desc") return b.price - a.price;
-      return 0; // recent (déjà ordonné par le fetch)
+      return 0;
     });
     return arr;
-  }, [items, q, city, category, minPrice, maxPrice, sort]);
+  }, [items, debouncedQ, city, category, minPrice, maxPrice, sort]);
 
   const activeFilters = [city, category, minPrice, maxPrice].filter(Boolean).length;
 
