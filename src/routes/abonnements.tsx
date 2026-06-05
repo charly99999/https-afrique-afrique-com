@@ -8,6 +8,8 @@ import { SUB_PRICES, type SubPlan } from "@/data/pricing";
 import { startSubscriptionPayment } from "@/lib/paydunya.functions";
 import { redirectToCheckout } from "@/lib/redirect-checkout";
 import { useAuth } from "@/hooks/use-auth";
+import { MobileMoneyBadges } from "@/components/MobileMoneyBadges";
+import { getStoredCountry } from "@/lib/currency";
 
 export const Route = createFileRoute("/abonnements")({
   head: () => ({
@@ -124,6 +126,8 @@ function PlansPage() {
             </div>
           </article>
         ))}
+
+        <MobileMoneyBadges countryCode={getStoredCountry()} className="mt-2" />
       </div>
     </MobileShell>
   );

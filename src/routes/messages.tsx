@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, Check, CheckCheck } from "lucide-react";
 import { z } from "zod";
 import { MobileShell } from "@/components/MobileShell";
 import { supabase } from "@/integrations/supabase/client";
@@ -169,7 +169,11 @@ function Thread({ userId, listingId, otherId }: { userId: string; listingId: str
   const [sending, setSending] = useState(false);
   const [listing, setListing] = useState<{ title: string; price: number; cover: string | null } | null>(null);
   const [otherName, setOtherName] = useState("Utilisateur");
+  const [otherTyping, setOtherTyping] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const otherTypingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -192,10 +196,10 @@ function Thread({ userId, listingId, otherId }: { userId: string; listingId: str
       setMessages((msgs ?? []) as Message[]);
       if (lst) {
         const resolvedCover = await resolveListingImages([lst.cover_url]);
-        setListing({ 
-          title: lst.title, 
-          price: Number(lst.price_fcfa), 
-          cover: lst.cover_url ? (resolvedCover.get(lst.cover_url) ?? lst.cover_url) : null 
+        setListing({
+          title: lst.title,
+          price: Number(lst.price_fcfa),
+          cover: lst.cover_url ? (resolvedCover.get(lst.cover_url) ?? lst.cover_url) : null,
         });
       }
       const profRow = prof as any;
@@ -205,7 +209,10 @@ function Thread({ userId, listingId, otherId }: { userId: string; listingId: str
       if (unread.length) await supabase.from("messages").update({ read_at: new Date().toISOString() }).in("id", unread);
     }
     load();
-    const ch = supabase.channel(`messages:thread:${userId}:${listingId}:${otherId}`)
+
+    const ch = supabase.channel(`messages:thread:${listingId}:${[userId, otherId].sort().join(":")}`, {
+      config: { broadcast: { self: false } },
+    })
       .on("postgres_changes",
         { event: "INSERT", schema: "public", table: "messages", filter: `listing_id=eq.${listingId}` },
         (payload) => {
@@ -217,11 +224,45 @@ function Thread({ userId, listingId, otherId }: { userId: string; listingId: str
             }
           }
         }
-      ).subscribe();
-    return () => { cancelled = true; supabase.removeChannel(ch); };
+      )
+      .on("postgres_changes",
+        { event: "UPDATE", schema: "public", table: "messages", filter: `listing_id=eq.${listingId}` },
+        (payload) => {
+          const m = payload.new as Message;
+          setMessages((prev) => prev.map((x) => x.id === m.id ? m : x));
+        }
+      )
+      .on("broadcast", { event: "typing" }, ({ payload }) => {
+        if (payload?.from === otherId) {
+          setOtherTyping(true);
+          if (otherTypingTimeoutRef.current) clearTimeout(otherTypingTimeoutRef.current);
+          otherTypingTimeoutRef.current = setTimeout(() => setOtherTyping(false), 3000);
+        }
+      })
+      .subscribe();
+    channelRef.current = ch;
+
+    return () => {
+      cancelled = true;
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      if (otherTypingTimeoutRef.current) clearTimeout(otherTypingTimeoutRef.current);
+      supabase.removeChannel(ch);
+      channelRef.current = null;
+    };
   }, [listingId, otherId, userId]);
 
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages.length]);
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages.length, otherTyping]);
+
+  function handleTyping(value: string) {
+    setBody(value);
+    if (!channelRef.current) return;
+    // Throttle : on n'envoie un signal "typing" qu'une fois toutes les 2s
+    if (typingTimeoutRef.current) return;
+    channelRef.current.send({ type: "broadcast", event: "typing", payload: { from: userId } });
+    typingTimeoutRef.current = setTimeout(() => {
+      typingTimeoutRef.current = null;
+    }, 2000);
+  }
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
@@ -253,7 +294,9 @@ function Thread({ userId, listingId, otherId }: { userId: string; listingId: str
           {listing?.cover && <img src={listing.cover} alt="" className="size-10 shrink-0 rounded-lg object-cover" />}
           <div className="min-w-0">
             <p className="truncate text-sm font-bold">{otherName}</p>
-            <p className="truncate text-[11px] text-brand-green">{listing?.title ?? "Annonce"}{listing ? ` · ${formatFcfa(listing.price)}` : ""}</p>
+            <p className="truncate text-[11px] text-brand-green">
+              {otherTyping ? "écrit…" : (listing?.title ?? "Annonce") + (listing ? ` · ${formatFcfa(listing.price)}` : "")}
+            </p>
           </div>
         </Link>
       </header>
@@ -274,11 +317,25 @@ function Thread({ userId, listingId, otherId }: { userId: string; listingId: str
               <li key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[78%] rounded-2xl px-3.5 py-2 text-sm ${mine ? "bg-brand-green text-primary-foreground" : "bg-accent/40 text-foreground"}`}>
                   <p className="whitespace-pre-wrap break-words">{m.body}</p>
-                  <p className={`mt-1 text-[10px] ${mine ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{shortTime(m.created_at)}</p>
+                  <p className={`mt-1 flex items-center gap-1 text-[10px] ${mine ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                    <span>{shortTime(m.created_at)}</span>
+                    {mine && (m.read_at
+                      ? <CheckCheck className="size-3" aria-label="Lu" />
+                      : <Check className="size-3" aria-label="Envoyé" />)}
+                  </p>
                 </div>
               </li>
             );
           })}
+          {otherTyping && (
+            <li className="flex justify-start">
+              <div className="flex items-center gap-1 rounded-2xl bg-accent/40 px-3 py-2.5">
+                <span className="size-1.5 animate-pulse rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
+                <span className="size-1.5 animate-pulse rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
+                <span className="size-1.5 animate-pulse rounded-full bg-muted-foreground" />
+              </div>
+            </li>
+          )}
           <div ref={endRef} />
         </ul>
       </div>
@@ -286,7 +343,7 @@ function Thread({ userId, listingId, otherId }: { userId: string; listingId: str
       <form onSubmit={send} className="fixed inset-x-0 bottom-[88px] z-40 mx-auto flex max-w-[440px] gap-2 px-4">
         <input
           value={body}
-          onChange={(e) => setBody(e.target.value)}
+          onChange={(e) => handleTyping(e.target.value)}
           placeholder="Votre message…"
           className="flex-1 rounded-2xl border border-border bg-background px-4 py-3 text-sm shadow-soft focus:border-brand-green focus:outline-none"
         />

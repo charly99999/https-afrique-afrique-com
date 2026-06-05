@@ -9,6 +9,8 @@ import { startBoostPayment } from "@/lib/paydunya.functions";
 import { redirectToCheckout } from "@/lib/redirect-checkout";
 import { BOOST_PRICES, type BoostDays } from "@/data/pricing";
 import { resolveListingImages } from "@/lib/listing-images";
+import { MobileMoneyBadges } from "@/components/MobileMoneyBadges";
+import { getStoredCountry } from "@/lib/currency";
 
 export const Route = createFileRoute("/boost/$id")({
   head: () => ({ meta: [{ title: "Booster mon annonce — Afrique-business" }] }),
@@ -102,7 +104,9 @@ function BoostPage() {
           })}
         </div>
 
-        <div className="mt-8 rounded-2xl bg-accent/30 p-4 text-xs text-muted-foreground">
+        <MobileMoneyBadges countryCode={getStoredCountry()} className="mt-6" />
+
+        <div className="mt-6 rounded-2xl bg-accent/30 p-4 text-xs text-muted-foreground">
           <p className="mb-2 font-bold text-foreground">Inclus dans chaque boost</p>
           <ul className="space-y-1">
             <li className="flex gap-2"><Check className="size-3.5 text-brand-green" /> Remontée en tête de liste</li>
