@@ -3,11 +3,11 @@ import type {} from "@tanstack/react-start";
 
 const BASE_URL = "https://afrique-afrique.com";
 
-export const Route = createFileRoute("/sitemap-category-$slug[.]xml")({
+export const Route = createFileRoute("/sitemap-category-$slug.xml")({
   server: {
     handlers: {
       GET: async ({ params }) => {
-        const slug = (params as { slug: string }).slug;
+        const slug = (params as unknown as Record<string, string>).slug ?? "";
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data, error } = await supabaseAdmin
           .from("listings")
