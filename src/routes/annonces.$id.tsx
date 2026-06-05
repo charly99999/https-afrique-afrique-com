@@ -195,16 +195,27 @@ function ListingDetail() {
 
       {listing.ownerId ? (
         <Link to="/boutique/$ownerId" params={{ ownerId: listing.ownerId }}
-          className="mx-5 mt-6 flex items-center gap-4 rounded-2xl border border-border bg-card p-4 transition active:scale-[0.99]">
-          <div className="grid size-12 place-items-center rounded-full bg-brand-green/10 font-display text-lg italic text-brand-green">
+          className="mx-5 mt-6 flex items-start gap-4 rounded-2xl border border-border bg-card p-4 transition active:scale-[0.99]">
+          <div className="grid size-12 shrink-0 place-items-center rounded-full bg-brand-green/10 font-display text-lg italic text-brand-green">
             {listing.seller[0]}
           </div>
-          <div className="flex-1">
-            <p className="text-sm font-bold">{listing.seller}</p>
-            <p className="text-[11px] text-brand-green">Voir la boutique →</p>
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-sm font-bold">{listing.seller}</p>
+              {sellerVerified && <VerifiedBadge />}
+            </div>
+            {sellerStats && (
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                {memberSinceLabel(sellerStats.member_since)} • {sellerStats.active_listings} annonce{sellerStats.active_listings > 1 ? "s" : ""}
+              </p>
+            )}
+            <div className="mt-1.5 flex flex-wrap items-center gap-2">
+              {sellerStats && <TrustChip stats={sellerStats} />}
+              <span className="text-[11px] text-brand-green">Voir la boutique →</span>
+            </div>
           </div>
-          {listing.badge === "business" && <span className="rounded bg-foreground px-2 py-0.5 text-[9px] font-extrabold text-brand-gold">👑</span>}
-          {listing.badge === "pro" && <span className="rounded bg-brand-green px-2 py-0.5 text-[9px] font-extrabold text-primary-foreground">PRO</span>}
+          {listing.badge === "business" && <span className="shrink-0 rounded bg-foreground px-2 py-0.5 text-[9px] font-extrabold text-brand-gold">👑</span>}
+          {listing.badge === "pro" && <span className="shrink-0 rounded bg-brand-green px-2 py-0.5 text-[9px] font-extrabold text-primary-foreground">PRO</span>}
         </Link>
       ) : (
         <div className="mx-5 mt-6 flex items-center gap-4 rounded-2xl border border-border bg-card p-4">
@@ -238,10 +249,18 @@ function ListingDetail() {
         <Rocket className="size-4 text-brand-gold" /> Booster cette annonce
       </Link>
 
-      <button type="button" onClick={reportListing} disabled={reporting}
-        className="mx-5 mt-3 flex items-center gap-2 text-xs text-muted-foreground hover:text-destructive disabled:opacity-50">
+      <button type="button" onClick={openReport}
+        className="mx-5 mt-3 flex items-center gap-2 text-xs text-muted-foreground hover:text-destructive">
         <Flag className="size-3.5" /> Signaler cette annonce
       </button>
+
+      {showReport && user && listing && (
+        <ReportListingDialog
+          listingId={listing.id}
+          userId={user.id}
+          onClose={() => setShowReport(false)}
+        />
+      )}
 
       {similar.length > 0 && (
         <section className="mt-10 px-5 pb-10">
