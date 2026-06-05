@@ -44,6 +44,11 @@ export const CATEGORIES: Category[] = [
   { slug: "autres", name: "Autres", emoji: "📦", sub: [] },
 ];
 
+/** Catégories gratuites — publication 100% offerte, badge "Opportunité gratuite". */
+export const FREE_CATEGORIES = new Set<string>(["services"]);
+export const isFreeCategory = (slug?: string | null) => !!slug && FREE_CATEGORIES.has(slug);
+
+
 export type SellerBadge = "gratuit" | "pro" | "business";
 
 export type Listing = {
