@@ -106,11 +106,17 @@ function EditListingPage() {
   const subs = CATEGORIES.find((c) => c.slug === category)?.sub ?? [];
   const totalPhotos = existing.length + newPhotos.length;
 
-  function addPhotos(files: FileList | null) {
+  async function addPhotos(files: FileList | null) {
     if (!files) return;
     const incoming = Array.from(files).slice(0, MAX_PHOTOS - totalPhotos);
-    const valid = incoming.filter((f) => f.type.startsWith("image/") && f.size < 6 * 1024 * 1024);
-    setNewPhotos((p) => [...p, ...valid.map((file) => ({ file, preview: URL.createObjectURL(file) }))]);
+    const accepted = incoming.filter((f) => f.type.startsWith("image/") && f.size < 20 * 1024 * 1024);
+    if (accepted.length === 0) return;
+    try {
+      const compressed = await compressMany(accepted);
+      setNewPhotos((p) => [...p, ...compressed.map((file) => ({ file, preview: URL.createObjectURL(file) }))]);
+    } catch {
+      toast.error("Impossible de traiter ces images");
+    }
   }
 
   function removeExisting(p: ExistingPhoto) {
