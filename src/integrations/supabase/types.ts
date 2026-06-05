@@ -84,6 +84,60 @@ export type Database = {
           },
         ]
       }
+      kyc_submissions: {
+        Row: {
+          created_at: string
+          doc_back_path: string | null
+          doc_country: string
+          doc_front_path: string
+          doc_number: string
+          doc_type: string
+          full_name: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          selfie_path: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          doc_back_path?: string | null
+          doc_country: string
+          doc_front_path: string
+          doc_number: string
+          doc_type: string
+          full_name: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          selfie_path: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          doc_back_path?: string | null
+          doc_country?: string
+          doc_front_path?: string
+          doc_number?: string
+          doc_type?: string
+          full_name?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          selfie_path?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       listing_photos: {
         Row: {
           created_at: string
@@ -425,6 +479,47 @@ export type Database = {
           },
         ]
       }
+      reviews: {
+        Row: {
+          author_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          listing_id: string | null
+          rating: number
+          seller_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          listing_id?: string | null
+          rating: number
+          seller_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          listing_id?: string | null
+          rating?: number
+          seller_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           active: boolean
@@ -536,6 +631,13 @@ export type Database = {
         Returns: {
           phone: string
           whatsapp: string
+        }[]
+      }
+      get_seller_rating: {
+        Args: { _seller_id: string }
+        Returns: {
+          avg_rating: number
+          total: number
         }[]
       }
       get_seller_stats: {

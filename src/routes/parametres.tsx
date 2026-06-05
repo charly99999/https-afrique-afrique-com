@@ -4,7 +4,7 @@ import { MobileShell } from "@/components/MobileShell";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, Save, LogOut, Trash2, MessageCircle } from "lucide-react";
+import { ArrowLeft, Save, LogOut, Trash2, MessageCircle, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/parametres")({
   head: () => ({ meta: [{ title: "Paramètres — Afrique-business" }] }),
@@ -194,6 +194,16 @@ function ParametresPage() {
             <p className="text-muted-foreground">Email</p>
             <p className="font-medium">{user?.email}</p>
           </div>
+          <Link
+            to="/kyc"
+            className="flex w-full items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-left text-sm font-medium hover:bg-muted"
+          >
+            <span className="grid size-8 place-items-center rounded-lg bg-brand-green/10 text-brand-green">
+              <ShieldCheck className="size-4" />
+            </span>
+            <span className="flex-1">Vérifier mon identité</span>
+            <span className="text-muted-foreground">→</span>
+          </Link>
           <button
             type="button"
             onClick={handlePasswordReset}
