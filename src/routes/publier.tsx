@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Camera, X, ArrowLeft, Loader2 } from "lucide-react";
 import { MobileShell } from "@/components/MobileShell";
-import { CATEGORIES, COUNTRIES, type CountryCode } from "@/data/catalog";
+import { CATEGORIES, COUNTRIES, isFreeCategory, type CountryCode } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { resolveListingImage } from "@/lib/listing-images";
@@ -65,7 +65,10 @@ function PublierPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (photos.length < MIN_PHOTOS) return toast.error(`${MIN_PHOTOS} photo minimum`);
-    if (!title.trim() || !description.trim() || !price) return toast.error("Champs requis");
+    const isFree = isFreeCategory(category);
+    if (!title.trim() || !description.trim()) return toast.error("Champs requis");
+    if (!isFree && !price) return toast.error("Prix requis");
+
 
     setSubmitting(true);
     let listingId: string | null = null;
@@ -183,10 +186,22 @@ function PublierPage() {
             className="w-full rounded-xl border border-border bg-card p-3 text-sm outline-none focus:ring-2 focus:ring-brand-green/30" />
         </div>
 
+        {isFreeCategory(category) && (
+          <div className="rounded-2xl border-2 border-brand-green/40 bg-brand-green/10 p-4">
+            <p className="text-xs font-extrabold uppercase tracking-wider text-brand-green">✨ Opportunité gratuite</p>
+            <p className="mt-1 text-[12px] leading-relaxed text-foreground">
+              Publication 100% gratuite pour les offres d'emploi, demandes d'emploi et prestataires de services.
+              Aidons l'Afrique à se mettre au travail 🌍
+            </p>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <Label>Prix (FCFA)</Label>
-            <Input value={price} onChange={(v) => setPrice(v.replace(/\D/g, ""))} placeholder="0" required inputMode="numeric" />
+            <Label>{isFreeCategory(category) ? "Rémunération (optionnel)" : "Prix (FCFA)"}</Label>
+            <Input value={price} onChange={(v) => setPrice(v.replace(/\D/g, ""))}
+              placeholder={isFreeCategory(category) ? "Laisser vide si non défini" : "0"}
+              required={!isFreeCategory(category)} inputMode="numeric" />
           </div>
           <label className="flex items-end gap-2 pb-3 text-sm">
             <input type="checkbox" checked={negotiable} onChange={(e) => setNegotiable(e.target.checked)} className="size-4 accent-brand-green" />
@@ -206,6 +221,7 @@ function PublierPage() {
               options={[{ value: "", label: "—" }, ...subs.map((s) => ({ value: s, label: s }))]} />
           </div>
         )}
+
 
         <div className="grid grid-cols-2 gap-3">
           <div>

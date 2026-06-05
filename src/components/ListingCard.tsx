@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Heart, BadgeCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Listing } from "@/data/catalog";
-import { formatFcfa } from "@/data/catalog";
+import { formatFcfa, isFreeCategory } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
@@ -84,17 +84,25 @@ export function ListingCard({ listing }: { listing: ListingItem }) {
             👑 Business
           </span>
         )}
+        {isFreeCategory(listing.category) && (
+          <span className="absolute bottom-2 right-2 rounded-full bg-brand-green px-2 py-0.5 text-[9px] font-extrabold uppercase text-primary-foreground shadow-sm">
+            ✨ Gratuit
+          </span>
+        )}
       </div>
       <p className="mb-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-green">
         {listing.subCategory ?? listing.category}
       </p>
       <h4 className="line-clamp-1 text-sm font-bold">{listing.title}</h4>
       <p className="mt-1 font-mono text-sm font-bold text-foreground">
-        {formatFcfa(listing.price)}
+        {isFreeCategory(listing.category) && (!listing.price || listing.price === 0)
+          ? <span className="text-brand-green">Opportunité gratuite</span>
+          : formatFcfa(listing.price)}
         {"priceSuffix" in listing && listing.priceSuffix && (
           <span className="ml-1 text-[10px] font-normal text-muted-foreground">{listing.priceSuffix}</span>
         )}
       </p>
+
       <p className="mt-1 text-[10px] text-muted-foreground">
         {listing.city} • {listing.postedAt}
       </p>
