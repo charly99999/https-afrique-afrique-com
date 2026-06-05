@@ -190,9 +190,18 @@ function PublierPage() {
       </header>
 
       <form onSubmit={handleSubmit} className="space-y-5 px-5 pb-10 pt-5">
+        {(title || description || price) && (
+          <div className="flex items-center justify-between rounded-xl border border-brand-green/30 bg-brand-green/5 px-3 py-2 text-[11px] text-muted-foreground">
+            <span>📝 Brouillon sauvegardé automatiquement</span>
+            <button type="button" onClick={() => { clearDraft(); setDraft(INITIAL_DRAFT); }}
+              className="flex items-center gap-1 font-bold text-foreground hover:text-brand-green">
+              <Trash2 className="size-3" /> Effacer
+            </button>
+          </div>
+        )}
         {/* Photos */}
         <div>
-          <Label>Photos (1 à 8)</Label>
+          <Label>Photos (1 à 8) — compressées automatiquement</Label>
           <div className="grid grid-cols-3 gap-2">
             {photos.map((p, i) => (
               <div key={p.preview} className="relative aspect-square overflow-hidden rounded-xl bg-muted">
@@ -201,18 +210,28 @@ function PublierPage() {
                   className="absolute right-1 top-1 grid size-6 place-items-center rounded-full bg-background/90">
                   <X className="size-3" />
                 </button>
+                <div className="absolute bottom-1 right-1 flex gap-1">
+                  {i > 0 && (
+                    <button type="button" onClick={() => movePhoto(i, i - 1)}
+                      className="grid size-6 place-items-center rounded-full bg-background/90 text-[10px] font-bold">←</button>
+                  )}
+                  {i < photos.length - 1 && (
+                    <button type="button" onClick={() => movePhoto(i, i + 1)}
+                      className="grid size-6 place-items-center rounded-full bg-background/90 text-[10px] font-bold">→</button>
+                  )}
+                </div>
                 {i === 0 && <span className="absolute bottom-1 left-1 rounded bg-brand-green px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary-foreground">Couverture</span>}
               </div>
             ))}
             {photos.length < MAX_PHOTOS && (
-              <button type="button" onClick={() => fileInput.current?.click()}
-                className="grid aspect-square place-items-center rounded-xl border-2 border-dashed border-border bg-muted text-muted-foreground">
-                <Camera className="size-6" />
+              <button type="button" disabled={compressing} onClick={() => fileInput.current?.click()}
+                className="grid aspect-square place-items-center rounded-xl border-2 border-dashed border-border bg-muted text-muted-foreground disabled:opacity-50">
+                {compressing ? <Loader2 className="size-5 animate-spin" /> : <Camera className="size-6" />}
               </button>
             )}
           </div>
           <input ref={fileInput} type="file" accept="image/*" multiple hidden
-            onChange={(e) => { addPhotos(e.target.files); e.target.value = ""; }} />
+            onChange={(e) => { void addPhotos(e.target.files); e.target.value = ""; }} />
         </div>
 
         <div>
