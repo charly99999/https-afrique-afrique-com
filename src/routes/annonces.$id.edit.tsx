@@ -7,6 +7,7 @@ import { CATEGORIES, COUNTRIES, type CountryCode } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { resolveListingImages } from "@/lib/listing-images";
+import { compressMany } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/annonces/$id/edit")({
   head: () => ({ meta: [{ title: "Modifier l'annonce — Afrique-business" }] }),
