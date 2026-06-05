@@ -1,12 +1,25 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { Camera, X, ArrowLeft, Loader2 } from "lucide-react";
+import { Camera, X, ArrowLeft, Loader2, Trash2 } from "lucide-react";
 import { MobileShell } from "@/components/MobileShell";
 import { CATEGORIES, COUNTRIES, isFreeCategory, type CountryCode } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { resolveListingImage } from "@/lib/listing-images";
+
+import { compressMany } from "@/lib/image-compress";
+import { useDraft } from "@/hooks/use-draft";
+
+const DRAFT_KEY = "ab_publier_draft_v1";
+type DraftShape = {
+  title: string; description: string; price: string; negotiable: boolean;
+  category: string; subCategory: string; country: CountryCode; city: string;
+};
+const INITIAL_DRAFT: DraftShape = {
+  title: "", description: "", price: "", negotiable: false,
+  category: CATEGORIES[0].slug, subCategory: "",
+  country: "CI", city: COUNTRIES[0].cities[0],
+};
 
 export const Route = createFileRoute("/publier")({
   head: () => ({ meta: [{ title: "Publier une annonce — Afrique-business" }] }),
@@ -23,16 +36,21 @@ function PublierPage() {
   const fileInput = useRef<HTMLInputElement>(null);
 
   const [photos, setPhotos] = useState<PhotoFile[]>([]);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [negotiable, setNegotiable] = useState(false);
-  const [category, setCategory] = useState(CATEGORIES[0].slug);
-  const [subCategory, setSubCategory] = useState("");
-  const [country, setCountry] = useState<CountryCode>("CI");
-  const [city, setCity] = useState(COUNTRIES[0].cities[0]);
+  const [draft, setDraft, clearDraft] = useDraft<DraftShape>(DRAFT_KEY, INITIAL_DRAFT);
+  const { title, description, price, negotiable, category, subCategory, country, city } = draft;
+  const setField = <K extends keyof DraftShape>(k: K, v: DraftShape[K]) =>
+    setDraft((d) => ({ ...d, [k]: v }));
+  const setTitle = (v: string) => setField("title", v);
+  const setDescription = (v: string) => setField("description", v);
+  const setPrice = (v: string) => setField("price", v);
+  const setNegotiable = (v: boolean) => setField("negotiable", v);
+  const setCategory = (v: string) => setField("category", v);
+  const setSubCategory = (v: string) => setField("subCategory", v);
+  const setCountry = (v: CountryCode) => setField("country", v);
+  const setCity = (v: string) => setField("city", v);
   const [submitting, setSubmitting] = useState(false);
   const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
+  const [compressing, setCompressing] = useState(false);
 
   if (loading || !user) {
     if (loading) return <MobileShell><div className="p-10 text-center text-sm text-muted-foreground">…</div></MobileShell>;
@@ -51,15 +69,38 @@ function PublierPage() {
   const cities = COUNTRIES.find((c) => c.code === country)?.cities ?? [];
   const subs = CATEGORIES.find((c) => c.slug === category)?.sub ?? [];
 
-  function addPhotos(files: FileList | null) {
+  async function addPhotos(files: FileList | null) {
     if (!files) return;
     const incoming = Array.from(files).slice(0, MAX_PHOTOS - photos.length);
-    const valid = incoming.filter((f) => f.type.startsWith("image/") && f.size < 6 * 1024 * 1024);
-    setPhotos((p) => [...p, ...valid.map((file) => ({ file, preview: URL.createObjectURL(file) }))]);
+    const accepted = incoming.filter((f) => f.type.startsWith("image/") && f.size < 20 * 1024 * 1024);
+    if (accepted.length === 0) return;
+    setCompressing(true);
+    try {
+      const compressed = await compressMany(accepted);
+      setPhotos((p) => [...p, ...compressed.map((file) => ({ file, preview: URL.createObjectURL(file) }))]);
+    } catch {
+      toast.error("Impossible de traiter ces images");
+    } finally {
+      setCompressing(false);
+    }
   }
 
   function removePhoto(i: number) {
-    setPhotos((p) => p.filter((_, idx) => idx !== i));
+    setPhotos((p) => {
+      const target = p[i];
+      if (target) URL.revokeObjectURL(target.preview);
+      return p.filter((_, idx) => idx !== i);
+    });
+  }
+
+  function movePhoto(from: number, to: number) {
+    setPhotos((p) => {
+      if (to < 0 || to >= p.length) return p;
+      const next = p.slice();
+      const [it] = next.splice(from, 1);
+      next.splice(to, 0, it);
+      return next;
+    });
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -122,6 +163,7 @@ function PublierPage() {
       if (actErr) throw actErr;
 
       toast.success("Annonce publiée !");
+      clearDraft();
       navigate({ to: "/annonces/$id", params: { id: listing.id } });
     } catch (err) {
       // Rollback : supprimer fichiers uploadés et listing créé
@@ -148,9 +190,18 @@ function PublierPage() {
       </header>
 
       <form onSubmit={handleSubmit} className="space-y-5 px-5 pb-10 pt-5">
+        {(title || description || price) && (
+          <div className="flex items-center justify-between rounded-xl border border-brand-green/30 bg-brand-green/5 px-3 py-2 text-[11px] text-muted-foreground">
+            <span>📝 Brouillon sauvegardé automatiquement</span>
+            <button type="button" onClick={() => { clearDraft(); setDraft(INITIAL_DRAFT); }}
+              className="flex items-center gap-1 font-bold text-foreground hover:text-brand-green">
+              <Trash2 className="size-3" /> Effacer
+            </button>
+          </div>
+        )}
         {/* Photos */}
         <div>
-          <Label>Photos (1 à 8)</Label>
+          <Label>Photos (1 à 8) — compressées automatiquement</Label>
           <div className="grid grid-cols-3 gap-2">
             {photos.map((p, i) => (
               <div key={p.preview} className="relative aspect-square overflow-hidden rounded-xl bg-muted">
@@ -159,18 +210,28 @@ function PublierPage() {
                   className="absolute right-1 top-1 grid size-6 place-items-center rounded-full bg-background/90">
                   <X className="size-3" />
                 </button>
+                <div className="absolute bottom-1 right-1 flex gap-1">
+                  {i > 0 && (
+                    <button type="button" onClick={() => movePhoto(i, i - 1)}
+                      className="grid size-6 place-items-center rounded-full bg-background/90 text-[10px] font-bold">←</button>
+                  )}
+                  {i < photos.length - 1 && (
+                    <button type="button" onClick={() => movePhoto(i, i + 1)}
+                      className="grid size-6 place-items-center rounded-full bg-background/90 text-[10px] font-bold">→</button>
+                  )}
+                </div>
                 {i === 0 && <span className="absolute bottom-1 left-1 rounded bg-brand-green px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary-foreground">Couverture</span>}
               </div>
             ))}
             {photos.length < MAX_PHOTOS && (
-              <button type="button" onClick={() => fileInput.current?.click()}
-                className="grid aspect-square place-items-center rounded-xl border-2 border-dashed border-border bg-muted text-muted-foreground">
-                <Camera className="size-6" />
+              <button type="button" disabled={compressing} onClick={() => fileInput.current?.click()}
+                className="grid aspect-square place-items-center rounded-xl border-2 border-dashed border-border bg-muted text-muted-foreground disabled:opacity-50">
+                {compressing ? <Loader2 className="size-5 animate-spin" /> : <Camera className="size-6" />}
               </button>
             )}
           </div>
           <input ref={fileInput} type="file" accept="image/*" multiple hidden
-            onChange={(e) => { addPhotos(e.target.files); e.target.value = ""; }} />
+            onChange={(e) => { void addPhotos(e.target.files); e.target.value = ""; }} />
         </div>
 
         <div>

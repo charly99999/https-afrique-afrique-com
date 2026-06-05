@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, SlidersHorizontal, X, Clock } from "lucide-react";
 import { MobileShell } from "@/components/MobileShell";
 import { ListingCard } from "@/components/ListingCard";
 import { CATEGORIES, COUNTRIES, formatFcfa, type CountryCode } from "@/data/catalog";
 import { fetchListings, type DbListing } from "@/lib/listings-client";
+import { useDebounce } from "@/hooks/use-debounce";
+import { useSearchHistory } from "@/hooks/use-search-history";
 
 export const Route = createFileRoute("/explorer")({
   head: () => ({
@@ -30,12 +32,19 @@ function Explorer() {
   const [items, setItems] = useState<DbListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
+  const debouncedQ = useDebounce(q, 250);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const { history, push: pushHistory, remove: removeHistory, clear: clearHistory } = useSearchHistory();
   const [city, setCity] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
   const [sort, setSort] = useState<SortKey>("recent");
   const [filtersOpen, setFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    if (debouncedQ.trim().length >= 2) pushHistory(debouncedQ);
+  }, [debouncedQ, pushHistory]);
 
   useEffect(() => {
     const saved = (typeof window !== "undefined" && localStorage.getItem("ab_country")) as CountryFilter | null;
@@ -55,7 +64,7 @@ function Explorer() {
   );
 
   const filtered = useMemo(() => {
-    const needle = q.trim().toLowerCase();
+    const needle = debouncedQ.trim().toLowerCase();
     const min = minPrice ? Number(minPrice) : 0;
     const max = maxPrice ? Number(maxPrice) : Infinity;
     const arr = items.filter((l) => {
@@ -65,15 +74,14 @@ function Explorer() {
       if (l.price < min || l.price > max) return false;
       return true;
     });
-    // Boostées toujours en tête, puis tri choisi
     arr.sort((a, b) => {
       if (!!b.boosted !== !!a.boosted) return b.boosted ? 1 : -1;
       if (sort === "price_asc") return a.price - b.price;
       if (sort === "price_desc") return b.price - a.price;
-      return 0; // recent (déjà ordonné par le fetch)
+      return 0;
     });
     return arr;
-  }, [items, q, city, category, minPrice, maxPrice, sort]);
+  }, [items, debouncedQ, city, category, minPrice, maxPrice, sort]);
 
   const activeFilters = [city, category, minPrice, maxPrice].filter(Boolean).length;
 
@@ -93,9 +101,37 @@ function Explorer() {
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
               placeholder="Rechercher une annonce…"
-              className="w-full rounded-2xl border border-border bg-background py-3 pl-10 pr-3 text-sm focus:border-brand-green focus:outline-none"
+              className="w-full rounded-2xl border border-border bg-background py-3 pl-10 pr-9 text-sm focus:border-brand-green focus:outline-none"
             />
+            {q && (
+              <button onClick={() => setQ("")} aria-label="Effacer"
+                className="absolute right-2 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-full text-muted-foreground hover:bg-muted">
+                <X className="size-4" />
+              </button>
+            )}
+            {searchFocused && history.length > 0 && q.trim().length === 0 && (
+              <div className="absolute left-0 right-0 top-full z-40 mt-1 rounded-2xl border border-border bg-background shadow-lg">
+                <div className="flex items-center justify-between px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Recherches récentes
+                  <button onMouseDown={(e) => { e.preventDefault(); clearHistory(); }} className="text-[10px] font-bold text-brand-green">Tout effacer</button>
+                </div>
+                {history.map((h) => (
+                  <div key={h} className="flex items-center justify-between px-3 py-2 hover:bg-muted">
+                    <button onMouseDown={(e) => { e.preventDefault(); setQ(h); }} className="flex flex-1 items-center gap-2 text-left text-sm">
+                      <Clock className="size-3.5 text-muted-foreground" />
+                      {h}
+                    </button>
+                    <button onMouseDown={(e) => { e.preventDefault(); removeHistory(h); }} aria-label="Supprimer"
+                      className="grid size-7 place-items-center rounded-full text-muted-foreground hover:bg-background">
+                      <X className="size-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <button onClick={() => setFiltersOpen(true)}
             className="relative grid size-12 place-items-center rounded-2xl border border-border bg-background">
