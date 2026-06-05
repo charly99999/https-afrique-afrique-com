@@ -153,14 +153,11 @@ function ListingDetail() {
     );
   }
 
-  const cover = photos[0] ?? listing.image;
-
-  return (
-    <MobileShell>
   const gallery = photos.length > 0 ? photos : [listing.image];
 
   return (
     <MobileShell>
+
       <div className="relative">
         <div
           className="hide-scrollbar flex aspect-[4/5] w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden"
