@@ -234,7 +234,7 @@ function EditListingPage() {
             )}
           </div>
           <input ref={fileInput} type="file" accept="image/*" multiple hidden
-            onChange={(e) => { addPhotos(e.target.files); e.target.value = ""; }} />
+            onChange={(e) => { void addPhotos(e.target.files); e.target.value = ""; }} />
         </div>
 
         <div>
