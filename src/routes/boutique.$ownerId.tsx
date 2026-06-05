@@ -9,6 +9,7 @@ import { resolveListingImages } from "@/lib/listing-images";
 import type { DbListing } from "@/lib/listings-client";
 import type { CountryCode, SellerBadge } from "@/data/catalog";
 import { VerifiedBadge, TrustChip, memberSinceLabel, type SellerStats } from "@/components/TrustBadge";
+import { SellerReviews } from "@/components/SellerReviews";
 import { getBoutiqueSeo, type BoutiqueSeo } from "@/lib/seo.functions";
 
 const SITE = "https://afrique-afrique.com";
