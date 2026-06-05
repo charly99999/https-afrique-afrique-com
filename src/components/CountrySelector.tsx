@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronDown, MapPin, Loader2, LocateFixed } from "lucide-react";
 import { COUNTRIES, type CountryCode } from "@/data/catalog";
 import { useGeolocation } from "@/hooks/use-geolocation";
+import { setStoredCountry } from "@/lib/currency";
 
 export function CountrySelector({
   value,
@@ -20,9 +21,16 @@ export function CountrySelector({
       const match = COUNTRIES.find((c) => c.code === r.country);
       if (match) {
         onChange(match.code as CountryCode);
+        setStoredCountry(match.code);
         setOpen(false);
       }
     }
+  }
+
+  function handleSelect(code: CountryCode) {
+    onChange(code);
+    setStoredCountry(code);
+    setOpen(false);
   }
 
   return (
@@ -62,10 +70,7 @@ export function CountrySelector({
                 <li key={c.code}>
                   <button
                     type="button"
-                    onClick={() => {
-                      onChange(c.code);
-                      setOpen(false);
-                    }}
+                    onClick={() => handleSelect(c.code)}
                     className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition hover:bg-muted ${
                       c.code === value ? "bg-accent/40 font-semibold" : ""
                     }`}
