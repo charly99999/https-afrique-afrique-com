@@ -3,16 +3,17 @@ import type {} from "@tanstack/react-start";
 
 const BASE_URL = "https://afrique-afrique.com";
 
-export const Route = createFileRoute("/sitemap-category-$slug.xml")({
+export const Route = createFileRoute("/sitemap-category-$slug[.]xml")({
   server: {
     handlers: {
       GET: async ({ params }) => {
+        const slug = (params as { slug: string }).slug;
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data, error } = await supabaseAdmin
           .from("listings")
           .select("id, updated_at, published_at")
           .eq("status", "active")
-          .eq("category_slug", params.slug)
+          .eq("category_slug", slug)
           .order("published_at", { ascending: false })
           .limit(5000);
 
