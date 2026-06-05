@@ -23,7 +23,7 @@ async function logIpn(entry: {
       invoice_token: entry.invoice_token ?? null,
       payment_id: entry.payment_id ?? null,
       error: entry.error ?? null,
-      payload: entry.payload ?? null,
+      payload: (entry.payload ?? null) as never,
     });
   } catch {
     // ne jamais faire échouer le webhook à cause du log
