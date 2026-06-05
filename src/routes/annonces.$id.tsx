@@ -153,12 +153,33 @@ function ListingDetail() {
     );
   }
 
-  const cover = photos[0] ?? listing.image;
+  const gallery = photos.length > 0 ? photos : [listing.image];
 
   return (
     <MobileShell>
+
       <div className="relative">
-        <img src={cover} alt={listing.title} className="aspect-[4/5] w-full object-cover" />
+        <div
+          className="hide-scrollbar flex aspect-[4/5] w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden"
+          style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", touchAction: "pan-x" }}
+        >
+          {gallery.map((src, i) => (
+            <img
+              key={src + i}
+              src={src}
+              alt={`${listing.title} — photo ${i + 1}`}
+              draggable={false}
+              className="aspect-[4/5] h-full w-full shrink-0 snap-center object-cover"
+            />
+          ))}
+        </div>
+        {gallery.length > 1 && (
+          <div className="pointer-events-none absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5 rounded-full bg-background/70 px-2 py-1 backdrop-blur">
+            {gallery.map((_, i) => (
+              <span key={i} className="size-1.5 rounded-full bg-foreground/70" />
+            ))}
+          </div>
+        )}
         <Link to="/" aria-label="Retour"
           className="absolute left-4 top-4 grid size-10 place-items-center rounded-full bg-background/90 text-foreground shadow-soft backdrop-blur">
           <ArrowLeft className="size-5" />
@@ -174,13 +195,14 @@ function ListingDetail() {
         </div>
       </div>
 
-      {photos.length > 1 && (
+      {gallery.length > 1 && (
         <div className="hide-scrollbar mt-3 flex gap-2 overflow-x-auto px-5">
-          {photos.map((p) => (
-            <img key={p} src={p} alt="" className="size-20 shrink-0 rounded-xl object-cover" />
+          {gallery.map((p, i) => (
+            <img key={p + i} src={p} alt="" className="size-16 shrink-0 rounded-xl object-cover" />
           ))}
         </div>
       )}
+
 
       <div className="px-5 pt-6">
         <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-brand-green">
