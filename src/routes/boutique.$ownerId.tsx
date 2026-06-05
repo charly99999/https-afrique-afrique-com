@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { resolveListingImages } from "@/lib/listing-images";
 import type { DbListing } from "@/lib/listings-client";
 import type { CountryCode, SellerBadge } from "@/data/catalog";
+import { VerifiedBadge, TrustChip, memberSinceLabel, type SellerStats } from "@/components/TrustBadge";
 
 export const Route = createFileRoute("/boutique/$ownerId")({
   head: () => ({ meta: [{ title: "Boutique du vendeur — Afrique-business" }] }),
@@ -36,7 +37,8 @@ function timeAgo(iso: string): string {
 function BoutiquePage() {
   const { ownerId } = useParams({ from: "/boutique/$ownerId" });
   const { user } = useAuth();
-  const [profile, setProfile] = useState<{ display_name: string | null; account_type: string | null; city: string | null; country: string | null; avatar_url?: string | null } | null>(null);
+  const [profile, setProfile] = useState<{ display_name: string | null; account_type: string | null; city: string | null; country: string | null; avatar_url?: string | null; verified?: boolean } | null>(null);
+  const [stats, setStats] = useState<SellerStats | null>(null);
   const [listings, setListings] = useState<DbListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -49,15 +51,18 @@ function BoutiquePage() {
         const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(ownerId);
         if (!isUuid) { setNotFound(true); setLoading(false); return; }
 
-        const { data: prof } = await supabase
-          .from("public_profiles")
-          .select("id, display_name, account_type, city, country")
-          .eq("id", ownerId)
-          .maybeSingle();
+        const [{ data: prof }, { data: statsRow }] = await Promise.all([
+          supabase.from("public_profiles")
+            .select("id, display_name, account_type, city, country, verified")
+            .eq("id", ownerId)
+            .maybeSingle(),
+          supabase.rpc("get_seller_stats", { _seller_id: ownerId }).maybeSingle(),
+        ]);
 
         if (cancelled) return;
         if (!prof) { setNotFound(true); setLoading(false); return; }
         setProfile(prof as any);
+        if (statsRow) setStats(statsRow as SellerStats);
 
         const { data: rows } = await supabase
           .from("listings")
@@ -130,21 +135,28 @@ function BoutiquePage() {
         <h1 className="font-display text-xl italic">Boutique</h1>
       </div>
 
-      <div className="mx-5 flex items-center gap-4 rounded-2xl border border-border bg-card p-5">
-        <div className="grid size-16 place-items-center rounded-full bg-brand-green/10 font-display text-2xl italic text-brand-green">
+      <div className="mx-5 flex items-start gap-4 rounded-2xl border border-border bg-card p-5">
+        <div className="grid size-16 shrink-0 place-items-center rounded-full bg-brand-green/10 font-display text-2xl italic text-brand-green">
           {name[0]?.toUpperCase()}
         </div>
-        <div className="flex-1">
-          <p className="text-base font-bold">{name}</p>
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-base font-bold">{name}</p>
+            {profile.verified && <VerifiedBadge />}
+          </div>
           {(profile.city || profile.country) && (
             <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
               <MapPin className="size-3" /> {profile.city ?? ""} {profile.country ? `• ${profile.country}` : ""}
             </p>
           )}
-          <div className="mt-2 flex gap-2">
+          {stats && (
+            <p className="mt-1 text-[11px] text-muted-foreground">{memberSinceLabel(stats.member_since)}</p>
+          )}
+          <div className="mt-2 flex flex-wrap gap-2">
             {tier === "business" && <span className="rounded bg-foreground px-2 py-0.5 text-[9px] font-extrabold text-brand-gold">👑 Business</span>}
             {tier === "pro" && <span className="rounded bg-brand-green px-2 py-0.5 text-[9px] font-extrabold text-primary-foreground">PRO</span>}
             <span className="rounded bg-muted px-2 py-0.5 text-[9px] font-bold text-muted-foreground">{listings.length} annonce{listings.length > 1 ? "s" : ""}</span>
+            {stats && <TrustChip stats={stats} />}
           </div>
         </div>
       </div>
