@@ -7,21 +7,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { formatFcfa } from "@/data/catalog";
 import { resolveListingImages } from "@/lib/listing-images";
+import type { Database } from "@/integrations/supabase/types";
 
 const searchSchema = z.object({
   listing: z.string().uuid().optional(),
   to: z.string().uuid().optional(),
 });
 
-type Message = {
-  id: string;
-  listing_id: string;
-  sender_id: string;
-  recipient_id: string;
-  body: string;
-  read_at: string | null;
-  created_at: string;
-};
+type Message = Database["public"]["Tables"]["messages"]["Row"];
 
 type Conversation = {
   listing_id: string;
@@ -71,20 +64,24 @@ function ConversationsList({ userId }: { userId: string }) {
       const { data } = await supabase
         .from("messages")
         .select(`id, listing_id, sender_id, recipient_id, body, read_at, created_at,
-          listings:listing_id ( id, title, cover_url, price_fcfa )`)
+          listings(id, title, cover_url, price_fcfa)`)
         .or(`sender_id.eq.${userId},recipient_id.eq.${userId}`)
         .order("created_at", { ascending: false })
         .limit(200);
+        
       if (cancelled || !data) return;
+      
       const map = new Map<string, Conversation>();
       const otherIds = new Set<string>();
+      
       for (const m of data) {
         if (!m.listing_id) continue;
         const other = m.sender_id === userId ? m.recipient_id : m.sender_id;
         const key = `${m.listing_id}::${other}`;
         otherIds.add(other);
+        
         if (!map.has(key)) {
-          const l = m.listings as { title?: string; cover_url?: string; price_fcfa?: number } | null;
+          const l = m.listings as any;
           map.set(key, {
             listing_id: m.listing_id,
             other_id: other,
@@ -100,16 +97,25 @@ function ConversationsList({ userId }: { userId: string }) {
         const c = map.get(key)!;
         if (m.recipient_id === userId && !m.read_at) c.unread += 1;
       }
+      
       if (otherIds.size) {
         const { data: profs } = await supabase
-          .from("public_profiles" as never).select("id, display_name").in("id", Array.from(otherIds));
-        const nameById = new Map((profs as { id: string; display_name: string | null }[] | null)?.map((p) => [p.id, p.display_name ?? "Utilisateur"]) ?? []);
+          .from("public_profiles")
+          .select("id, display_name")
+          .in("id", Array.from(otherIds));
+        
+        const nameById = new Map((profs as any[])?.map((p) => [p.id, p.display_name ?? "Utilisateur"]) ?? []);
         for (const c of map.values()) c.other_name = nameById.get(c.other_id) ?? "Utilisateur";
       }
-      const convos = Array.from(map.values());
-      const resolved = await resolveListingImages(convos.map((c) => c.listing_cover));
-      setConvos(convos.map((c) => ({ ...c, listing_cover: c.listing_cover ? (resolved.get(c.listing_cover) ?? c.listing_cover) : null })));
+      
+      const convoList = Array.from(map.values());
+      const resolved = await resolveListingImages(convoList.map((c) => c.listing_cover));
+      setConvos(convoList.map((c) => ({ 
+        ...c, 
+        listing_cover: c.listing_cover ? (resolved.get(c.listing_cover) ?? c.listing_cover) : null 
+      })));
     }
+    
     load();
     const ch = supabase.channel(`messages:list:${userId}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, load)
@@ -164,25 +170,35 @@ function Thread({ userId, listingId, otherId }: { userId: string; listingId: str
   const [listing, setListing] = useState<{ title: string; price: number; cover: string | null } | null>(null);
   const [otherName, setOtherName] = useState("Utilisateur");
   const endRef = useRef<HTMLDivElement>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      const [{ data: msgs }, { data: lst }, { data: prof }] = await Promise.all([
+      setLoadError(null);
+      const [{ data: msgs, error: msgsError }, { data: lst }, { data: prof }] = await Promise.all([
         supabase.from("messages").select("*")
           .eq("listing_id", listingId)
           .or(`and(sender_id.eq.${userId},recipient_id.eq.${otherId}),and(sender_id.eq.${otherId},recipient_id.eq.${userId})`)
           .order("created_at", { ascending: true }),
         supabase.from("listings").select("title, price_fcfa, cover_url").eq("id", listingId).maybeSingle(),
-        supabase.from("public_profiles" as never).select("display_name").eq("id", otherId).maybeSingle(),
+        supabase.from("public_profiles").select("display_name").eq("id", otherId).maybeSingle(),
       ]);
       if (cancelled) return;
+      if (msgsError) {
+        setLoadError(msgsError.message);
+        return;
+      }
       setMessages((msgs ?? []) as Message[]);
       if (lst) {
         const resolvedCover = await resolveListingImages([lst.cover_url]);
-        setListing({ title: lst.title, price: Number(lst.price_fcfa), cover: lst.cover_url ? (resolvedCover.get(lst.cover_url) ?? lst.cover_url) : null });
+        setListing({ 
+          title: lst.title, 
+          price: Number(lst.price_fcfa), 
+          cover: lst.cover_url ? (resolvedCover.get(lst.cover_url) ?? lst.cover_url) : null 
+        });
       }
-      const profRow = prof as { display_name?: string | null } | null;
+      const profRow = prof as any;
       if (profRow?.display_name) setOtherName(profRow.display_name);
       // mark unread as read
       const unread = (msgs ?? []).filter((m) => m.recipient_id === userId && !m.read_at).map((m) => m.id);
@@ -216,9 +232,14 @@ function Thread({ userId, listingId, otherId }: { userId: string; listingId: str
       listing_id: listingId, sender_id: userId, recipient_id: otherId, body: text,
     }).select().single();
     setSending(false);
-    if (!error && data) {
+    if (error) {
+      setLoadError(error.message);
+      return;
+    }
+    if (data) {
       setMessages((prev) => prev.some((x) => x.id === data.id) ? prev : [...prev, data as Message]);
       setBody("");
+      setLoadError(null);
     }
   }
 
@@ -238,6 +259,11 @@ function Thread({ userId, listingId, otherId }: { userId: string; listingId: str
       </header>
 
       <div className="px-4 py-4 pb-28">
+        {loadError && (
+          <p className="mb-4 rounded-xl border border-destructive/20 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+            {loadError}
+          </p>
+        )}
         {messages.length === 0 && (
           <p className="py-10 text-center text-xs text-muted-foreground">Lancez la discussion 👋</p>
         )}

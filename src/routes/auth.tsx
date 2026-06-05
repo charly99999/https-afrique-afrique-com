@@ -30,7 +30,7 @@ function AuthPage() {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -39,8 +39,14 @@ function AuthPage() {
           },
         });
         if (error) throw error;
-        toast.success("Compte créé. Vous êtes connecté.");
-        navigate({ to: target });
+        if (data.session) {
+          toast.success("Compte créé. Vous êtes connecté.");
+          navigate({ to: target });
+        } else {
+          toast.success("Compte créé. Vérifiez votre e-mail pour confirmer votre compte.");
+          setMode("signin");
+          setPassword("");
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -144,6 +150,7 @@ function Field({
 
 function traduireErreur(msg: string): string {
   const m = msg.toLowerCase();
+  if (m.includes("failed to fetch")) return "Connexion réseau impossible pour le moment. Réessayez dans quelques secondes.";
   if (m.includes("invalid login")) return "E-mail ou mot de passe incorrect";
   if (m.includes("already registered") || m.includes("user already")) return "Cette adresse est déjà inscrite";
   if (m.includes("password") && m.includes("pwned")) return "Mot de passe trop courant. Choisissez-en un autre.";

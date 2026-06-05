@@ -6,26 +6,38 @@ import { formatFcfa } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import type { DbListing } from "@/lib/listings-client";
 
-export function ListingCard({ listing }: { listing: Listing }) {
+type ListingItem = Listing | DbListing;
+
+export function ListingCard({ listing }: { listing: ListingItem }) {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [isFav, setIsFav] = useState(false);
+  const [isFav, setIsFav] = useState((listing as DbListing).isFavorite ?? false);
   const [busy, setBusy] = useState(false);
+  const isPersistedListing = /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(listing.id);
 
   useEffect(() => {
-    if (!user) { setIsFav(false); return; }
-    let cancelled = false;
-    supabase.from("favorites").select("listing_id")
-      .eq("user_id", user.id).eq("listing_id", listing.id).maybeSingle()
-      .then(({ data }) => { if (!cancelled) setIsFav(!!data); });
-    return () => { cancelled = true; };
-  }, [user, listing.id]);
+    // If we have DbListing with isFavorite, we trust it on mount
+    if ("isFavorite" in listing && listing.isFavorite !== undefined) {
+      setIsFav(listing.isFavorite);
+    } else if (user && isPersistedListing) {
+      // Fallback only if not provided (N+1 scenario we want to avoid but keep for compatibility)
+      let cancelled = false;
+      supabase.from("favorites").select("listing_id")
+        .eq("user_id", user.id).eq("listing_id", listing.id).maybeSingle()
+        .then(({ data }) => { if (!cancelled) setIsFav(!!data); });
+      return () => { cancelled = true; };
+    } else {
+      setIsFav(false);
+    }
+  }, [user, listing.id, (listing as DbListing).isFavorite, isPersistedListing]);
 
   async function toggleFav(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
     if (!user) { navigate({ to: "/auth" }); return; }
+    if (!isPersistedListing) { toast.error("Les annonces de démonstration ne peuvent pas être ajoutées aux favoris."); return; }
     if (busy) return;
     setBusy(true);
     try {
@@ -79,7 +91,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
       <h4 className="line-clamp-1 text-sm font-bold">{listing.title}</h4>
       <p className="mt-1 font-mono text-sm font-bold text-foreground">
         {formatFcfa(listing.price)}
-        {listing.priceSuffix && (
+        {"priceSuffix" in listing && listing.priceSuffix && (
           <span className="ml-1 text-[10px] font-normal text-muted-foreground">{listing.priceSuffix}</span>
         )}
       </p>
@@ -90,7 +102,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
   );
 }
 
-export function BoostedCard({ listing }: { listing: Listing }) {
+export function BoostedCard({ listing }: { listing: ListingItem }) {
   return (
     <Link
       to="/annonces/$id"

@@ -24,18 +24,26 @@ function HomePage() {
   const [activeCat, setActiveCat] = useState<string>("all");
   const [query, setQuery] = useState("");
   const [dbListings, setDbListings] = useState<DbListing[] | null>(null);
+  const [hasLoadedListings, setHasLoadedListings] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    fetchListings(country).then((d) => { if (!cancelled) setDbListings(d); });
+    setHasLoadedListings(false);
+    fetchListings(country).then((d) => {
+      if (!cancelled) {
+        setDbListings(d);
+        setHasLoadedListings(true);
+      }
+    });
     return () => { cancelled = true; };
   }, [country]);
 
   const source: DbListing[] = useMemo(() => {
+    if (!hasLoadedListings) return [];
     if (dbListings && dbListings.length > 0) return dbListings;
     // Fallback démo si la DB est vide pour ce pays
     return LISTINGS.filter((l) => l.country === country) as unknown as DbListing[];
-  }, [dbListings, country]);
+  }, [dbListings, country, hasLoadedListings]);
 
   const filtered = useMemo(
     () => source.filter((l) =>
