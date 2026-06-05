@@ -124,6 +124,8 @@ function PlansPage() {
             </div>
           </article>
         ))}
+
+        <MobileMoneyBadges countryCode={getStoredCountry()} className="mt-2" />
       </div>
     </MobileShell>
   );
