@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /auth
+Disallow: /publier
+Disallow: /mes-annonces
+Disallow: /mes-statistiques
+Disallow: /messages
+Disallow: /mon-abonnement
+Disallow: /parametres
+Disallow: /paiement.succes
+Disallow: /api/
+
+Sitemap: https://afrique-afrique.com/sitemap.xml

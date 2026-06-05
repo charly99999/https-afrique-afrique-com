@@ -169,9 +169,13 @@ function ListingDetail() {
               src={src}
               alt={`${listing.title} — photo ${i + 1}`}
               draggable={false}
+              loading={i === 0 ? "eager" : "lazy"}
+              decoding="async"
+              {...(i === 0 ? { fetchPriority: "high" as const } : {})}
               className="aspect-[4/5] h-full w-full shrink-0 snap-center object-cover"
             />
           ))}
+
         </div>
         {gallery.length > 1 && (
           <div className="pointer-events-none absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5 rounded-full bg-background/70 px-2 py-1 backdrop-blur">
