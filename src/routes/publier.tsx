@@ -123,10 +123,10 @@ function PublierPage() {
     } catch (err) {
       // Rollback : supprimer fichiers uploadés et listing créé
       if (uploadedPaths.length > 0) {
-        await supabase.storage.from("listings").remove(uploadedPaths).catch(() => {});
+        try { await supabase.storage.from("listings").remove(uploadedPaths); } catch { /* noop */ }
       }
       if (listingId) {
-        await supabase.from("listings").delete().eq("id", listingId).catch(() => {});
+        try { await supabase.from("listings").delete().eq("id", listingId); } catch { /* noop */ }
       }
       toast.error(err instanceof Error ? err.message : "Erreur publication");
     } finally {
@@ -223,7 +223,9 @@ function PublierPage() {
         <button type="submit" disabled={submitting}
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-green py-3.5 text-sm font-bold text-primary-foreground transition active:scale-[0.98] disabled:opacity-60">
           {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
-          {submitting ? "Publication…" : "Publier mon annonce"}
+          {submitting
+            ? progress ? `Photo ${progress.current}/${progress.total}…` : "Publication…"
+            : "Publier mon annonce"}
         </button>
       </form>
     </MobileShell>
