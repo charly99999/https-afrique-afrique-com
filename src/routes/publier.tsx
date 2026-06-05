@@ -1,14 +1,17 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Camera, X, ArrowLeft, Loader2, Trash2 } from "lucide-react";
+import { Camera, X, ArrowLeft, Loader2, Trash2, Sparkles, ShieldAlert } from "lucide-react";
 import { MobileShell } from "@/components/MobileShell";
-import { CATEGORIES, COUNTRIES, isFreeCategory, type CountryCode } from "@/data/catalog";
+import { CATEGORIES, COUNTRIES, isFreeCategory, type CountryCode, formatFcfa } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 
 import { compressMany } from "@/lib/image-compress";
 import { useDraft } from "@/hooks/use-draft";
+import { moderateListing } from "@/lib/ai-moderation.functions";
+import { estimatePrice } from "@/lib/ai-price.functions";
 
 const DRAFT_KEY = "ab_publier_draft_v1";
 type DraftShape = {
