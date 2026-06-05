@@ -104,7 +104,7 @@ function BoostPage() {
           })}
         </div>
 
-        <MobileMoneyBadges countryCode={info?.country ?? getStoredCountry()} className="mt-6" />
+        <MobileMoneyBadges countryCode={getStoredCountry()} className="mt-6" />
 
         <div className="mt-6 rounded-2xl bg-accent/30 p-4 text-xs text-muted-foreground">
           <p className="mb-2 font-bold text-foreground">Inclus dans chaque boost</p>
