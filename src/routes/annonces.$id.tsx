@@ -164,6 +164,11 @@ function ListingDetail() {
   }
 
   const gallery = photos.length > 0 ? photos : [listing.image];
+  const SITE_ORIGIN = "https://afrique-afrique.com";
+  const toAbsUrl = (u: string) => (/^https?:\/\//i.test(u) ? u : `${SITE_ORIGIN}${u.startsWith("/") ? u : `/${u}`}`);
+  const absGallery = gallery.map(toAbsUrl);
+
+
 
   return (
     <MobileShell>
@@ -194,7 +199,7 @@ function ListingDetail() {
               "@type": "Product",
               name: listing.title,
               description: listing.description,
-              image: gallery,
+              image: absGallery,
               category: listing.category,
               sku: listing.id,
               brand: listing.subCategory ? { "@type": "Brand", name: listing.subCategory } : undefined,

@@ -152,13 +152,18 @@ function BoutiquePage() {
                   addressCountry: profile.country ?? undefined,
                 }
               : undefined,
-            makesOffer: listings.slice(0, 50).map((l) => ({
-              "@type": "Offer",
-              url: `https://afrique-afrique.com/annonces/${l.id}`,
-              price: l.price,
-              priceCurrency: "XOF",
-              itemOffered: { "@type": "Product", name: l.title, image: l.image },
-            })),
+            makesOffer: listings.slice(0, 50).map((l) => {
+              const absImg = /^https?:\/\//i.test(l.image)
+                ? l.image
+                : `https://afrique-afrique.com${l.image.startsWith("/") ? l.image : `/${l.image}`}`;
+              return {
+                "@type": "Offer",
+                url: `https://afrique-afrique.com/annonces/${l.id}`,
+                price: l.price,
+                priceCurrency: "XOF",
+                itemOffered: { "@type": "Product", name: l.title, image: absImg },
+              };
+            }),
             aggregateRating: stats && stats.trust_score
               ? { "@type": "AggregateRating", ratingValue: Math.min(5, stats.trust_score / 20).toFixed(1), bestRating: 5, ratingCount: stats.active_listings || 1 }
               : undefined,
