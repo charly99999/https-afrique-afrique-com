@@ -189,17 +189,30 @@ function ListingDetail() {
         </div>
       </div>
 
-      <div className="mx-5 mt-6 flex items-center gap-4 rounded-2xl border border-border bg-card p-4">
-        <div className="grid size-12 place-items-center rounded-full bg-brand-green/10 font-display text-lg italic text-brand-green">
-          {listing.seller[0]}
+      {listing.ownerId ? (
+        <Link to="/boutique/$ownerId" params={{ ownerId: listing.ownerId }}
+          className="mx-5 mt-6 flex items-center gap-4 rounded-2xl border border-border bg-card p-4 transition active:scale-[0.99]">
+          <div className="grid size-12 place-items-center rounded-full bg-brand-green/10 font-display text-lg italic text-brand-green">
+            {listing.seller[0]}
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-bold">{listing.seller}</p>
+            <p className="text-[11px] text-brand-green">Voir la boutique →</p>
+          </div>
+          {listing.badge === "business" && <span className="rounded bg-foreground px-2 py-0.5 text-[9px] font-extrabold text-brand-gold">👑</span>}
+          {listing.badge === "pro" && <span className="rounded bg-brand-green px-2 py-0.5 text-[9px] font-extrabold text-primary-foreground">PRO</span>}
+        </Link>
+      ) : (
+        <div className="mx-5 mt-6 flex items-center gap-4 rounded-2xl border border-border bg-card p-4">
+          <div className="grid size-12 place-items-center rounded-full bg-brand-green/10 font-display text-lg italic text-brand-green">
+            {listing.seller[0]}
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-bold">{listing.seller}</p>
+            <p className="text-[11px] text-muted-foreground">Vendeur particulier</p>
+          </div>
         </div>
-        <div className="flex-1">
-          <p className="text-sm font-bold">{listing.seller}</p>
-          <p className="text-[11px] text-muted-foreground">Voir la boutique →</p>
-        </div>
-        {listing.badge === "business" && <span className="rounded bg-foreground px-2 py-0.5 text-[9px] font-extrabold text-brand-gold">👑</span>}
-        {listing.badge === "pro" && <span className="rounded bg-brand-green px-2 py-0.5 text-[9px] font-extrabold text-primary-foreground">PRO</span>}
-      </div>
+      )}
 
       <section className="mt-6 px-5">
         <h2 className="mb-3 text-xs font-extrabold uppercase tracking-widest text-muted-foreground">Description</h2>
