@@ -32,12 +32,19 @@ function Explorer() {
   const [items, setItems] = useState<DbListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
+  const debouncedQ = useDebounce(q, 250);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const { history, push: pushHistory, remove: removeHistory, clear: clearHistory } = useSearchHistory();
   const [city, setCity] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
   const [sort, setSort] = useState<SortKey>("recent");
   const [filtersOpen, setFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    if (debouncedQ.trim().length >= 2) pushHistory(debouncedQ);
+  }, [debouncedQ, pushHistory]);
 
   useEffect(() => {
     const saved = (typeof window !== "undefined" && localStorage.getItem("ab_country")) as CountryFilter | null;
