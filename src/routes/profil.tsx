@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { MobileShell } from "@/components/MobileShell";
-import { Settings, BarChart3, Store, CreditCard, Bell, LogIn, LogOut } from "lucide-react";
+import { Settings, BarChart3, Store, CreditCard, Bell, LogIn, LogOut, MessageCircle } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
