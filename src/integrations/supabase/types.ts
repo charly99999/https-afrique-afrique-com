@@ -311,6 +311,8 @@ export type Database = {
           id: string
           phone: string | null
           updated_at: string
+          verified: boolean
+          verified_at: string | null
           whatsapp: string | null
         }
         Insert: {
@@ -326,6 +328,8 @@ export type Database = {
           id: string
           phone?: string | null
           updated_at?: string
+          verified?: boolean
+          verified_at?: string | null
           whatsapp?: string | null
         }
         Update: {
@@ -341,6 +345,8 @@ export type Database = {
           id?: string
           phone?: string | null
           updated_at?: string
+          verified?: boolean
+          verified_at?: string | null
           whatsapp?: string | null
         }
         Relationships: []
@@ -456,6 +462,8 @@ export type Database = {
           created_at: string | null
           display_name: string | null
           id: string | null
+          verified: boolean | null
+          verified_at: string | null
         }
         Insert: {
           account_expires_at?: string | null
@@ -467,6 +475,8 @@ export type Database = {
           created_at?: string | null
           display_name?: string | null
           id?: string | null
+          verified?: boolean | null
+          verified_at?: string | null
         }
         Update: {
           account_expires_at?: string | null
@@ -478,6 +488,8 @@ export type Database = {
           created_at?: string | null
           display_name?: string | null
           id?: string | null
+          verified?: boolean | null
+          verified_at?: string | null
         }
         Relationships: []
       }
@@ -488,6 +500,16 @@ export type Database = {
         Returns: {
           phone: string
           whatsapp: string
+        }[]
+      }
+      get_seller_stats: {
+        Args: { _seller_id: string }
+        Returns: {
+          active_listings: number
+          member_since: string
+          trust_score: number
+          verified: boolean
+          verified_at: string
         }[]
       }
       has_role: {
