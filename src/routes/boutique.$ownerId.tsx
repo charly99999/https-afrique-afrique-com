@@ -251,6 +251,8 @@ function BoutiquePage() {
           </div>
         )}
       </section>
+
+      <SellerReviews sellerId={ownerId} />
     </MobileShell>
   );
 }
