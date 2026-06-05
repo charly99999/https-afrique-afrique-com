@@ -6,7 +6,7 @@ import { MobileShell } from "@/components/MobileShell";
 import { CATEGORIES, COUNTRIES, isFreeCategory, type CountryCode } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { resolveListingImage } from "@/lib/listing-images";
+
 import { compressMany } from "@/lib/image-compress";
 import { useDraft } from "@/hooks/use-draft";
 
