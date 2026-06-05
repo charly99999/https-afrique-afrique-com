@@ -75,6 +75,10 @@ function ListingDetail() {
   async function toggleFav() {
     if (!user) { navigate({ to: "/auth" }); return; }
     if (!listing || busy) return;
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(listing.id)) {
+      toast.error("Les annonces de démonstration ne peuvent pas être ajoutées aux favoris.");
+      return;
+    }
     setBusy(true);
     try {
       if (isFav) {
@@ -95,6 +99,10 @@ function ListingDetail() {
   async function reportListing() {
     if (!user) { navigate({ to: "/auth" }); return; }
     if (!listing || reporting) return;
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(listing.id)) {
+      toast.error("Le signalement n'est disponible que sur les annonces publiées.");
+      return;
+    }
     const reason = window.prompt("Pourquoi signaler cette annonce ?");
     if (!reason?.trim()) return;
     setReporting(true);
