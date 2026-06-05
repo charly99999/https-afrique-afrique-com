@@ -11,7 +11,16 @@ import type { CountryCode, SellerBadge } from "@/data/catalog";
 import { VerifiedBadge, TrustChip, memberSinceLabel, type SellerStats } from "@/components/TrustBadge";
 
 export const Route = createFileRoute("/boutique/$ownerId")({
-  head: () => ({ meta: [{ title: "Boutique du vendeur — Afrique-business" }] }),
+  head: ({ params }) => ({
+    meta: [
+      { title: "Boutique du vendeur — Afrique-business" },
+      { name: "description", content: "Découvrez toutes les annonces de ce vendeur sur Afrique-business." },
+      { property: "og:title", content: "Boutique du vendeur — Afrique-business" },
+      { property: "og:type", content: "profile" },
+      { property: "og:url", content: `https://afrique-afrique.com/boutique/${params.ownerId}` },
+    ],
+    links: [{ rel: "canonical", href: `https://afrique-afrique.com/boutique/${params.ownerId}` }],
+  }),
   errorComponent: ({ error, reset }) => (
     <MobileShell>
       <div className="px-6 py-20 text-center">
@@ -128,6 +137,34 @@ function BoutiquePage() {
 
   return (
     <MobileShell>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Store",
+            name,
+            url: `https://afrique-afrique.com/boutique/${ownerId}`,
+            address: profile.city || profile.country
+              ? {
+                  "@type": "PostalAddress",
+                  addressLocality: profile.city ?? undefined,
+                  addressCountry: profile.country ?? undefined,
+                }
+              : undefined,
+            makesOffer: listings.slice(0, 50).map((l) => ({
+              "@type": "Offer",
+              url: `https://afrique-afrique.com/annonces/${l.id}`,
+              price: l.price,
+              priceCurrency: "XOF",
+              itemOffered: { "@type": "Product", name: l.title, image: l.image },
+            })),
+            aggregateRating: stats && stats.trust_score
+              ? { "@type": "AggregateRating", ratingValue: Math.min(5, stats.trust_score / 20).toFixed(1), bestRating: 5, ratingCount: stats.active_listings || 1 }
+              : undefined,
+          }),
+        }}
+      />
       <div className="flex items-center gap-3 px-5 py-4">
         <Link to="/" aria-label="Retour" className="grid size-10 place-items-center rounded-full bg-card shadow-soft">
           <ArrowLeft className="size-5" />

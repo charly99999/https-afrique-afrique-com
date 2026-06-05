@@ -188,20 +188,44 @@ function ListingDetail() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Product",
-            name: listing.title,
-            description: listing.description,
-            image: gallery,
-            offers: {
-              "@type": "Offer",
-              price: listing.price,
-              priceCurrency: "XOF",
-              availability: "https://schema.org/InStock",
-              url: `https://afrique-afrique.com/annonces/${listing.id}`,
+          __html: JSON.stringify([
+            {
+              "@context": "https://schema.org",
+              "@type": "Product",
+              name: listing.title,
+              description: listing.description,
+              image: gallery,
+              category: listing.category,
+              sku: listing.id,
+              brand: listing.subCategory ? { "@type": "Brand", name: listing.subCategory } : undefined,
+              offers: {
+                "@type": "Offer",
+                price: listing.price,
+                priceCurrency: "XOF",
+                availability: "https://schema.org/InStock",
+                itemCondition: "https://schema.org/UsedCondition",
+                url: `https://afrique-afrique.com/annonces/${listing.id}`,
+                areaServed: { "@type": "Place", name: `${listing.city}, ${listing.country ?? ""}`.trim() },
+                seller: listing.ownerId
+                  ? {
+                      "@type": sellerVerified || listing.badge === "business" || listing.badge === "pro" ? "Organization" : "Person",
+                      name: listing.seller,
+                      url: `https://afrique-afrique.com/boutique/${listing.ownerId}`,
+                    }
+                  : { "@type": "Person", name: listing.seller },
+              },
             },
-          }),
+            {
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Accueil", item: "https://afrique-afrique.com/" },
+                { "@type": "ListItem", position: 2, name: "Explorer", item: "https://afrique-afrique.com/explorer" },
+                { "@type": "ListItem", position: 3, name: listing.category, item: `https://afrique-afrique.com/explorer?category=${listing.category}` },
+                { "@type": "ListItem", position: 4, name: listing.title, item: `https://afrique-afrique.com/annonces/${listing.id}` },
+              ],
+            },
+          ]),
         }}
       />
 
