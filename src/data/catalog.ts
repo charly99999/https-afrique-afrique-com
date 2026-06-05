@@ -36,7 +36,7 @@ export const CATEGORIES: Category[] = [
   { slug: "electromenager", name: "Électroménager", emoji: "🧊", sub: ["Réfrigérateurs", "Climatiseurs", "Cuisinières"] },
   { slug: "mode", name: "Mode & Beauté", emoji: "👗", sub: ["Vêtements Homme", "Vêtements Femme", "Chaussures", "Bijoux"] },
   { slug: "enfant", name: "Pour l'Enfant", emoji: "👶", sub: ["Vêtements", "Jouets", "Mobilier Bébé"] },
-  { slug: "services", name: "Services & Emploi", emoji: "💼", sub: ["Offres d'emploi", "Cours", "Livraisons"] },
+  { slug: "services", name: "Emploi & Services", emoji: "💼", sub: ["Offres d'emploi", "Demandes d'emploi", "Prestataires de services", "Cours & Formation"] },
   { slug: "maison", name: "Maison & Loisirs", emoji: "🛋️", sub: ["Meubles", "Décoration", "Sports"] },
   { slug: "pro-agricole", name: "Pro & Agricole", emoji: "🚜", sub: [] },
   { slug: "alimentation", name: "Alimentation", emoji: "🍎", sub: [] },
