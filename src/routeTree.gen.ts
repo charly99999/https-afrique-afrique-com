@@ -24,6 +24,7 @@ import { Route as PaiementSuccesRouteImport } from './routes/paiement.succes'
 import { Route as BoostIdRouteImport } from './routes/boost.$id'
 import { Route as AnnoncesIdRouteImport } from './routes/annonces.$id'
 import { Route as ApiPublicPaydunyaIpnRouteImport } from './routes/api/public/paydunya-ipn'
+import { Route as AnnoncesIdEditRouteImport } from './routes/annonces.$id.edit'
 
 const PublierRoute = PublierRouteImport.update({
   id: '/publier',
@@ -100,6 +101,11 @@ const ApiPublicPaydunyaIpnRoute = ApiPublicPaydunyaIpnRouteImport.update({
   path: '/api/public/paydunya-ipn',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AnnoncesIdEditRoute = AnnoncesIdEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => AnnoncesIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -113,9 +119,10 @@ export interface FileRoutesByFullPath {
   '/parametres': typeof ParametresRoute
   '/profil': typeof ProfilRoute
   '/publier': typeof PublierRoute
-  '/annonces/$id': typeof AnnoncesIdRoute
+  '/annonces/$id': typeof AnnoncesIdRouteWithChildren
   '/boost/$id': typeof BoostIdRoute
   '/paiement/succes': typeof PaiementSuccesRoute
+  '/annonces/$id/edit': typeof AnnoncesIdEditRoute
   '/api/public/paydunya-ipn': typeof ApiPublicPaydunyaIpnRoute
 }
 export interface FileRoutesByTo {
@@ -130,9 +137,10 @@ export interface FileRoutesByTo {
   '/parametres': typeof ParametresRoute
   '/profil': typeof ProfilRoute
   '/publier': typeof PublierRoute
-  '/annonces/$id': typeof AnnoncesIdRoute
+  '/annonces/$id': typeof AnnoncesIdRouteWithChildren
   '/boost/$id': typeof BoostIdRoute
   '/paiement/succes': typeof PaiementSuccesRoute
+  '/annonces/$id/edit': typeof AnnoncesIdEditRoute
   '/api/public/paydunya-ipn': typeof ApiPublicPaydunyaIpnRoute
 }
 export interface FileRoutesById {
@@ -148,9 +156,10 @@ export interface FileRoutesById {
   '/parametres': typeof ParametresRoute
   '/profil': typeof ProfilRoute
   '/publier': typeof PublierRoute
-  '/annonces/$id': typeof AnnoncesIdRoute
+  '/annonces/$id': typeof AnnoncesIdRouteWithChildren
   '/boost/$id': typeof BoostIdRoute
   '/paiement/succes': typeof PaiementSuccesRoute
+  '/annonces/$id/edit': typeof AnnoncesIdEditRoute
   '/api/public/paydunya-ipn': typeof ApiPublicPaydunyaIpnRoute
 }
 export interface FileRouteTypes {
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/annonces/$id'
     | '/boost/$id'
     | '/paiement/succes'
+    | '/annonces/$id/edit'
     | '/api/public/paydunya-ipn'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/annonces/$id'
     | '/boost/$id'
     | '/paiement/succes'
+    | '/annonces/$id/edit'
     | '/api/public/paydunya-ipn'
   id:
     | '__root__'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/annonces/$id'
     | '/boost/$id'
     | '/paiement/succes'
+    | '/annonces/$id/edit'
     | '/api/public/paydunya-ipn'
   fileRoutesById: FileRoutesById
 }
@@ -219,7 +231,7 @@ export interface RootRouteChildren {
   ParametresRoute: typeof ParametresRoute
   ProfilRoute: typeof ProfilRoute
   PublierRoute: typeof PublierRoute
-  AnnoncesIdRoute: typeof AnnoncesIdRoute
+  AnnoncesIdRoute: typeof AnnoncesIdRouteWithChildren
   BoostIdRoute: typeof BoostIdRoute
   PaiementSuccesRoute: typeof PaiementSuccesRoute
   ApiPublicPaydunyaIpnRoute: typeof ApiPublicPaydunyaIpnRoute
@@ -332,8 +344,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaydunyaIpnRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/annonces/$id/edit': {
+      id: '/annonces/$id/edit'
+      path: '/edit'
+      fullPath: '/annonces/$id/edit'
+      preLoaderRoute: typeof AnnoncesIdEditRouteImport
+      parentRoute: typeof AnnoncesIdRoute
+    }
   }
 }
+
+interface AnnoncesIdRouteChildren {
+  AnnoncesIdEditRoute: typeof AnnoncesIdEditRoute
+}
+
+const AnnoncesIdRouteChildren: AnnoncesIdRouteChildren = {
+  AnnoncesIdEditRoute: AnnoncesIdEditRoute,
+}
+
+const AnnoncesIdRouteWithChildren = AnnoncesIdRoute._addFileChildren(
+  AnnoncesIdRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -347,7 +378,7 @@ const rootRouteChildren: RootRouteChildren = {
   ParametresRoute: ParametresRoute,
   ProfilRoute: ProfilRoute,
   PublierRoute: PublierRoute,
-  AnnoncesIdRoute: AnnoncesIdRoute,
+  AnnoncesIdRoute: AnnoncesIdRouteWithChildren,
   BoostIdRoute: BoostIdRoute,
   PaiementSuccesRoute: PaiementSuccesRoute,
   ApiPublicPaydunyaIpnRoute: ApiPublicPaydunyaIpnRoute,
@@ -355,3 +386,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
