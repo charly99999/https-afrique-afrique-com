@@ -137,8 +137,24 @@ function PublierPage() {
     if (!title.trim() || !description.trim()) return toast.error("Champs requis");
     if (!isFree && !price) return toast.error("Prix requis");
 
-
+    // Modération IA — bloque les rejets, prévient sur "review"
     setSubmitting(true);
+    try {
+      const mod = await moderateFn({ data: { title: title.trim(), description: description.trim(), category } });
+      if (mod.decision === "reject") {
+        setModeration({ decision: "reject", reason: mod.reason || "Contenu non autorisé." });
+        setSubmitting(false);
+        return;
+      }
+      if (mod.decision === "review" && !bypassReview) {
+        setModeration({ decision: "review", reason: mod.reason || "Annonce à vérifier avant publication." });
+        setSubmitting(false);
+        return;
+      }
+    } catch {
+      // Échec IA → on continue sans bloquer
+    }
+
     let listingId: string | null = null;
     const uploadedPaths: string[] = [];
 
