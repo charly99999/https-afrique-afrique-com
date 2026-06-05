@@ -15,25 +15,29 @@ export function ListingCard({ listing }: { listing: ListingItem }) {
   const navigate = useNavigate();
   const [isFav, setIsFav] = useState((listing as DbListing).isFavorite ?? false);
   const [busy, setBusy] = useState(false);
+  const isPersistedListing = /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(listing.id);
 
   useEffect(() => {
     // If we have DbListing with isFavorite, we trust it on mount
     if ("isFavorite" in listing && listing.isFavorite !== undefined) {
       setIsFav(listing.isFavorite);
-    } else if (user) {
+    } else if (user && isPersistedListing) {
       // Fallback only if not provided (N+1 scenario we want to avoid but keep for compatibility)
       let cancelled = false;
       supabase.from("favorites").select("listing_id")
         .eq("user_id", user.id).eq("listing_id", listing.id).maybeSingle()
         .then(({ data }) => { if (!cancelled) setIsFav(!!data); });
       return () => { cancelled = true; };
+    } else {
+      setIsFav(false);
     }
-  }, [user, listing.id, (listing as DbListing).isFavorite]);
+  }, [user, listing.id, (listing as DbListing).isFavorite, isPersistedListing]);
 
   async function toggleFav(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
     if (!user) { navigate({ to: "/auth" }); return; }
+    if (!isPersistedListing) { toast.error("Les annonces de démonstration ne peuvent pas être ajoutées aux favoris."); return; }
     if (busy) return;
     setBusy(true);
     try {
