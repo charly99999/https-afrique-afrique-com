@@ -12,9 +12,11 @@ export const Route = createFileRoute("/explorer")({
 });
 
 const DEFAULT_COUNTRY: CountryCode = "CI";
+type CountryFilter = CountryCode | "ALL";
+type SortKey = "recent" | "price_asc" | "price_desc";
 
 function Explorer() {
-  const [country, setCountry] = useState<CountryCode>(DEFAULT_COUNTRY);
+  const [country, setCountry] = useState<CountryFilter>(DEFAULT_COUNTRY);
   const [items, setItems] = useState<DbListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
@@ -22,10 +24,11 @@ function Explorer() {
   const [category, setCategory] = useState<string>("");
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
+  const [sort, setSort] = useState<SortKey>("recent");
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
-    const saved = (typeof window !== "undefined" && localStorage.getItem("ab_country")) as CountryCode | null;
+    const saved = (typeof window !== "undefined" && localStorage.getItem("ab_country")) as CountryFilter | null;
     if (saved) setCountry(saved);
   }, []);
 
@@ -36,20 +39,31 @@ function Explorer() {
     return () => { cancelled = true; };
   }, [country]);
 
-  const cities = useMemo(() => COUNTRIES.find((c) => c.code === country)?.cities ?? [], [country]);
+  const cities = useMemo(
+    () => country === "ALL" ? [] : (COUNTRIES.find((c) => c.code === country)?.cities ?? []),
+    [country],
+  );
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     const min = minPrice ? Number(minPrice) : 0;
     const max = maxPrice ? Number(maxPrice) : Infinity;
-    return items.filter((l) => {
+    const arr = items.filter((l) => {
       if (needle && !`${l.title} ${l.description}`.toLowerCase().includes(needle)) return false;
       if (city && l.city !== city) return false;
       if (category && l.category !== category) return false;
       if (l.price < min || l.price > max) return false;
       return true;
     });
-  }, [items, q, city, category, minPrice, maxPrice]);
+    // Boostées toujours en tête, puis tri choisi
+    arr.sort((a, b) => {
+      if (!!b.boosted !== !!a.boosted) return b.boosted ? 1 : -1;
+      if (sort === "price_asc") return a.price - b.price;
+      if (sort === "price_desc") return b.price - a.price;
+      return 0; // recent (déjà ordonné par le fetch)
+    });
+    return arr;
+  }, [items, q, city, category, minPrice, maxPrice, sort]);
 
   const activeFilters = [city, category, minPrice, maxPrice].filter(Boolean).length;
 
