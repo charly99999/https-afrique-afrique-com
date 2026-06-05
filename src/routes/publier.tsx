@@ -69,15 +69,38 @@ function PublierPage() {
   const cities = COUNTRIES.find((c) => c.code === country)?.cities ?? [];
   const subs = CATEGORIES.find((c) => c.slug === category)?.sub ?? [];
 
-  function addPhotos(files: FileList | null) {
+  async function addPhotos(files: FileList | null) {
     if (!files) return;
     const incoming = Array.from(files).slice(0, MAX_PHOTOS - photos.length);
-    const valid = incoming.filter((f) => f.type.startsWith("image/") && f.size < 6 * 1024 * 1024);
-    setPhotos((p) => [...p, ...valid.map((file) => ({ file, preview: URL.createObjectURL(file) }))]);
+    const accepted = incoming.filter((f) => f.type.startsWith("image/") && f.size < 20 * 1024 * 1024);
+    if (accepted.length === 0) return;
+    setCompressing(true);
+    try {
+      const compressed = await compressMany(accepted);
+      setPhotos((p) => [...p, ...compressed.map((file) => ({ file, preview: URL.createObjectURL(file) }))]);
+    } catch {
+      toast.error("Impossible de traiter ces images");
+    } finally {
+      setCompressing(false);
+    }
   }
 
   function removePhoto(i: number) {
-    setPhotos((p) => p.filter((_, idx) => idx !== i));
+    setPhotos((p) => {
+      const target = p[i];
+      if (target) URL.revokeObjectURL(target.preview);
+      return p.filter((_, idx) => idx !== i);
+    });
+  }
+
+  function movePhoto(from: number, to: number) {
+    setPhotos((p) => {
+      if (to < 0 || to >= p.length) return p;
+      const next = p.slice();
+      const [it] = next.splice(from, 1);
+      next.splice(to, 0, it);
+      return next;
+    });
   }
 
   async function handleSubmit(e: React.FormEvent) {
