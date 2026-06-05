@@ -11,9 +11,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ReportListingDialog } from "@/components/ReportListingDialog";
 import { VerifiedBadge, TrustChip, memberSinceLabel, type SellerStats } from "@/components/TrustBadge";
+import { ListingGallery } from "@/components/ListingGallery";
 
 export const Route = createFileRoute("/annonces/$id")({
-  head: () => ({ meta: [{ title: "Annonce — Afrique-business" }] }),
+  head: ({ params }) => ({
+    meta: [
+      { title: `Annonce ${params.id.slice(0, 8)} — Afrique-business` },
+      { name: "description", content: "Découvrez cette annonce sur Afrique-business, la marketplace panafricaine n°1." },
+      { property: "og:title", content: "Annonce — Afrique-business" },
+      { property: "og:type", content: "product" },
+      { property: "og:url", content: `https://afrique-afrique.com/annonces/${params.id}` },
+    ],
+    links: [{ rel: "canonical", href: `https://afrique-afrique.com/annonces/${params.id}` }],
+  }),
   notFoundComponent: () => (
     <MobileShell>
       <div className="px-6 py-20 text-center">
@@ -159,36 +169,12 @@ function ListingDetail() {
     <MobileShell>
 
       <div className="relative">
-        <div
-          className="hide-scrollbar flex aspect-[4/5] w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden"
-          style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", touchAction: "pan-x" }}
-        >
-          {gallery.map((src, i) => (
-            <img
-              key={src + i}
-              src={src}
-              alt={`${listing.title} — photo ${i + 1}`}
-              draggable={false}
-              loading={i === 0 ? "eager" : "lazy"}
-              decoding="async"
-              {...(i === 0 ? { fetchPriority: "high" as const } : {})}
-              className="aspect-[4/5] h-full w-full shrink-0 snap-center object-cover"
-            />
-          ))}
-
-        </div>
-        {gallery.length > 1 && (
-          <div className="pointer-events-none absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5 rounded-full bg-background/70 px-2 py-1 backdrop-blur">
-            {gallery.map((_, i) => (
-              <span key={i} className="size-1.5 rounded-full bg-foreground/70" />
-            ))}
-          </div>
-        )}
+        <ListingGallery photos={gallery} alt={listing.title} />
         <Link to="/" aria-label="Retour"
-          className="absolute left-4 top-4 grid size-10 place-items-center rounded-full bg-background/90 text-foreground shadow-soft backdrop-blur">
+          className="absolute left-4 top-4 z-10 grid size-10 place-items-center rounded-full bg-background/90 text-foreground shadow-soft backdrop-blur">
           <ArrowLeft className="size-5" />
         </Link>
-        <div className="absolute right-4 top-4 flex items-center gap-2">
+        <div className="absolute right-4 top-4 z-10 flex items-center gap-2">
           {listing.boosted && <span className="pro-glow rounded-full bg-brand-gold px-3 py-1 text-[10px] font-extrabold uppercase">Boosté</span>}
           {listing.badge === "pro" && <span className="rounded-full bg-brand-green px-3 py-1 text-[10px] font-bold uppercase text-primary-foreground">Pro</span>}
           {listing.badge === "business" && <span className="rounded-full bg-foreground px-3 py-1 text-[10px] font-bold uppercase text-brand-gold">👑 Business</span>}
@@ -199,14 +185,25 @@ function ListingDetail() {
         </div>
       </div>
 
-      {gallery.length > 1 && (
-        <div className="hide-scrollbar mt-3 flex gap-2 overflow-x-auto px-5">
-          {gallery.map((p, i) => (
-            <img key={p + i} src={p} alt="" className="size-16 shrink-0 rounded-xl object-cover" />
-          ))}
-        </div>
-      )}
-
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: listing.title,
+            description: listing.description,
+            image: gallery,
+            offers: {
+              "@type": "Offer",
+              price: listing.price,
+              priceCurrency: "XOF",
+              availability: "https://schema.org/InStock",
+              url: `https://afrique-afrique.com/annonces/${listing.id}`,
+            },
+          }),
+        }}
+      />
 
       <div className="px-5 pt-6">
         <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-brand-green">
