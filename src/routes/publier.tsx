@@ -32,6 +32,7 @@ function PublierPage() {
   const [country, setCountry] = useState<CountryCode>("CI");
   const [city, setCity] = useState(COUNTRIES[0].cities[0]);
   const [submitting, setSubmitting] = useState(false);
+  const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
 
   if (loading || !user) {
     if (loading) return <MobileShell><div className="p-10 text-center text-sm text-muted-foreground">…</div></MobileShell>;
@@ -67,8 +68,11 @@ function PublierPage() {
     if (!title.trim() || !description.trim() || !price) return toast.error("Champs requis");
 
     setSubmitting(true);
+    let listingId: string | null = null;
+    const uploadedPaths: string[] = [];
+
     try {
-      // 1. Insert listing en pending
+      // 1. Insert listing en pending (atomicité : actif après upload réussi)
       const { data: listing, error: insErr } = await supabase
         .from("listings")
         .insert({
@@ -81,16 +85,17 @@ function PublierPage() {
           subcategory_slug: subCategory || null,
           country,
           city,
-          status: "active", // MVP : auto-active. À passer en "pending" si modération.
-          published_at: new Date().toISOString(),
+          status: "pending",
         })
         .select("id")
         .single();
       if (insErr || !listing) throw insErr ?? new Error("Insertion impossible");
+      listingId = listing.id;
 
-      // 2. Upload photos
+      // 2. Upload photos une par une avec feedback
       const photoRows: { listing_id: string; url: string; position: number }[] = [];
       for (let i = 0; i < photos.length; i++) {
+        setProgress({ current: i + 1, total: photos.length });
         const file = photos[i].file;
         const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
         const path = `${currentUser.id}/${listing.id}/${Date.now()}-${i}.${ext}`;
@@ -98,21 +103,35 @@ function PublierPage() {
           cacheControl: "31536000", upsert: false, contentType: file.type,
         });
         if (upErr) throw upErr;
+        uploadedPaths.push(path);
         photoRows.push({ listing_id: listing.id, url: path, position: i });
       }
 
-      if (photoRows.length) {
-        const { error: phErr } = await supabase.from("listing_photos").insert(photoRows);
-        if (phErr) throw phErr;
-        await supabase.from("listings").update({ cover_url: photoRows[0].url }).eq("id", listing.id);
-      }
+      // 3. Insert photos + cover, puis activer
+      const { error: phErr } = await supabase.from("listing_photos").insert(photoRows);
+      if (phErr) throw phErr;
+
+      const { error: actErr } = await supabase.from("listings").update({
+        cover_url: photoRows[0].url,
+        status: "active",
+        published_at: new Date().toISOString(),
+      }).eq("id", listing.id);
+      if (actErr) throw actErr;
 
       toast.success("Annonce publiée !");
       navigate({ to: "/annonces/$id", params: { id: listing.id } });
     } catch (err) {
+      // Rollback : supprimer fichiers uploadés et listing créé
+      if (uploadedPaths.length > 0) {
+        try { await supabase.storage.from("listings").remove(uploadedPaths); } catch { /* noop */ }
+      }
+      if (listingId) {
+        try { await supabase.from("listings").delete().eq("id", listingId); } catch { /* noop */ }
+      }
       toast.error(err instanceof Error ? err.message : "Erreur publication");
     } finally {
       setSubmitting(false);
+      setProgress(null);
     }
   }
 
@@ -204,7 +223,9 @@ function PublierPage() {
         <button type="submit" disabled={submitting}
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-green py-3.5 text-sm font-bold text-primary-foreground transition active:scale-[0.98] disabled:opacity-60">
           {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
-          {submitting ? "Publication…" : "Publier mon annonce"}
+          {submitting
+            ? progress ? `Photo ${progress.current}/${progress.total}…` : "Publication…"
+            : "Publier mon annonce"}
         </button>
       </form>
     </MobileShell>

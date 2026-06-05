@@ -6,6 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Connexion — Afrique-business" }] }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+  }),
   component: AuthPage,
 });
 
@@ -13,6 +16,8 @@ type Mode = "signin" | "signup";
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { redirect } = Route.useSearch();
+  const target = redirect && redirect.startsWith("/") ? redirect : "/profil";
   const [mode, setMode] = useState<Mode>("signin");
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -35,12 +40,12 @@ function AuthPage() {
         });
         if (error) throw error;
         toast.success("Compte créé. Vous êtes connecté.");
-        navigate({ to: "/profil" });
+        navigate({ to: target });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Connexion réussie");
-        navigate({ to: "/profil" });
+        navigate({ to: target });
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erreur inconnue";

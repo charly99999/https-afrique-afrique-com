@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { MobileShell } from "@/components/MobileShell";
-import { Plus, Rocket, Trash2 } from "lucide-react";
+import { Pencil, Plus, Rocket, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { formatFcfa } from "@/data/catalog";
 import { toast } from "sonner";
-import { resolveListingImages } from "@/lib/listing-images";
+import { deleteListingStorage, resolveListingImages } from "@/lib/listing-images";
 
 export const Route = createFileRoute("/mes-annonces")({
   head: () => ({ meta: [{ title: "Mes annonces — Afrique-business" }] }),
@@ -35,7 +35,11 @@ function MyListingsPage() {
   useEffect(() => { load(); }, [user]);
 
   async function handleDelete(id: string) {
-    if (!confirm("Supprimer cette annonce ?")) return;
+    if (!user) return;
+    if (!confirm("Supprimer cette annonce ? Cette action est irréversible.")) return;
+    // 1. Nettoyer les fichiers Storage (best-effort, avant la suppression DB)
+    await deleteListingStorage(user.id, id);
+    // 2. Supprimer l'annonce (cascade via FK : listing_photos, favorites)
     const { error } = await supabase.from("listings").delete().eq("id", id);
     if (error) toast.error(error.message);
     else { toast.success("Annonce supprimée"); load(); }
@@ -92,7 +96,11 @@ function MyListingsPage() {
                   {boosted && <span className="rounded bg-brand-gold/20 px-1.5 py-0.5 font-bold text-brand-gold">Boosté</span>}
                   <span className="text-muted-foreground">{r.views_count} vues</span>
                 </div>
-                <div className="mt-2 flex gap-2">
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Link to="/annonces/$id/edit" params={{ id: r.id }}
+                    className="flex items-center gap-1 rounded-lg bg-brand-green/10 px-2.5 py-1 text-[11px] font-bold text-brand-green">
+                    <Pencil className="size-3" /> Modifier
+                  </Link>
                   <Link to="/boost/$id" params={{ id: r.id }}
                     className="flex items-center gap-1 rounded-lg bg-brand-gold/10 px-2.5 py-1 text-[11px] font-bold text-brand-gold">
                     <Rocket className="size-3" /> Booster

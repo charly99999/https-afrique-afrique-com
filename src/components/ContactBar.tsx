@@ -1,5 +1,7 @@
-import { Phone, MessageCircle } from "lucide-react";
+import { Phone, MessageCircle, Lock } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import type { DbListing } from "@/lib/listings-client";
+import { useAuth } from "@/hooks/use-auth";
 
 export function ContactBar({
   listing,
@@ -10,6 +12,8 @@ export function ContactBar({
   onMessage: () => void;
   isOwn: boolean;
 }) {
+  const { user } = useAuth();
+
   if (isOwn) {
     return (
       <div className="fixed inset-x-0 bottom-[88px] z-40 mx-auto max-w-[440px] px-5">
@@ -19,8 +23,25 @@ export function ContactBar({
       </div>
     );
   }
+
+  // Visiteur non connecté : on indique clairement qu'il faut se connecter pour voir le contact
+  if (!user) {
+    return (
+      <div className="fixed inset-x-0 bottom-[88px] z-40 mx-auto max-w-[440px] px-5">
+        <Link
+          to="/auth"
+          search={{ redirect: typeof window !== "undefined" ? window.location.pathname : "/" }}
+          className="flex items-center justify-center gap-2 rounded-2xl bg-brand-green py-3.5 text-sm font-bold text-primary-foreground shadow-soft"
+        >
+          <Lock className="size-4" /> Connectez-vous pour contacter le vendeur
+        </Link>
+      </div>
+    );
+  }
+
   const phone = listing.sellerPhone?.replace(/[^\d+]/g, "");
   const wa = listing.sellerWhatsapp?.replace(/[^\d]/g, "");
+
   return (
     <div className="fixed inset-x-0 bottom-[88px] z-40 mx-auto max-w-[440px] px-5">
       <div className="flex gap-2 rounded-2xl bg-background/95 p-2 shadow-soft ring-1 ring-border backdrop-blur">
