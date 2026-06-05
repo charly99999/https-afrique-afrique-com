@@ -9,6 +9,8 @@ import { fetchListing, fetchPhotos, fetchSimilarListings, type DbListing } from 
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ReportListingDialog } from "@/components/ReportListingDialog";
+import { VerifiedBadge, TrustChip, memberSinceLabel, type SellerStats } from "@/components/TrustBadge";
 
 export const Route = createFileRoute("/annonces/$id")({
   head: () => ({ meta: [{ title: "Annonce — Afrique-business" }] }),
@@ -41,8 +43,10 @@ function ListingDetail() {
   const [similar, setSimilar] = useState<DbListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFav, setIsFav] = useState(false);
-  const [reporting, setReporting] = useState(false);
+  const [showReport, setShowReport] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [sellerStats, setSellerStats] = useState<SellerStats | null>(null);
+  const [sellerVerified, setSellerVerified] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -73,6 +77,16 @@ function ListingDetail() {
           if (!cancelled) {
             setPhotos(ph);
             setSimilar(sim);
+          }
+          if (l.ownerId) {
+            const [{ data: statsRow }, { data: prof }] = await Promise.all([
+              supabase.rpc("get_seller_stats", { _seller_id: l.ownerId }).maybeSingle(),
+              supabase.from("public_profiles").select("verified").eq("id", l.ownerId).maybeSingle(),
+            ]);
+            if (!cancelled) {
+              if (statsRow) setSellerStats(statsRow as SellerStats);
+              if (prof) setSellerVerified(!!(prof as any).verified);
+            }
           }
         }
         setLoading(false);
@@ -108,24 +122,14 @@ function ListingDetail() {
     }
   }
 
-  async function reportListing() {
+  function openReport() {
     if (!user) { navigate({ to: "/auth" }); return; }
-    if (!listing || reporting) return;
+    if (!listing) return;
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(listing.id)) {
       toast.error("Le signalement n'est disponible que sur les annonces publiées.");
       return;
     }
-    const reason = window.prompt("Pourquoi signaler cette annonce ?");
-    if (!reason?.trim()) return;
-    setReporting(true);
-    try {
-      await supabase.from("reports").insert({ listing_id: listing.id, reporter_id: user.id, reason: reason.trim() });
-      toast.success("Merci, le signalement a été envoyé à la modération.");
-    } catch (err) {
-      toast.error("Erreur lors de l'envoi du signalement.");
-    } finally {
-      setReporting(false);
-    }
+    setShowReport(true);
   }
 
   async function startConversation() {
