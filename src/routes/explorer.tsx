@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, SlidersHorizontal, X, Clock } from "lucide-react";
 import { MobileShell } from "@/components/MobileShell";
 import { ListingCard } from "@/components/ListingCard";
 import { CATEGORIES, COUNTRIES, formatFcfa, type CountryCode } from "@/data/catalog";
 import { fetchListings, type DbListing } from "@/lib/listings-client";
+import { useDebounce } from "@/hooks/use-debounce";
+import { useSearchHistory } from "@/hooks/use-search-history";
 
 export const Route = createFileRoute("/explorer")({
   head: () => ({
