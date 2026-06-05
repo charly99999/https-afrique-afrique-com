@@ -9,18 +9,51 @@ import { resolveListingImages } from "@/lib/listing-images";
 import type { DbListing } from "@/lib/listings-client";
 import type { CountryCode, SellerBadge } from "@/data/catalog";
 import { VerifiedBadge, TrustChip, memberSinceLabel, type SellerStats } from "@/components/TrustBadge";
+import { getBoutiqueSeo, type BoutiqueSeo } from "@/lib/seo.functions";
+
+const SITE = "https://afrique-afrique.com";
+
+function truncate(s: string, n: number) {
+  const clean = s.replace(/\s+/g, " ").trim();
+  return clean.length <= n ? clean : clean.slice(0, n - 1).trimEnd() + "…";
+}
 
 export const Route = createFileRoute("/boutique/$ownerId")({
-  head: ({ params }) => ({
-    meta: [
-      { title: "Boutique du vendeur — Afrique-business" },
-      { name: "description", content: "Découvrez toutes les annonces de ce vendeur sur Afrique-business." },
-      { property: "og:title", content: "Boutique du vendeur — Afrique-business" },
-      { property: "og:type", content: "profile" },
-      { property: "og:url", content: `https://afrique-afrique.com/boutique/${params.ownerId}` },
-    ],
-    links: [{ rel: "canonical", href: `https://afrique-afrique.com/boutique/${params.ownerId}` }],
-  }),
+  loader: async ({ params }): Promise<BoutiqueSeo | null> => {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(params.ownerId);
+    if (!isUuid) return null;
+    try {
+      return await getBoutiqueSeo({ data: { id: params.ownerId } });
+    } catch {
+      return null;
+    }
+  },
+  head: ({ params, loaderData }) => {
+    const seo = loaderData as BoutiqueSeo | null | undefined;
+    const url = `${SITE}/boutique/${params.ownerId}`;
+    const name = seo?.displayName ?? "Boutique";
+    const where = [seo?.city, seo?.country].filter(Boolean).join(", ");
+    const title = seo
+      ? `${name}${where ? ` · ${where}` : ""} — Afrique-business`
+      : "Boutique du vendeur — Afrique-business";
+    const description = seo
+      ? truncate(
+          `${name} propose ${seo.listingsCount} annonce${seo.listingsCount > 1 ? "s" : ""} sur Afrique-business${where ? ` à ${where}` : ""}. ${seo.bio ?? ""}`,
+          155,
+        )
+      : "Découvrez toutes les annonces de ce vendeur sur Afrique-business.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "profile" },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   errorComponent: ({ error, reset }) => (
     <MobileShell>
       <div className="px-6 py-20 text-center">
