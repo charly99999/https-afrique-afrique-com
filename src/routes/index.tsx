@@ -1,189 +1,176 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, Sparkles } from "lucide-react";
+import { Search, Menu, Bell, Zap } from "lucide-react";
 import { MobileShell } from "@/components/MobileShell";
-import { CountrySelector } from "@/components/CountrySelector";
-import { ListingCard, BoostedCard } from "@/components/ListingCard";
-import { CATEGORIES, LISTINGS, type CountryCode } from "@/data/catalog";
+import { LISTINGS, formatFcfa, type CountryCode } from "@/data/catalog";
 import { fetchListings, type DbListing } from "@/lib/listings-client";
+import africaMap from "@/assets/africa-map.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Afrique-business — Petites annonces en Afrique francophone" },
-      { name: "description", content: "Achetez et vendez en FCFA partout en Afrique francophone : voitures, immobilier, électronique, mode, services. 11 pays couverts." },
-      { property: "og:title", content: "Afrique-business — Petites annonces" },
-      { property: "og:description", content: "La marketplace n°1 d'Afrique francophone. Vendez vite, achetez en confiance." },
+      { title: "Afrique Business — Trouvez tout en un seul clic" },
+      { name: "description", content: "Marketplace n°1 d'Afrique francophone : immobilier, véhicules, téléphones, emploi, services. 11 pays couverts." },
+      { property: "og:title", content: "Afrique Business" },
+      { property: "og:description", content: "Trouvez tout en un seul clic. Partout en Afrique." },
     ],
   }),
   component: HomePage,
 });
 
+const NAVY = "#0D1B3E";
+
+type Tile = { label: string; emoji: string; bg: string; to: string; cat?: string; free?: boolean };
+const TILES: Tile[] = [
+  { label: "Immobilier", emoji: "🏡", bg: "from-emerald-50 to-emerald-100", to: "/explorer", cat: "immobilier" },
+  { label: "Véhicules", emoji: "🚗", bg: "from-red-50 to-orange-100", to: "/explorer", cat: "vehicules" },
+  { label: "Téléphones", emoji: "📱", bg: "from-slate-100 to-slate-200", to: "/explorer", cat: "electronique" },
+  { label: "Électronique", emoji: "🖥️", bg: "from-indigo-50 to-blue-100", to: "/explorer", cat: "electronique" },
+  { label: "Maison", emoji: "🛋️", bg: "from-sky-50 to-sky-100", to: "/explorer", cat: "maison" },
+  { label: "Mode", emoji: "🧥", bg: "from-rose-50 to-rose-100", to: "/explorer", cat: "mode" },
+  { label: "Emploi", emoji: "💼", bg: "from-amber-50 to-yellow-100", to: "/explorer", cat: "services", free: true },
+  { label: "Services", emoji: "🛠️", bg: "from-lime-50 to-green-100", to: "/explorer", cat: "services", free: true },
+];
+
 function HomePage() {
-  const [country, setCountry] = useState<CountryCode>("CI");
-  const [activeCat, setActiveCat] = useState<string>("all");
+  const [country] = useState<CountryCode>("CI");
   const [query, setQuery] = useState("");
   const [dbListings, setDbListings] = useState<DbListing[] | null>(null);
-  const [hasLoadedListings, setHasLoadedListings] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    setHasLoadedListings(false);
-    fetchListings(country).then((d) => {
-      if (!cancelled) {
-        setDbListings(d);
-        setHasLoadedListings(true);
-      }
-    });
+    fetchListings(country).then((d) => { if (!cancelled) setDbListings(d); });
     return () => { cancelled = true; };
   }, [country]);
 
-  const source: DbListing[] = useMemo(() => {
-    if (!hasLoadedListings) return [];
-    if (dbListings && dbListings.length > 0) return dbListings;
-    // Fallback démo si la DB est vide pour ce pays
-    return LISTINGS.filter((l) => l.country === country) as unknown as DbListing[];
-  }, [dbListings, country, hasLoadedListings]);
-
-  const filtered = useMemo(
-    () => source.filter((l) =>
-      (activeCat === "all" || l.category === activeCat) &&
-      (query === "" || l.title.toLowerCase().includes(query.toLowerCase())),
-    ),
-    [source, activeCat, query],
-  );
-
-  const boosted = filtered.filter((l) => l.boosted);
-  const recent = filtered.filter((l) => !l.boosted);
+  const offers = useMemo(() => {
+    const src = (dbListings && dbListings.length > 0)
+      ? dbListings
+      : (LISTINGS.filter((l) => l.country === country) as unknown as DbListing[]);
+    return src.slice(0, 8);
+  }, [dbListings, country]);
 
   return (
     <MobileShell>
-      <header className="sticky top-0 z-40 bg-background/90 px-6 pb-4 pt-7 backdrop-blur-md">
-        <div className="mb-5 flex items-center justify-between">
-          <Link
-            to="/"
-            className="font-display text-2xl uppercase tracking-[0.06em] text-brand-green"
-          >
-            Afrique<span className="text-brand-gold">.</span>Business
-          </Link>
-          <CountrySelector value={country} onChange={setCountry} />
-        </div>
+      {/* HEADER NAVY */}
+      <div className="relative" style={{ backgroundColor: NAVY }}>
+        <header className="px-5 pb-5 pt-6">
+          <div className="mb-4 flex items-center justify-between text-white">
+            <button aria-label="Menu" className="grid size-9 place-items-center">
+              <Menu className="size-6" />
+            </button>
+            <h1 className="text-lg font-extrabold tracking-tight">Afrique Business</h1>
+            <Link to="/messages" aria-label="Notifications" className="relative grid size-9 place-items-center">
+              <Bell className="size-6" />
+              <span className="absolute -right-0.5 -top-0.5 grid size-[18px] place-items-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2" style={{ ['--tw-ring-color' as string]: NAVY }}>12</span>
+            </Link>
+          </div>
 
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Chercher une villa, une voiture…"
-            className="w-full rounded-2xl border border-border bg-card py-3.5 pl-11 pr-4 text-sm font-medium shadow-sm outline-none placeholder:text-muted-foreground/70 focus:border-brand-green focus:ring-2 focus:ring-brand-green/10"
-          />
-        </div>
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Rechercher une annonce..."
+              className="w-full rounded-full bg-white py-3 pl-11 pr-12 text-sm text-slate-800 shadow-md outline-none placeholder:text-slate-400"
+            />
+            <button aria-label="Rechercher" className="absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-slate-500">
+              <Search className="size-4" />
+            </button>
+          </div>
+        </header>
 
-        <div className="hide-scrollbar mt-4 flex gap-2 overflow-x-auto pb-1">
-          <CategoryChip active={activeCat === "all"} onClick={() => setActiveCat("all")}>Tous</CategoryChip>
-          {CATEGORIES.slice(0, 6).map((cat) => (
-            <CategoryChip key={cat.slug} active={activeCat === cat.slug} onClick={() => setActiveCat(cat.slug)}>
-              <span className="mr-1">{cat.emoji}</span>{cat.name}
-            </CategoryChip>
+        {/* HERO BANNER */}
+        <section className="px-5 pb-6">
+          <div className="relative overflow-hidden rounded-2xl p-5" style={{ background: "linear-gradient(135deg, #0D1B3E 0%, #1a2d5c 60%, #0D1B3E 100%)" }}>
+            <div className="relative z-10 max-w-[58%]">
+              <h2 className="text-3xl font-extrabold leading-none text-white">Trouvez tout</h2>
+              <p className="mt-1 text-base font-medium text-white/90">en un seul clic</p>
+              <Link
+                to="/explorer"
+                className="mt-4 inline-block rounded-full bg-[#FFD700] px-4 py-2 text-xs font-extrabold text-[#0D1B3E] shadow-md active:scale-95"
+              >
+                Partout en Afrique
+              </Link>
+            </div>
+            <img
+              src={africaMap}
+              alt="Carte de l'Afrique"
+              className="pointer-events-none absolute -right-4 -top-2 h-[160%] w-auto opacity-95"
+            />
+          </div>
+        </section>
+      </div>
+
+      {/* CATEGORIES GRID */}
+      <section className="bg-white px-4 pt-5">
+        <div className="grid grid-cols-4 gap-3">
+          {TILES.map((t) => (
+            <Link
+              key={t.label + t.emoji}
+              to={t.to}
+              className="group flex flex-col items-center"
+            >
+              <div className={`relative grid aspect-square w-full place-items-center rounded-2xl bg-gradient-to-br ${t.bg} shadow-sm ring-1 ring-black/5 transition active:scale-95`}>
+                <span className="text-4xl">{t.emoji}</span>
+                {t.free && (
+                  <span className="absolute -right-1 -top-1 rounded-full bg-[#00A651] px-1.5 py-0.5 text-[8px] font-extrabold uppercase tracking-wide text-white shadow">
+                    Gratuit
+                  </span>
+                )}
+              </div>
+              <span className="mt-1.5 text-[11px] font-semibold text-slate-800">{t.label}</span>
+            </Link>
           ))}
         </div>
-      </header>
+      </section>
 
-      {activeCat === "all" && (
-        <section className="mt-6 px-6">
-          <div className="grid grid-cols-4 gap-3">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat.slug}
-                onClick={() => setActiveCat(cat.slug)}
-                className="flex flex-col items-center gap-1.5 rounded-2xl border border-border bg-card p-3 transition active:scale-95 hover:border-brand-green/40"
-              >
-                <span className="text-2xl">{cat.emoji}</span>
-                <span className="text-center text-[10px] font-semibold leading-tight text-foreground/80">{cat.name}</span>
-              </button>
-            ))}
+      {/* OFFRES SPÉCIALES */}
+      <section className="bg-white px-4 py-6">
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="grid size-7 place-items-center rounded-full bg-[#FFD700]/20">
+              <Zap className="size-4 fill-[#FFD700] text-[#FFD700]" />
+            </span>
+            <h3 className="text-base font-extrabold text-slate-900">Offres spéciales</h3>
           </div>
-        </section>
-      )}
+          <Link to="/explorer" className="text-xs font-semibold text-sky-600">Voir tout</Link>
+        </div>
 
-      {boosted.length > 0 && (
-        <section className="animate-fade-up mt-8 px-6">
-          <div className="mb-5 flex items-end justify-between">
-            <div>
-              <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-brand-gold">
-                Sélection Premium
-              </p>
-              <h2 className="font-display text-3xl italic leading-none text-brand-green">
-                Annonces Boostées
-              </h2>
-            </div>
+        <div className="hide-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 pb-2">
+          {offers.map((l) => (
             <Link
-              to="/explorer"
-              className="border-b border-brand-green/30 pb-0.5 text-xs font-semibold text-brand-green"
+              key={l.id}
+              to="/annonces/$id"
+              params={{ id: l.id }}
+              className="w-[140px] shrink-0"
             >
-              Voir tout
+              <div className="aspect-square overflow-hidden rounded-xl bg-slate-100 ring-1 ring-black/5">
+                {l.image ? (
+                  <img src={l.image} alt={l.title} loading="lazy" className="size-full object-cover" />
+                ) : null}
+              </div>
+              <p className="mt-2 line-clamp-1 text-[12px] font-semibold text-slate-900">{l.title}</p>
+              <p className="text-[12px] font-bold text-slate-900">{formatFcfa(l.price)}</p>
             </Link>
-          </div>
-          <div className="hide-scrollbar -mx-6 flex gap-4 overflow-x-auto px-6">
-            {boosted.map((l) => <BoostedCard key={l.id} listing={l} />)}
-          </div>
-        </section>
-      )}
-
-      <section className="mt-10 px-6">
-        <div className="relative overflow-hidden rounded-[2rem] bg-brand-green p-8 text-primary-foreground shadow-luxury">
-          <div className="absolute -right-16 -top-16 size-40 rounded-full bg-white/5 blur-3xl" />
-          <Sparkles className="absolute right-6 top-6 size-5 text-brand-gold/60" />
-          <div className="relative z-10">
-            <h3 className="mb-2 text-2xl font-bold leading-tight">Vendez 10× plus vite</h3>
-            <p className="mb-6 max-w-[230px] text-sm leading-relaxed text-primary-foreground/80">
-              Passez au compte Pro ou Business et profitez d'une visibilité prioritaire immédiate.
-            </p>
-            <Link
-              to="/abonnements"
-              className="inline-block rounded-xl bg-brand-gold px-6 py-3 text-sm font-bold text-foreground shadow-xl shadow-black/20 transition active:scale-95"
-            >
-              Devenir Pro
-            </Link>
-          </div>
+          ))}
         </div>
       </section>
 
-      <section className="mb-10 mt-12 px-6">
-        <div className="mb-6 flex items-center gap-4">
-          <div className="h-px flex-1 bg-border" />
-          <h2 className="text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-            Annonces Récentes
-          </h2>
-          <div className="h-px flex-1 bg-border" />
-        </div>
-        {recent.length > 0 ? (
-          <div className="grid grid-cols-2 gap-4">
-            {recent.map((l) => <ListingCard key={l.id} listing={l} />)}
-          </div>
-        ) : (
-          <p className="rounded-2xl bg-muted py-10 text-center text-sm text-muted-foreground">
-            Aucune annonce pour cette sélection.
-          </p>
-        )}
+      {/* PRO/BUSINESS CTA */}
+      <section className="px-4 pb-8">
+        <Link
+          to="/abonnements"
+          className="block rounded-2xl p-5 text-white shadow-lg"
+          style={{ background: "linear-gradient(135deg, #0D1B3E 0%, #1a2d5c 100%)" }}
+        >
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#FFD700]">Boostez vos ventes</p>
+          <h4 className="mt-1 text-lg font-extrabold">Passez Pro ou Business</h4>
+          <p className="mt-1 text-xs text-white/80">Visibilité prioritaire, boutique perso, statistiques avancées.</p>
+          <span className="mt-3 inline-block rounded-full bg-[#FFD700] px-4 py-1.5 text-xs font-extrabold text-[#0D1B3E]">Voir les offres</span>
+        </Link>
       </section>
     </MobileShell>
-  );
-}
-
-function CategoryChip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`shrink-0 whitespace-nowrap rounded-xl px-5 py-2.5 text-xs font-semibold transition ${
-        active
-          ? "bg-brand-green text-primary-foreground shadow-lg shadow-brand-green/20"
-          : "border border-border bg-card text-muted-foreground hover:border-brand-green/30 hover:text-brand-green"
-      }`}
-    >
-      {children}
-    </button>
   );
 }
