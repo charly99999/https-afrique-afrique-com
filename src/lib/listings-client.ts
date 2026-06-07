@@ -91,7 +91,7 @@ export async function fetchListings(country: CountryCode | "ALL", userId?: strin
     if (favs) favoriteIds = new Set(favs.map(f => f.listing_id));
   }
 
-  return data.map((r) => {
+  const items = data.map((r) => {
     const prof = r.owner_id ? profiles.get(r.owner_id) : undefined;
     const tier = prof?.account_type as SellerBadge | undefined;
     return {
@@ -104,13 +104,15 @@ export async function fetchListings(country: CountryCode | "ALL", userId?: strin
       city: r.city,
       image: r.cover_url ? (resolvedImages.get(r.cover_url) ?? r.cover_url) : "/placeholder.svg",
       boosted: r.boosted_until ? new Date(r.boosted_until) > new Date() : false,
-      badge: tier === "pro" || tier === "business" ? tier : "gratuit",
+      badge: (tier === "pro" || tier === "business" ? tier : "gratuit") as SellerBadge,
       seller: prof?.display_name ?? "Vendeur",
       postedAt: timeAgo(r.published_at ?? r.created_at),
       description: r.description,
+      verified: !!prof?.verified,
       isFavorite: favoriteIds.has(r.id),
-    };
+    } satisfies DbListing;
   });
+  return sortListingsByPriority(items);
 }
 
 export async function fetchListing(id: string, userId?: string): Promise<DbListing | null> {
