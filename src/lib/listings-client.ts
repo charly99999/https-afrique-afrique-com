@@ -38,6 +38,18 @@ function timeAgo(iso: string): string {
   return `Il y a ${d}j`;
 }
 
+const TIER_RANK: Record<SellerBadge, number> = { business: 0, pro: 1, gratuit: 2 };
+
+export function sortListingsByPriority(items: DbListing[]): DbListing[] {
+  return [...items].sort((a, b) => {
+    const ta = TIER_RANK[a.badge ?? "gratuit"];
+    const tb = TIER_RANK[b.badge ?? "gratuit"];
+    if (ta !== tb) return ta - tb;
+    if (!!b.boosted !== !!a.boosted) return b.boosted ? 1 : -1;
+    return 0;
+  });
+}
+
 type PubProfile = Database["public"]["Views"]["public_profiles"]["Row"];
 
 async function fetchPublicProfiles(ids: string[]): Promise<Map<string, PubProfile>> {
