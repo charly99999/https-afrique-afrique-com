@@ -167,6 +167,7 @@ export async function fetchListing(id: string, userId?: string): Promise<DbListi
     ownerId: data.owner_id ?? undefined,
     sellerPhone: phone,
     sellerWhatsapp: whatsapp,
+    verified: !!prof?.verified,
     isFavorite: isFav,
   };
 }
