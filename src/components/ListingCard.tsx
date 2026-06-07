@@ -113,6 +113,13 @@ export function ListingCard({ listing }: { listing: ListingItem }) {
       <p className="mt-1 text-[10px] text-muted-foreground">
         {listing.city} • {listing.postedAt}
       </p>
+      {(listing.badge === "pro" || listing.badge === "business") && (
+        <span
+          className="mt-2 inline-flex items-center justify-center gap-1 rounded-full bg-[#25D366] py-1.5 text-[11px] font-bold text-white"
+        >
+          <MessageCircle className="size-3" /> Contacter sur WhatsApp
+        </span>
+      )}
     </Link>
   );
 }
