@@ -147,19 +147,12 @@ function HomePage() {
               className="w-[140px] shrink-0"
             >
               <div className="aspect-square overflow-hidden rounded-xl bg-slate-100 ring-1 ring-black/5">
-                {l.cover_url || (l as unknown as { image?: string }).image ? (
-                  <img
-                    src={(l as unknown as { image?: string }).image ?? l.cover_url ?? ""}
-                    alt={l.title}
-                    loading="lazy"
-                    className="size-full object-cover"
-                  />
+                {l.image ? (
+                  <img src={l.image} alt={l.title} loading="lazy" className="size-full object-cover" />
                 ) : null}
               </div>
               <p className="mt-2 line-clamp-1 text-[12px] font-semibold text-slate-900">{l.title}</p>
-              <p className="text-[12px] font-bold text-slate-900">
-                {formatFcfa(Number((l as unknown as { price?: number; price_fcfa?: number }).price ?? (l as unknown as { price_fcfa?: number }).price_fcfa ?? 0))}
-              </p>
+              <p className="text-[12px] font-bold text-slate-900">{formatFcfa(l.price)}</p>
             </Link>
           ))}
         </div>
