@@ -23,6 +23,7 @@ export type DbListing = {
   ownerId?: string;
   sellerPhone?: string;
   sellerWhatsapp?: string;
+  verified?: boolean;
   isFavorite?: boolean;
 };
 
