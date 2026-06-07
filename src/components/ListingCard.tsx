@@ -90,9 +90,16 @@ export function ListingCard({ listing }: { listing: ListingItem }) {
           </span>
         )}
       </div>
-      <p className="mb-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-green">
-        {listing.subCategory ?? listing.category}
-      </p>
+      <div className="mb-0.5 flex items-center gap-1.5">
+        <p className="text-[10px] font-bold uppercase tracking-wide text-brand-green">
+          {listing.subCategory ?? listing.category}
+        </p>
+        {(listing as DbListing).verified && (
+          <span title="Vendeur vérifié" className="inline-flex items-center gap-0.5 rounded bg-sky-500/15 px-1 py-0.5 text-[9px] font-extrabold text-sky-600">
+            <BadgeCheck className="size-2.5" /> Vérifié
+          </span>
+        )}
+      </div>
       <h4 className="line-clamp-1 text-sm font-bold">{listing.title}</h4>
       <p className="mt-1 font-mono text-sm font-bold text-foreground">
         {isFreeCategory(listing.category) && (!listing.price || listing.price === 0)
