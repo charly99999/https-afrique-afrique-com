@@ -9,11 +9,11 @@ export function MobileShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      <main className="mx-auto min-h-screen max-w-[440px] bg-white pb-28 shadow-xl ring-1 ring-black/5">
+      <main className="mx-auto min-h-screen w-full max-w-[440px] bg-white pb-28 shadow-xl ring-1 ring-black/5 md:max-w-3xl lg:max-w-5xl xl:max-w-7xl">
         {children}
       </main>
 
-      <nav className="fixed bottom-0 left-1/2 z-50 w-full max-w-[440px] -translate-x-1/2 border-t border-slate-200 bg-white px-6 pb-5 pt-2 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+      <nav className="fixed bottom-0 left-1/2 z-50 w-full max-w-[440px] -translate-x-1/2 border-t border-slate-200 bg-white px-6 pb-5 pt-2 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] md:max-w-3xl lg:max-w-5xl xl:max-w-7xl">
         <div className="flex items-end justify-between">
           <NavItem to="/" icon={<Home className="size-5" />} label="Accueil" active={isActive("/")} />
           <NavItem to="/explorer" icon={<Heart className="size-5" />} label="Favoris" active={isActive("/explorer")} />
