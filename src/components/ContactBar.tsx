@@ -41,6 +41,9 @@ export function ContactBar({
 
   const phone = listing.sellerPhone?.replace(/[^\d+]/g, "");
   const wa = listing.sellerWhatsapp?.replace(/[^\d]/g, "");
+  const waMessage = encodeURIComponent(
+    `Bonjour, je suis intéressé(e) par votre annonce "${listing.title}" sur Afrimarket. Est-elle toujours disponible ?`
+  );
 
   return (
     <div className="fixed inset-x-0 bottom-[88px] z-40 mx-auto max-w-[440px] px-5">
@@ -55,8 +58,12 @@ export function ContactBar({
           </button>
         )}
         {wa ? (
-          <a href={`https://wa.me/${wa}`} target="_blank" rel="noreferrer"
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-foreground py-3 text-sm font-bold text-brand-gold">
+          <a
+            href={`https://wa.me/${wa}?text=${waMessage}`}
+            target="_blank"
+            rel="noreferrer"
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#25D366] py-3 text-sm font-bold text-white"
+          >
             <MessageCircle className="size-4" /> WhatsApp
           </a>
         ) : (

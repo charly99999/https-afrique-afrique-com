@@ -9,6 +9,10 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { useSearchHistory } from "@/hooks/use-search-history";
 
 export const Route = createFileRoute("/explorer")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    category: typeof s.category === "string" ? s.category : "",
+    q: typeof s.q === "string" ? s.q : "",
+  }),
   head: () => ({
     meta: [
       { title: "Explorer toutes les annonces — Afrique-business" },
@@ -28,19 +32,24 @@ type CountryFilter = CountryCode | "ALL";
 type SortKey = "recent" | "price_asc" | "price_desc";
 
 function Explorer() {
+  const search = Route.useSearch();
   const [country, setCountry] = useState<CountryFilter>(DEFAULT_COUNTRY);
   const [items, setItems] = useState<DbListing[]>([]);
   const [loading, setLoading] = useState(true);
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(search.q ?? "");
   const debouncedQ = useDebounce(q, 250);
   const [searchFocused, setSearchFocused] = useState(false);
   const { history, push: pushHistory, remove: removeHistory, clear: clearHistory } = useSearchHistory();
   const [city, setCity] = useState<string>("");
-  const [category, setCategory] = useState<string>("");
+  const [category, setCategory] = useState<string>(search.category ?? "");
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
   const [sort, setSort] = useState<SortKey>("recent");
   const [filtersOpen, setFiltersOpen] = useState(false);
+
+  // Sync from URL on navigation
+  useEffect(() => { setCategory(search.category ?? ""); }, [search.category]);
+  useEffect(() => { if (search.q !== undefined) setQ(search.q); }, [search.q]);
 
   useEffect(() => {
     if (debouncedQ.trim().length >= 2) pushHistory(debouncedQ);
@@ -54,9 +63,9 @@ function Explorer() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetchListings(country).then((data) => { if (!cancelled) { setItems(data); setLoading(false); } });
+    fetchListings(country, undefined, category || undefined).then((data) => { if (!cancelled) { setItems(data); setLoading(false); } });
     return () => { cancelled = true; };
-  }, [country]);
+  }, [country, category]);
 
   const cities = useMemo(
     () => country === "ALL" ? [] : (COUNTRIES.find((c) => c.code === country)?.cities ?? []),

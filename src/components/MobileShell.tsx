@@ -20,7 +20,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
           <div className="-mt-8">
             <Link
               to="/publier"
-              className="grid size-14 place-items-center rounded-full border-4 border-white bg-[#0D1B3E] text-white shadow-lg shadow-black/30 transition active:scale-95"
+              className="grid size-14 place-items-center rounded-full border-4 border-white bg-[#0B3D2E] text-white shadow-lg shadow-black/30 transition active:scale-95"
               aria-label="Publier une annonce"
             >
               <Plus className="size-7" strokeWidth={2.5} />
