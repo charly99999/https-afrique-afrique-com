@@ -65,13 +65,14 @@ async function fetchPublicProfiles(ids: string[]): Promise<Map<string, PubProfil
   return map;
 }
 
-export async function fetchListings(country: CountryCode | "ALL", userId?: string): Promise<DbListing[]> {
+export async function fetchListings(country: CountryCode | "ALL", userId?: string, category?: string): Promise<DbListing[]> {
   let q = supabase
     .from("listings")
     .select(`id, title, description, price_fcfa, category_slug, subcategory_slug,
              country, city, cover_url, boosted_until, published_at, created_at, owner_id`)
     .eq("status", "active");
   if (country !== "ALL") q = q.eq("country", country);
+  if (category) q = q.eq("category_slug", category);
   
   const { data, error } = await q
     .order("boosted_until", { ascending: false, nullsFirst: false })
