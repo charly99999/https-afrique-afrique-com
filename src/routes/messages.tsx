@@ -349,7 +349,7 @@ function Thread({ userId, listingId, otherId }: { userId: string; listingId: str
         </ul>
       </div>
 
-      <form onSubmit={send} className="fixed inset-x-0 bottom-[88px] z-40 mx-auto flex max-w-[440px] gap-2 px-4">
+      <form onSubmit={send} className="fixed inset-x-0 bottom-[88px] z-40 mx-auto flex w-full max-w-[440px] gap-2 px-4 md:max-w-3xl lg:max-w-5xl xl:max-w-7xl">
         <input
           value={body}
           onChange={(e) => handleTyping(e.target.value)}
