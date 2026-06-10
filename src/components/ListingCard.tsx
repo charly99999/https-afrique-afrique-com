@@ -57,13 +57,13 @@ export function ListingCard({ listing, masonry = false }: { listing: ListingItem
   }
 
   return (
-    <Link to="/annonces/$id" params={{ id: listing.id }} className="group flex flex-col">
-      <div className="relative mb-3 aspect-square overflow-hidden rounded-2xl bg-muted">
+    <Link to="/annonces/$id" params={{ id: listing.id }} className="group mb-3 flex break-inside-avoid flex-col">
+      <div className={`relative mb-3 overflow-hidden rounded-2xl bg-muted ${masonry ? "" : "aspect-square"}`}>
         <img
           src={listing.image}
           alt={listing.title}
           loading="lazy"
-          className="size-full object-cover transition duration-500 group-hover:scale-105"
+          className={`w-full object-cover transition duration-500 group-hover:scale-105 ${masonry ? "h-auto" : "size-full"}`}
         />
         <button
           type="button"
