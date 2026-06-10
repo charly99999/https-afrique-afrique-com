@@ -321,15 +321,22 @@ function ListingDetail() {
         <p className="whitespace-pre-line text-sm leading-relaxed">{listing.description}</p>
       </section>
 
-      <section className="mx-5 mt-6 flex items-start gap-3 rounded-2xl bg-accent/30 p-4">
-        <ShieldCheck className="mt-0.5 size-5 shrink-0 text-brand-green" />
-        <div>
-          <p className="text-xs font-bold">Conseils de sécurité</p>
-          <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-            Rencontrez le vendeur dans un lieu public, vérifiez le produit avant de payer, ne payez jamais à l'avance.
-          </p>
-        </div>
-      </section>
+      {(() => {
+        const isJobs = listing.category === "services" || listing.category === "travail" || listing.category === "emploi";
+        return (
+          <section className="mx-5 mt-6 flex items-start gap-3 rounded-2xl bg-accent/30 p-4">
+            <ShieldCheck className="mt-0.5 size-5 shrink-0 text-brand-green" />
+            <div>
+              <p className="text-xs font-bold">⚠️ Conseils de sécurité</p>
+              <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                {isJobs
+                  ? "Ne payez jamais pour obtenir un emploi, un entretien, un recrutement ou une mission. Aucun employeur ou client sérieux ne doit exiger un paiement à l'avance. Vérifiez toujours l'identité de l'employeur ou du prestataire avant tout engagement. Méfiez-vous des offres trop belles pour être vraies et signalez toute annonce suspecte ou frauduleuse."
+                  : "Rencontrez le vendeur dans un lieu public, vérifiez le produit avant de payer, ne payez jamais à l'avance. Méfiez-vous des prix anormalement bas et signalez toute annonce suspecte."}
+              </p>
+            </div>
+          </section>
+        );
+      })()}
 
       <Link to="/boost/$id" params={{ id: listing.id }}
         className="mx-5 mt-4 flex items-center gap-3 rounded-2xl border-2 border-dashed border-brand-gold/50 bg-brand-gold/10 px-4 py-3 text-sm font-bold text-foreground">
@@ -354,8 +361,8 @@ function ListingDetail() {
           <h2 className="mb-4 flex items-center gap-3 text-sm font-extrabold uppercase tracking-tight">
             <span className="h-[2px] w-6 bg-brand-green" /> Annonces Similaires
           </h2>
-          <div className="grid grid-cols-2 gap-4">
-            {similar.map((l) => <ListingCard key={l.id} listing={l as any} />)}
+          <div className="columns-2 gap-3 md:columns-3 lg:columns-4">
+            {similar.map((l) => <ListingCard key={l.id} listing={l as any} masonry />)}
           </div>
         </section>
       )}
