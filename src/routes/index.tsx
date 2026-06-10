@@ -72,12 +72,11 @@ function HomePage() {
     return () => { cancelled = true; supabase.removeChannel(channel); };
   }, [user]);
 
-  const boosted = useMemo(() => {
+  const feed = useMemo(() => {
     const src = (dbListings && dbListings.length > 0)
-      ? dbListings.filter((l) => l.boosted)
-      : (LISTINGS.filter((l) => l.country === country && l.boosted) as unknown as DbListing[]);
-    const fallback = (dbListings && dbListings.length > 0) ? dbListings : (LISTINGS.filter((l) => l.country === country) as unknown as DbListing[]);
-    return (src.length > 0 ? src : fallback).slice(0, 8);
+      ? dbListings
+      : (LISTINGS.filter((l) => l.country === country) as unknown as DbListing[]);
+    return src;
   }, [dbListings, country]);
 
   return (
