@@ -10,7 +10,7 @@ import type { DbListing } from "@/lib/listings-client";
 
 type ListingItem = Listing | DbListing;
 
-export function ListingCard({ listing }: { listing: ListingItem }) {
+export function ListingCard({ listing, masonry = false }: { listing: ListingItem; masonry?: boolean }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isFav, setIsFav] = useState((listing as DbListing).isFavorite ?? false);
