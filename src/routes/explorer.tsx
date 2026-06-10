@@ -185,8 +185,8 @@ function Explorer() {
                 <option value="price_desc">Prix décroissant</option>
               </select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              {filtered.map((l) => <ListingCard key={l.id} listing={l} />)}
+            <div className="columns-2 gap-3 md:columns-3 lg:columns-4 xl:columns-5">
+              {filtered.map((l) => <ListingCard key={l.id} listing={l} masonry />)}
             </div>
           </>
         )}
