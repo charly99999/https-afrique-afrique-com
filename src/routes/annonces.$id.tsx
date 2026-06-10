@@ -361,8 +361,8 @@ function ListingDetail() {
           <h2 className="mb-4 flex items-center gap-3 text-sm font-extrabold uppercase tracking-tight">
             <span className="h-[2px] w-6 bg-brand-green" /> Annonces Similaires
           </h2>
-          <div className="grid grid-cols-2 gap-4">
-            {similar.map((l) => <ListingCard key={l.id} listing={l as any} />)}
+          <div className="columns-2 gap-3 md:columns-3 lg:columns-4">
+            {similar.map((l) => <ListingCard key={l.id} listing={l as any} masonry />)}
           </div>
         </section>
       )}
