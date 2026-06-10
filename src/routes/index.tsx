@@ -175,36 +175,22 @@ function HomePage() {
         </div>
       </section>
 
-      {/* ANNONCES BOOSTÉES */}
+      {/* ANNONCES — GRILLE MASONRY VERTICALE */}
       <section className="bg-white px-4 py-6">
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-base font-extrabold text-slate-900">Annonces boostées</h3>
+          <h3 className="text-base font-extrabold text-slate-900">Annonces récentes</h3>
           <Link to="/explorer" className="text-xs font-semibold" style={{ color: DARK_GREEN }}>Voir tout</Link>
         </div>
 
-        <div className="hide-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 pb-2">
-          {boosted.map((l) => (
-            <Link
-              key={l.id}
-              to="/annonces/$id"
-              params={{ id: l.id }}
-              className="w-[140px] shrink-0"
-            >
-              <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100 ring-1 ring-black/5">
-                {l.image ? (
-                  <img src={l.image} alt={l.title} loading="lazy" className="size-full object-cover" />
-                ) : null}
-                {l.boosted && (
-                  <span className="absolute left-1.5 top-1.5 rounded px-1.5 py-0.5 text-[8px] font-extrabold uppercase text-[#0B3D2E]" style={{ backgroundColor: GOLD }}>
-                    Boosté
-                  </span>
-                )}
-              </div>
-              <p className="mt-2 line-clamp-1 text-[12px] font-semibold text-slate-900">{l.title}</p>
-              <p className="text-[12px] font-bold" style={{ color: DARK_GREEN }}>{formatFcfa(l.price)}</p>
-            </Link>
-          ))}
-        </div>
+        {feed.length === 0 ? (
+          <p className="py-10 text-center text-sm text-slate-500">Aucune annonce pour l'instant.</p>
+        ) : (
+          <div className="columns-2 gap-3 md:columns-3 lg:columns-4 xl:columns-5">
+            {feed.map((l) => (
+              <ListingCard key={l.id} listing={l} masonry />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* PRO/BUSINESS CTA */}
