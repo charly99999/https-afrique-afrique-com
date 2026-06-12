@@ -74,6 +74,16 @@ async function activatePayment(payment: PaymentRow) {
     await supabaseAdmin.from("listings")
       .update({ boosted_until: expires })
       .eq("id", payment.related_listing_id);
+
+    // Publication auto sur la Page Facebook (non bloquant)
+    try {
+      const { postBoostedListingToFacebook } = await import("./facebook.server");
+      const result = await postBoostedListingToFacebook(payment.related_listing_id);
+      if (!result.ok) console.error("[facebook] échec publication:", result.error);
+      else console.log("[facebook] annonce publiée:", result.postId);
+    } catch (e) {
+      console.error("[facebook] erreur:", e);
+    }
   }
 }
 
