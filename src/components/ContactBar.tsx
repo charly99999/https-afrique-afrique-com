@@ -42,7 +42,7 @@ export function ContactBar({
   const phone = listing.sellerPhone?.replace(/[^\d+]/g, "");
   const wa = listing.sellerWhatsapp?.replace(/[^\d]/g, "");
   const waMessage = encodeURIComponent(
-    `Bonjour, je suis intéressé(e) par votre annonce "${listing.title}" sur Afrimarket. Est-elle toujours disponible ?`
+    `Bonjour, je suis intéressé(e) par votre annonce "${listing.title}" sur Afrique-Business. Est-elle toujours disponible ?`
   );
 
   return (
