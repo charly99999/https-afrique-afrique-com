@@ -12,9 +12,9 @@ import africaMap from "@/assets/africa-map-green.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Afrimarket — Trouvez tout en un seul clic" },
+      { title: "Afrique-Business — Trouvez tout en un seul clic" },
       { name: "description", content: "Marketplace n°1 d'Afrique francophone : immobilier, véhicules, téléphones, emploi, services. 11 pays couverts." },
-      { property: "og:title", content: "Afrimarket — Afrique-business" },
+      { property: "og:title", content: "Afrique-Business — Afrique-business" },
       { property: "og:description", content: "Trouvez tout en un seul clic. Partout en Afrique." },
     ],
   }),
@@ -90,7 +90,7 @@ function HomePage() {
                 <span className="text-base">🌍</span>
               </span>
               <div className="leading-tight">
-                <h1 className="text-lg font-extrabold tracking-tight" style={{ color: GOLD }}>Afrimarket</h1>
+                <h1 className="text-lg font-extrabold tracking-tight" style={{ color: GOLD }}>Afrique-Business</h1>
                 <p className="text-[10px] font-medium text-white/70">Afrique-business / Ivoire-business</p>
               </div>
             </div>
