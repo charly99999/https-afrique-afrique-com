@@ -215,6 +215,15 @@ function Explorer() {
               </select>
             </Field>
 
+            {communes.length > 0 && (
+              <Field label="Commune / Quartier">
+                <select value={commune} onChange={(e) => setCommune(e.target.value)} className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm">
+                  <option value="">Toutes les communes</option>
+                  {communes.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </Field>
+            )}
+
             <Field label="Catégorie">
               <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm">
                 <option value="">Toutes catégories</option>
