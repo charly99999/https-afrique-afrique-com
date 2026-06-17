@@ -4,6 +4,7 @@ import { Search, SlidersHorizontal, X, Clock } from "lucide-react";
 import { MobileShell } from "@/components/MobileShell";
 import { ListingCard } from "@/components/ListingCard";
 import { CATEGORIES, COUNTRIES, formatFcfa, type CountryCode } from "@/data/catalog";
+import { getCommunes } from "@/data/communes";
 import { fetchListings, type DbListing } from "@/lib/listings-client";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useSearchHistory } from "@/hooks/use-search-history";
@@ -41,6 +42,7 @@ function Explorer() {
   const [searchFocused, setSearchFocused] = useState(false);
   const { history, push: pushHistory, remove: removeHistory, clear: clearHistory } = useSearchHistory();
   const [city, setCity] = useState<string>("");
+  const [commune, setCommune] = useState<string>("");
   const [category, setCategory] = useState<string>(search.category ?? "");
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
@@ -72,13 +74,17 @@ function Explorer() {
     [country],
   );
 
+  const communes = useMemo(() => getCommunes(city), [city]);
+  useEffect(() => { setCommune(""); }, [city]);
+
   const filtered = useMemo(() => {
     const needle = debouncedQ.trim().toLowerCase();
     const min = minPrice ? Number(minPrice) : 0;
     const max = maxPrice ? Number(maxPrice) : Infinity;
     const arr = items.filter((l) => {
       if (needle && !`${l.title} ${l.description}`.toLowerCase().includes(needle)) return false;
-      if (city && l.city !== city) return false;
+      if (city && l.city !== city && !(commune && l.city === commune)) return false;
+      if (commune && l.city !== commune && !`${l.title} ${l.description}`.toLowerCase().includes(commune.toLowerCase())) return false;
       if (category && l.category !== category) return false;
       if (l.price < min || l.price > max) return false;
       return true;
@@ -90,11 +96,11 @@ function Explorer() {
       return 0;
     });
     return arr;
-  }, [items, debouncedQ, city, category, minPrice, maxPrice, sort]);
+  }, [items, debouncedQ, city, commune, category, minPrice, maxPrice, sort]);
 
-  const activeFilters = [city, category, minPrice, maxPrice].filter(Boolean).length;
+  const activeFilters = [city, commune, category, minPrice, maxPrice].filter(Boolean).length;
 
-  function reset() { setCity(""); setCategory(""); setMinPrice(""); setMaxPrice(""); }
+  function reset() { setCity(""); setCommune(""); setCategory(""); setMinPrice(""); setMaxPrice(""); }
 
   return (
     <MobileShell>
@@ -208,6 +214,15 @@ function Explorer() {
                 {cities.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </Field>
+
+            {communes.length > 0 && (
+              <Field label="Commune / Quartier">
+                <select value={commune} onChange={(e) => setCommune(e.target.value)} className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm">
+                  <option value="">Toutes les communes</option>
+                  {communes.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </Field>
+            )}
 
             <Field label="Catégorie">
               <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm">
