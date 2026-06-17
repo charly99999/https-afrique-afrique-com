@@ -385,3 +385,6 @@ function ListingDetail() {
           </>
         );
       })()}
+    </MobileShell>
+  );
+}
