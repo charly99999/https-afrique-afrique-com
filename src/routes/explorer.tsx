@@ -42,6 +42,7 @@ function Explorer() {
   const [searchFocused, setSearchFocused] = useState(false);
   const { history, push: pushHistory, remove: removeHistory, clear: clearHistory } = useSearchHistory();
   const [city, setCity] = useState<string>("");
+  const [commune, setCommune] = useState<string>("");
   const [category, setCategory] = useState<string>(search.category ?? "");
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
