@@ -74,13 +74,17 @@ function Explorer() {
     [country],
   );
 
+  const communes = useMemo(() => getCommunes(city), [city]);
+  useEffect(() => { setCommune(""); }, [city]);
+
   const filtered = useMemo(() => {
     const needle = debouncedQ.trim().toLowerCase();
     const min = minPrice ? Number(minPrice) : 0;
     const max = maxPrice ? Number(maxPrice) : Infinity;
     const arr = items.filter((l) => {
       if (needle && !`${l.title} ${l.description}`.toLowerCase().includes(needle)) return false;
-      if (city && l.city !== city) return false;
+      if (city && l.city !== city && !(commune && l.city === commune)) return false;
+      if (commune && l.city !== commune && !`${l.title} ${l.description}`.toLowerCase().includes(commune.toLowerCase())) return false;
       if (category && l.category !== category) return false;
       if (l.price < min || l.price > max) return false;
       return true;
@@ -92,11 +96,11 @@ function Explorer() {
       return 0;
     });
     return arr;
-  }, [items, debouncedQ, city, category, minPrice, maxPrice, sort]);
+  }, [items, debouncedQ, city, commune, category, minPrice, maxPrice, sort]);
 
-  const activeFilters = [city, category, minPrice, maxPrice].filter(Boolean).length;
+  const activeFilters = [city, commune, category, minPrice, maxPrice].filter(Boolean).length;
 
-  function reset() { setCity(""); setCategory(""); setMinPrice(""); setMaxPrice(""); }
+  function reset() { setCity(""); setCommune(""); setCategory(""); setMinPrice(""); setMaxPrice(""); }
 
   return (
     <MobileShell>
