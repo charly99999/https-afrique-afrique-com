@@ -367,7 +367,21 @@ function ListingDetail() {
         </section>
       )}
 
-      <ContactBar listing={listing} onMessage={startConversation} isOwn={!!user && listing.ownerId === user.id} />
-    </MobileShell>
-  );
-}
+      {(() => {
+        const isB2B = listing.category === "services" || listing.category === "travail" || listing.category === "emploi";
+        const isVerifiedPro = isB2B && (sellerVerified || listing.badge === "pro" || listing.badge === "business");
+        return (
+          <>
+            {isVerifiedPro && (
+              <div className="mx-5 mt-4 flex items-center gap-3 rounded-2xl border border-brand-gold/40 bg-gradient-to-br from-brand-gold-soft to-background p-4 shadow-soft">
+                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-brand-gold/20 text-lg">✨</span>
+                <div>
+                  <p className="text-[10px] font-extrabold uppercase tracking-widest text-brand-gold">Professionnel vérifié</p>
+                  <p className="text-sm font-bold text-foreground">À votre service</p>
+                </div>
+              </div>
+            )}
+            <ContactBar listing={listing} onMessage={startConversation} isOwn={!!user && listing.ownerId === user.id} isB2B={isB2B} />
+          </>
+        );
+      })()}
