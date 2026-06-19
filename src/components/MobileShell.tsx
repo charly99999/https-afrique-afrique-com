@@ -39,8 +39,9 @@ function NavItem({ to, icon, label, active }: { to: string; icon: ReactNode; lab
   return (
     <Link
       to={to}
-      className={`flex flex-col items-center gap-1 transition ${active ? "text-slate-900" : "text-slate-400"}`}
+      className={`group relative flex flex-col items-center gap-1 transition ${active ? "text-brand-green" : "text-slate-400 hover:text-slate-600"}`}
     >
+      {active && <span aria-hidden className="absolute -top-2 h-1 w-6 rounded-full bg-brand-gold" />}
       {icon}
       <span className="text-[10px] font-bold">{label}</span>
     </Link>
