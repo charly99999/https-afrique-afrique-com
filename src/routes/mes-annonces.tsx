@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { formatFcfa } from "@/data/catalog";
 import { toast } from "sonner";
 import { deleteListingStorage, resolveListingImages } from "@/lib/listing-images";
+import { BoostNudge } from "@/components/BoostNudge";
 
 export const Route = createFileRoute("/mes-annonces")({
   head: () => ({ meta: [{ title: "Mes annonces — Afrique-business" }] }),
@@ -71,6 +72,10 @@ function MyListingsPage() {
           </Link>
         </div>
       </header>
+
+      <div className="px-5 pt-4">
+        <BoostNudge />
+      </div>
 
       <div className="space-y-3 px-5 py-5">
         {rows === null ? <p className="py-10 text-center text-sm text-muted-foreground">Chargement…</p> : null}
