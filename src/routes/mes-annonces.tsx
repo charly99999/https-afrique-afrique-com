@@ -8,6 +8,7 @@ import { formatFcfa } from "@/data/catalog";
 import { toast } from "sonner";
 import { deleteListingStorage, resolveListingImages } from "@/lib/listing-images";
 import { BoostNudge } from "@/components/BoostNudge";
+import { PushOptIn } from "@/components/PushOptIn";
 
 export const Route = createFileRoute("/mes-annonces")({
   head: () => ({ meta: [{ title: "Mes annonces — Afrique-business" }] }),
@@ -74,6 +75,7 @@ function MyListingsPage() {
       </header>
 
       <div className="px-5 pt-4">
+        <PushOptIn />
         <BoostNudge />
       </div>
 
