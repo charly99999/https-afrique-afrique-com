@@ -31,6 +31,7 @@ import { Route as BoostIdRouteImport } from './routes/boost.$id'
 import { Route as AnnoncesIdRouteImport } from './routes/annonces.$id'
 import { Route as ApiPublicPaydunyaIpnRouteImport } from './routes/api/public/paydunya-ipn'
 import { Route as AnnoncesIdEditRouteImport } from './routes/annonces.$id.edit'
+import { Route as ApiPublicHooksPushBoostNudgeRouteImport } from './routes/api/public/hooks/push-boost-nudge'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -144,6 +145,12 @@ const AnnoncesIdEditRoute = AnnoncesIdEditRouteImport.update({
   path: '/edit',
   getParentRoute: () => AnnoncesIdRoute,
 } as any)
+const ApiPublicHooksPushBoostNudgeRoute =
+  ApiPublicHooksPushBoostNudgeRouteImport.update({
+    id: '/api/public/hooks/push-boost-nudge',
+    path: '/api/public/hooks/push-boost-nudge',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -168,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/paiement/succes': typeof PaiementSuccesRoute
   '/annonces/$id/edit': typeof AnnoncesIdEditRoute
   '/api/public/paydunya-ipn': typeof ApiPublicPaydunyaIpnRoute
+  '/api/public/hooks/push-boost-nudge': typeof ApiPublicHooksPushBoostNudgeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -192,6 +200,7 @@ export interface FileRoutesByTo {
   '/paiement/succes': typeof PaiementSuccesRoute
   '/annonces/$id/edit': typeof AnnoncesIdEditRoute
   '/api/public/paydunya-ipn': typeof ApiPublicPaydunyaIpnRoute
+  '/api/public/hooks/push-boost-nudge': typeof ApiPublicHooksPushBoostNudgeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -217,6 +226,7 @@ export interface FileRoutesById {
   '/paiement/succes': typeof PaiementSuccesRoute
   '/annonces/$id/edit': typeof AnnoncesIdEditRoute
   '/api/public/paydunya-ipn': typeof ApiPublicPaydunyaIpnRoute
+  '/api/public/hooks/push-boost-nudge': typeof ApiPublicHooksPushBoostNudgeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -243,6 +253,7 @@ export interface FileRouteTypes {
     | '/paiement/succes'
     | '/annonces/$id/edit'
     | '/api/public/paydunya-ipn'
+    | '/api/public/hooks/push-boost-nudge'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '/paiement/succes'
     | '/annonces/$id/edit'
     | '/api/public/paydunya-ipn'
+    | '/api/public/hooks/push-boost-nudge'
   id:
     | '__root__'
     | '/'
@@ -291,6 +303,7 @@ export interface FileRouteTypes {
     | '/paiement/succes'
     | '/annonces/$id/edit'
     | '/api/public/paydunya-ipn'
+    | '/api/public/hooks/push-boost-nudge'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -315,6 +328,7 @@ export interface RootRouteChildren {
   BoutiqueOwnerIdRoute: typeof BoutiqueOwnerIdRoute
   PaiementSuccesRoute: typeof PaiementSuccesRoute
   ApiPublicPaydunyaIpnRoute: typeof ApiPublicPaydunyaIpnRoute
+  ApiPublicHooksPushBoostNudgeRoute: typeof ApiPublicHooksPushBoostNudgeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -473,6 +487,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnnoncesIdEditRouteImport
       parentRoute: typeof AnnoncesIdRoute
     }
+    '/api/public/hooks/push-boost-nudge': {
+      id: '/api/public/hooks/push-boost-nudge'
+      path: '/api/public/hooks/push-boost-nudge'
+      fullPath: '/api/public/hooks/push-boost-nudge'
+      preLoaderRoute: typeof ApiPublicHooksPushBoostNudgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -510,6 +531,7 @@ const rootRouteChildren: RootRouteChildren = {
   BoutiqueOwnerIdRoute: BoutiqueOwnerIdRoute,
   PaiementSuccesRoute: PaiementSuccesRoute,
   ApiPublicPaydunyaIpnRoute: ApiPublicPaydunyaIpnRoute,
+  ApiPublicHooksPushBoostNudgeRoute: ApiPublicHooksPushBoostNudgeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

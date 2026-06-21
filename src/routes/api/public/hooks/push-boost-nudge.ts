@@ -23,7 +23,7 @@ export const Route = createFileRoute("/api/public/hooks/push-boost-nudge")({
 
         const { data: listings, error: lerr } = await supabaseAdmin
           .from("listings")
-          .select("id, owner_id, title, created_at, view_count, boosted_until")
+          .select("id, owner_id, title, created_at, views_count, boosted_until")
           .eq("status", "active")
           .or(`boosted_until.is.null,boosted_until.lt.${new Date().toISOString()}`)
           .limit(500);
@@ -33,7 +33,7 @@ export const Route = createFileRoute("/api/public/hooks/push-boost-nudge")({
         const candidates: Cand[] = [];
         for (const l of listings ?? []) {
           const created = new Date(l.created_at as string).getTime();
-          const views = (l as any).view_count ?? 0;
+          const views = (l as any).views_count ?? 0;
           const boostedUntil = (l as any).boosted_until ? new Date((l as any).boosted_until).getTime() : 0;
           let kind: string | null = null;
           if (created > Date.parse(dayAgo)) kind = "new";
