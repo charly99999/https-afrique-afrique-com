@@ -75,6 +75,7 @@ function MyListingsPage() {
       </header>
 
       <div className="px-5 pt-4">
+        <PushOptIn />
         <BoostNudge />
       </div>
 
