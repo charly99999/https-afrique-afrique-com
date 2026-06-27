@@ -15,6 +15,7 @@ import { Route as SitemapCountryCodeDotxmlRouteImport } from './routes/sitemap-c
 import { Route as SitemapCategorySlugDotxmlRouteImport } from './routes/sitemap-category-$slug[.]xml'
 import { Route as PublierRouteImport } from './routes/publier'
 import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as PlusRouteImport } from './routes/plus'
 import { Route as ParametresRouteImport } from './routes/parametres'
 import { Route as MonAbonnementRouteImport } from './routes/mon-abonnement'
 import { Route as MessagesRouteImport } from './routes/messages'
@@ -25,6 +26,7 @@ import { Route as ExplorerRouteImport } from './routes/explorer'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AbonnementsRouteImport } from './routes/abonnements'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProfilModifierRouteImport } from './routes/profil.modifier'
 import { Route as PaiementSuccesRouteImport } from './routes/paiement.succes'
 import { Route as BoutiqueOwnerIdRouteImport } from './routes/boutique.$ownerId'
 import { Route as BoostIdRouteImport } from './routes/boost.$id'
@@ -63,6 +65,11 @@ const PublierRoute = PublierRouteImport.update({
 const ProfilRoute = ProfilRouteImport.update({
   id: '/profil',
   path: '/profil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlusRoute = PlusRouteImport.update({
+  id: '/plus',
+  path: '/plus',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ParametresRoute = ParametresRouteImport.update({
@@ -115,6 +122,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfilModifierRoute = ProfilModifierRouteImport.update({
+  id: '/modifier',
+  path: '/modifier',
+  getParentRoute: () => ProfilRoute,
+} as any)
 const PaiementSuccesRoute = PaiementSuccesRouteImport.update({
   id: '/paiement/succes',
   path: '/paiement/succes',
@@ -163,7 +175,8 @@ export interface FileRoutesByFullPath {
   '/messages': typeof MessagesRoute
   '/mon-abonnement': typeof MonAbonnementRoute
   '/parametres': typeof ParametresRoute
-  '/profil': typeof ProfilRoute
+  '/plus': typeof PlusRoute
+  '/profil': typeof ProfilRouteWithChildren
   '/publier': typeof PublierRoute
   '/sitemap-category-$slug.xml': typeof SitemapCategorySlugDotxmlRoute
   '/sitemap-country-$code.xml': typeof SitemapCountryCodeDotxmlRoute
@@ -173,6 +186,7 @@ export interface FileRoutesByFullPath {
   '/boost/$id': typeof BoostIdRoute
   '/boutique/$ownerId': typeof BoutiqueOwnerIdRoute
   '/paiement/succes': typeof PaiementSuccesRoute
+  '/profil/modifier': typeof ProfilModifierRoute
   '/annonces/$id/edit': typeof AnnoncesIdEditRoute
   '/api/public/paydunya-ipn': typeof ApiPublicPaydunyaIpnRoute
   '/api/public/hooks/push-boost-nudge': typeof ApiPublicHooksPushBoostNudgeRoute
@@ -188,7 +202,8 @@ export interface FileRoutesByTo {
   '/messages': typeof MessagesRoute
   '/mon-abonnement': typeof MonAbonnementRoute
   '/parametres': typeof ParametresRoute
-  '/profil': typeof ProfilRoute
+  '/plus': typeof PlusRoute
+  '/profil': typeof ProfilRouteWithChildren
   '/publier': typeof PublierRoute
   '/sitemap-category-$slug.xml': typeof SitemapCategorySlugDotxmlRoute
   '/sitemap-country-$code.xml': typeof SitemapCountryCodeDotxmlRoute
@@ -198,6 +213,7 @@ export interface FileRoutesByTo {
   '/boost/$id': typeof BoostIdRoute
   '/boutique/$ownerId': typeof BoutiqueOwnerIdRoute
   '/paiement/succes': typeof PaiementSuccesRoute
+  '/profil/modifier': typeof ProfilModifierRoute
   '/annonces/$id/edit': typeof AnnoncesIdEditRoute
   '/api/public/paydunya-ipn': typeof ApiPublicPaydunyaIpnRoute
   '/api/public/hooks/push-boost-nudge': typeof ApiPublicHooksPushBoostNudgeRoute
@@ -214,7 +230,8 @@ export interface FileRoutesById {
   '/messages': typeof MessagesRoute
   '/mon-abonnement': typeof MonAbonnementRoute
   '/parametres': typeof ParametresRoute
-  '/profil': typeof ProfilRoute
+  '/plus': typeof PlusRoute
+  '/profil': typeof ProfilRouteWithChildren
   '/publier': typeof PublierRoute
   '/sitemap-category-$slug.xml': typeof SitemapCategorySlugDotxmlRoute
   '/sitemap-country-$code.xml': typeof SitemapCountryCodeDotxmlRoute
@@ -224,6 +241,7 @@ export interface FileRoutesById {
   '/boost/$id': typeof BoostIdRoute
   '/boutique/$ownerId': typeof BoutiqueOwnerIdRoute
   '/paiement/succes': typeof PaiementSuccesRoute
+  '/profil/modifier': typeof ProfilModifierRoute
   '/annonces/$id/edit': typeof AnnoncesIdEditRoute
   '/api/public/paydunya-ipn': typeof ApiPublicPaydunyaIpnRoute
   '/api/public/hooks/push-boost-nudge': typeof ApiPublicHooksPushBoostNudgeRoute
@@ -241,6 +259,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/mon-abonnement'
     | '/parametres'
+    | '/plus'
     | '/profil'
     | '/publier'
     | '/sitemap-category-$slug.xml'
@@ -251,6 +270,7 @@ export interface FileRouteTypes {
     | '/boost/$id'
     | '/boutique/$ownerId'
     | '/paiement/succes'
+    | '/profil/modifier'
     | '/annonces/$id/edit'
     | '/api/public/paydunya-ipn'
     | '/api/public/hooks/push-boost-nudge'
@@ -266,6 +286,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/mon-abonnement'
     | '/parametres'
+    | '/plus'
     | '/profil'
     | '/publier'
     | '/sitemap-category-$slug.xml'
@@ -276,6 +297,7 @@ export interface FileRouteTypes {
     | '/boost/$id'
     | '/boutique/$ownerId'
     | '/paiement/succes'
+    | '/profil/modifier'
     | '/annonces/$id/edit'
     | '/api/public/paydunya-ipn'
     | '/api/public/hooks/push-boost-nudge'
@@ -291,6 +313,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/mon-abonnement'
     | '/parametres'
+    | '/plus'
     | '/profil'
     | '/publier'
     | '/sitemap-category-$slug.xml'
@@ -301,6 +324,7 @@ export interface FileRouteTypes {
     | '/boost/$id'
     | '/boutique/$ownerId'
     | '/paiement/succes'
+    | '/profil/modifier'
     | '/annonces/$id/edit'
     | '/api/public/paydunya-ipn'
     | '/api/public/hooks/push-boost-nudge'
@@ -317,7 +341,8 @@ export interface RootRouteChildren {
   MessagesRoute: typeof MessagesRoute
   MonAbonnementRoute: typeof MonAbonnementRoute
   ParametresRoute: typeof ParametresRoute
-  ProfilRoute: typeof ProfilRoute
+  PlusRoute: typeof PlusRoute
+  ProfilRoute: typeof ProfilRouteWithChildren
   PublierRoute: typeof PublierRoute
   SitemapCategorySlugDotxmlRoute: typeof SitemapCategorySlugDotxmlRoute
   SitemapCountryCodeDotxmlRoute: typeof SitemapCountryCodeDotxmlRoute
@@ -373,6 +398,13 @@ declare module '@tanstack/react-router' {
       path: '/profil'
       fullPath: '/profil'
       preLoaderRoute: typeof ProfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plus': {
+      id: '/plus'
+      path: '/plus'
+      fullPath: '/plus'
+      preLoaderRoute: typeof PlusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parametres': {
@@ -445,6 +477,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profil/modifier': {
+      id: '/profil/modifier'
+      path: '/modifier'
+      fullPath: '/profil/modifier'
+      preLoaderRoute: typeof ProfilModifierRouteImport
+      parentRoute: typeof ProfilRoute
+    }
     '/paiement/succes': {
       id: '/paiement/succes'
       path: '/paiement/succes'
@@ -497,6 +536,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ProfilRouteChildren {
+  ProfilModifierRoute: typeof ProfilModifierRoute
+}
+
+const ProfilRouteChildren: ProfilRouteChildren = {
+  ProfilModifierRoute: ProfilModifierRoute,
+}
+
+const ProfilRouteWithChildren =
+  ProfilRoute._addFileChildren(ProfilRouteChildren)
+
 interface AnnoncesIdRouteChildren {
   AnnoncesIdEditRoute: typeof AnnoncesIdEditRoute
 }
@@ -520,7 +570,8 @@ const rootRouteChildren: RootRouteChildren = {
   MessagesRoute: MessagesRoute,
   MonAbonnementRoute: MonAbonnementRoute,
   ParametresRoute: ParametresRoute,
-  ProfilRoute: ProfilRoute,
+  PlusRoute: PlusRoute,
+  ProfilRoute: ProfilRouteWithChildren,
   PublierRoute: PublierRoute,
   SitemapCategorySlugDotxmlRoute: SitemapCategorySlugDotxmlRoute,
   SitemapCountryCodeDotxmlRoute: SitemapCountryCodeDotxmlRoute,
