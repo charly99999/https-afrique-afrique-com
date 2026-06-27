@@ -397,6 +397,7 @@ export type Database = {
           country: Database["public"]["Enums"]["country_code"]
           created_at: string
           display_name: string | null
+          email_opt_in: boolean
           free_boosts_remaining: number
           id: string
           phone: string | null
@@ -414,6 +415,7 @@ export type Database = {
           country?: Database["public"]["Enums"]["country_code"]
           created_at?: string
           display_name?: string | null
+          email_opt_in?: boolean
           free_boosts_remaining?: number
           id: string
           phone?: string | null
@@ -431,6 +433,7 @@ export type Database = {
           country?: Database["public"]["Enums"]["country_code"]
           created_at?: string
           display_name?: string | null
+          email_opt_in?: boolean
           free_boosts_remaining?: number
           id?: string
           phone?: string | null
