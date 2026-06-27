@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Search, Bell } from "lucide-react";
 import { MobileShell } from "@/components/MobileShell";
 import { ListingCard } from "@/components/ListingCard";
+import { ShareAppButton } from "@/components/ShareAppButton";
+import { PromoBanner } from "@/components/PromoBanner";
 import { LISTINGS, type CountryCode } from "@/data/catalog";
 import { fetchListings, type DbListing } from "@/lib/listings-client";
 import { useAuth } from "@/hooks/use-auth";
@@ -84,8 +86,9 @@ function HomePage() {
       {/* HEADER VERT FONCÉ */}
       <div className="relative" style={{ backgroundColor: DARK_GREEN }}>
         <header className="px-5 pb-5 pt-6">
-          <div className="mb-4 flex items-center justify-between text-white">
-            <div className="flex items-center gap-2">
+          <div className="mb-4 flex items-center justify-between gap-2 text-white">
+            <ShareAppButton />
+            <div className="flex flex-1 items-center justify-center gap-2 px-2">
               <span className="grid size-9 place-items-center rounded-full" style={{ backgroundColor: "rgba(212,175,55,0.15)" }}>
                 <span className="text-base">🌍</span>
               </span>
@@ -143,6 +146,9 @@ function HomePage() {
           </div>
         </section>
       </div>
+
+      {/* PROMO BANNER */}
+      <PromoBanner />
 
       {/* CATEGORIES GRID */}
       <section className="bg-white px-4 pt-5">

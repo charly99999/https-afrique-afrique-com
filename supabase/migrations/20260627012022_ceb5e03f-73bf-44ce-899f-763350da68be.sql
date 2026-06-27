@@ -1,0 +1,2 @@
+
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email_opt_in boolean NOT NULL DEFAULT true;
