@@ -81,6 +81,7 @@ export function ListingCard({ listing, masonry = false }: { listing: ListingItem
             className={`w-full object-cover transition duration-500 group-hover:scale-105 ${masonry ? "h-auto" : "size-full"}`}
           />
         )}
+        <button
           type="button"
           aria-label={isFav ? "Retirer des favoris" : "Ajouter aux favoris"}
           onClick={toggleFav}
