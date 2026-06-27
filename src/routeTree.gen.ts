@@ -21,6 +21,7 @@ import { Route as MonAbonnementRouteImport } from './routes/mon-abonnement'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MesStatistiquesRouteImport } from './routes/mes-statistiques'
 import { Route as MesAnnoncesRouteImport } from './routes/mes-annonces'
+import { Route as LegalRouteImport } from './routes/legal'
 import { Route as KycRouteImport } from './routes/kyc'
 import { Route as ExplorerRouteImport } from './routes/explorer'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -28,6 +29,11 @@ import { Route as AbonnementsRouteImport } from './routes/abonnements'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfilModifierRouteImport } from './routes/profil.modifier'
 import { Route as PaiementSuccesRouteImport } from './routes/paiement.succes'
+import { Route as LegalSecuriteRouteImport } from './routes/legal.securite'
+import { Route as LegalReglesRouteImport } from './routes/legal.regles'
+import { Route as LegalConfidentialiteRouteImport } from './routes/legal.confidentialite'
+import { Route as LegalCgvRouteImport } from './routes/legal.cgv'
+import { Route as LegalCguRouteImport } from './routes/legal.cgu'
 import { Route as BoutiqueOwnerIdRouteImport } from './routes/boutique.$ownerId'
 import { Route as BoostIdRouteImport } from './routes/boost.$id'
 import { Route as AnnoncesIdRouteImport } from './routes/annonces.$id'
@@ -97,6 +103,11 @@ const MesAnnoncesRoute = MesAnnoncesRouteImport.update({
   path: '/mes-annonces',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LegalRoute = LegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const KycRoute = KycRouteImport.update({
   id: '/kyc',
   path: '/kyc',
@@ -131,6 +142,31 @@ const PaiementSuccesRoute = PaiementSuccesRouteImport.update({
   id: '/paiement/succes',
   path: '/paiement/succes',
   getParentRoute: () => rootRouteImport,
+} as any)
+const LegalSecuriteRoute = LegalSecuriteRouteImport.update({
+  id: '/securite',
+  path: '/securite',
+  getParentRoute: () => LegalRoute,
+} as any)
+const LegalReglesRoute = LegalReglesRouteImport.update({
+  id: '/regles',
+  path: '/regles',
+  getParentRoute: () => LegalRoute,
+} as any)
+const LegalConfidentialiteRoute = LegalConfidentialiteRouteImport.update({
+  id: '/confidentialite',
+  path: '/confidentialite',
+  getParentRoute: () => LegalRoute,
+} as any)
+const LegalCgvRoute = LegalCgvRouteImport.update({
+  id: '/cgv',
+  path: '/cgv',
+  getParentRoute: () => LegalRoute,
+} as any)
+const LegalCguRoute = LegalCguRouteImport.update({
+  id: '/cgu',
+  path: '/cgu',
+  getParentRoute: () => LegalRoute,
 } as any)
 const BoutiqueOwnerIdRoute = BoutiqueOwnerIdRouteImport.update({
   id: '/boutique/$ownerId',
@@ -170,6 +206,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/explorer': typeof ExplorerRoute
   '/kyc': typeof KycRoute
+  '/legal': typeof LegalRouteWithChildren
   '/mes-annonces': typeof MesAnnoncesRoute
   '/mes-statistiques': typeof MesStatistiquesRoute
   '/messages': typeof MessagesRoute
@@ -185,6 +222,11 @@ export interface FileRoutesByFullPath {
   '/annonces/$id': typeof AnnoncesIdRouteWithChildren
   '/boost/$id': typeof BoostIdRoute
   '/boutique/$ownerId': typeof BoutiqueOwnerIdRoute
+  '/legal/cgu': typeof LegalCguRoute
+  '/legal/cgv': typeof LegalCgvRoute
+  '/legal/confidentialite': typeof LegalConfidentialiteRoute
+  '/legal/regles': typeof LegalReglesRoute
+  '/legal/securite': typeof LegalSecuriteRoute
   '/paiement/succes': typeof PaiementSuccesRoute
   '/profil/modifier': typeof ProfilModifierRoute
   '/annonces/$id/edit': typeof AnnoncesIdEditRoute
@@ -197,6 +239,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/explorer': typeof ExplorerRoute
   '/kyc': typeof KycRoute
+  '/legal': typeof LegalRouteWithChildren
   '/mes-annonces': typeof MesAnnoncesRoute
   '/mes-statistiques': typeof MesStatistiquesRoute
   '/messages': typeof MessagesRoute
@@ -212,6 +255,11 @@ export interface FileRoutesByTo {
   '/annonces/$id': typeof AnnoncesIdRouteWithChildren
   '/boost/$id': typeof BoostIdRoute
   '/boutique/$ownerId': typeof BoutiqueOwnerIdRoute
+  '/legal/cgu': typeof LegalCguRoute
+  '/legal/cgv': typeof LegalCgvRoute
+  '/legal/confidentialite': typeof LegalConfidentialiteRoute
+  '/legal/regles': typeof LegalReglesRoute
+  '/legal/securite': typeof LegalSecuriteRoute
   '/paiement/succes': typeof PaiementSuccesRoute
   '/profil/modifier': typeof ProfilModifierRoute
   '/annonces/$id/edit': typeof AnnoncesIdEditRoute
@@ -225,6 +273,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/explorer': typeof ExplorerRoute
   '/kyc': typeof KycRoute
+  '/legal': typeof LegalRouteWithChildren
   '/mes-annonces': typeof MesAnnoncesRoute
   '/mes-statistiques': typeof MesStatistiquesRoute
   '/messages': typeof MessagesRoute
@@ -240,6 +289,11 @@ export interface FileRoutesById {
   '/annonces/$id': typeof AnnoncesIdRouteWithChildren
   '/boost/$id': typeof BoostIdRoute
   '/boutique/$ownerId': typeof BoutiqueOwnerIdRoute
+  '/legal/cgu': typeof LegalCguRoute
+  '/legal/cgv': typeof LegalCgvRoute
+  '/legal/confidentialite': typeof LegalConfidentialiteRoute
+  '/legal/regles': typeof LegalReglesRoute
+  '/legal/securite': typeof LegalSecuriteRoute
   '/paiement/succes': typeof PaiementSuccesRoute
   '/profil/modifier': typeof ProfilModifierRoute
   '/annonces/$id/edit': typeof AnnoncesIdEditRoute
@@ -254,6 +308,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/explorer'
     | '/kyc'
+    | '/legal'
     | '/mes-annonces'
     | '/mes-statistiques'
     | '/messages'
@@ -269,6 +324,11 @@ export interface FileRouteTypes {
     | '/annonces/$id'
     | '/boost/$id'
     | '/boutique/$ownerId'
+    | '/legal/cgu'
+    | '/legal/cgv'
+    | '/legal/confidentialite'
+    | '/legal/regles'
+    | '/legal/securite'
     | '/paiement/succes'
     | '/profil/modifier'
     | '/annonces/$id/edit'
@@ -281,6 +341,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/explorer'
     | '/kyc'
+    | '/legal'
     | '/mes-annonces'
     | '/mes-statistiques'
     | '/messages'
@@ -296,6 +357,11 @@ export interface FileRouteTypes {
     | '/annonces/$id'
     | '/boost/$id'
     | '/boutique/$ownerId'
+    | '/legal/cgu'
+    | '/legal/cgv'
+    | '/legal/confidentialite'
+    | '/legal/regles'
+    | '/legal/securite'
     | '/paiement/succes'
     | '/profil/modifier'
     | '/annonces/$id/edit'
@@ -308,6 +374,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/explorer'
     | '/kyc'
+    | '/legal'
     | '/mes-annonces'
     | '/mes-statistiques'
     | '/messages'
@@ -323,6 +390,11 @@ export interface FileRouteTypes {
     | '/annonces/$id'
     | '/boost/$id'
     | '/boutique/$ownerId'
+    | '/legal/cgu'
+    | '/legal/cgv'
+    | '/legal/confidentialite'
+    | '/legal/regles'
+    | '/legal/securite'
     | '/paiement/succes'
     | '/profil/modifier'
     | '/annonces/$id/edit'
@@ -336,6 +408,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ExplorerRoute: typeof ExplorerRoute
   KycRoute: typeof KycRoute
+  LegalRoute: typeof LegalRouteWithChildren
   MesAnnoncesRoute: typeof MesAnnoncesRoute
   MesStatistiquesRoute: typeof MesStatistiquesRoute
   MessagesRoute: typeof MessagesRoute
@@ -442,6 +515,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MesAnnoncesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/legal': {
+      id: '/legal'
+      path: '/legal'
+      fullPath: '/legal'
+      preLoaderRoute: typeof LegalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/kyc': {
       id: '/kyc'
       path: '/kyc'
@@ -491,6 +571,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PaiementSuccesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/legal/securite': {
+      id: '/legal/securite'
+      path: '/securite'
+      fullPath: '/legal/securite'
+      preLoaderRoute: typeof LegalSecuriteRouteImport
+      parentRoute: typeof LegalRoute
+    }
+    '/legal/regles': {
+      id: '/legal/regles'
+      path: '/regles'
+      fullPath: '/legal/regles'
+      preLoaderRoute: typeof LegalReglesRouteImport
+      parentRoute: typeof LegalRoute
+    }
+    '/legal/confidentialite': {
+      id: '/legal/confidentialite'
+      path: '/confidentialite'
+      fullPath: '/legal/confidentialite'
+      preLoaderRoute: typeof LegalConfidentialiteRouteImport
+      parentRoute: typeof LegalRoute
+    }
+    '/legal/cgv': {
+      id: '/legal/cgv'
+      path: '/cgv'
+      fullPath: '/legal/cgv'
+      preLoaderRoute: typeof LegalCgvRouteImport
+      parentRoute: typeof LegalRoute
+    }
+    '/legal/cgu': {
+      id: '/legal/cgu'
+      path: '/cgu'
+      fullPath: '/legal/cgu'
+      preLoaderRoute: typeof LegalCguRouteImport
+      parentRoute: typeof LegalRoute
+    }
     '/boutique/$ownerId': {
       id: '/boutique/$ownerId'
       path: '/boutique/$ownerId'
@@ -536,6 +651,24 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface LegalRouteChildren {
+  LegalCguRoute: typeof LegalCguRoute
+  LegalCgvRoute: typeof LegalCgvRoute
+  LegalConfidentialiteRoute: typeof LegalConfidentialiteRoute
+  LegalReglesRoute: typeof LegalReglesRoute
+  LegalSecuriteRoute: typeof LegalSecuriteRoute
+}
+
+const LegalRouteChildren: LegalRouteChildren = {
+  LegalCguRoute: LegalCguRoute,
+  LegalCgvRoute: LegalCgvRoute,
+  LegalConfidentialiteRoute: LegalConfidentialiteRoute,
+  LegalReglesRoute: LegalReglesRoute,
+  LegalSecuriteRoute: LegalSecuriteRoute,
+}
+
+const LegalRouteWithChildren = LegalRoute._addFileChildren(LegalRouteChildren)
+
 interface ProfilRouteChildren {
   ProfilModifierRoute: typeof ProfilModifierRoute
 }
@@ -565,6 +698,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ExplorerRoute: ExplorerRoute,
   KycRoute: KycRoute,
+  LegalRoute: LegalRouteWithChildren,
   MesAnnoncesRoute: MesAnnoncesRoute,
   MesStatistiquesRoute: MesStatistiquesRoute,
   MessagesRoute: MessagesRoute,
