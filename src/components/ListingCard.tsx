@@ -1,11 +1,12 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Heart, BadgeCheck, MessageCircle } from "lucide-react";
+import { Heart, BadgeCheck, MessageCircle, ImageOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Listing } from "@/data/catalog";
 import { formatFcfa, isFreeCategory } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { useLiteMode } from "@/hooks/use-lite-mode";
 import type { DbListing } from "@/lib/listings-client";
 
 type ListingItem = Listing | DbListing;
@@ -13,6 +14,8 @@ type ListingItem = Listing | DbListing;
 export function ListingCard({ listing, masonry = false }: { listing: ListingItem; masonry?: boolean }) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [lite] = useLiteMode();
+  const [showImage, setShowImage] = useState(false);
   const [isFav, setIsFav] = useState((listing as DbListing).isFavorite ?? false);
   const [busy, setBusy] = useState(false);
   const isPersistedListing = /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(listing.id);
@@ -59,13 +62,25 @@ export function ListingCard({ listing, masonry = false }: { listing: ListingItem
   return (
     <Link to="/annonces/$id" params={{ id: listing.id }} className="group mb-3 flex break-inside-avoid flex-col">
       <div className={`relative mb-3 overflow-hidden rounded-2xl bg-muted ${masonry ? "" : "aspect-square"}`}>
-        <img
-          src={listing.image}
-          alt={listing.title}
-          loading="lazy"
-          className={`w-full object-cover transition duration-500 group-hover:scale-105 ${masonry ? "h-auto" : "size-full"}`}
-        />
-        <button
+        {lite && !showImage ? (
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowImage(true); }}
+            className={`flex w-full flex-col items-center justify-center gap-1 bg-muted text-muted-foreground ${masonry ? "aspect-square" : "size-full"}`}
+            aria-label="Charger l'image"
+          >
+            <ImageOff className="size-6" />
+            <span className="text-[10px] font-bold uppercase tracking-wide">Mode Lite</span>
+            <span className="text-[10px]">Toucher pour afficher</span>
+          </button>
+        ) : (
+          <img
+            src={listing.image}
+            alt={listing.title}
+            loading="lazy"
+            className={`w-full object-cover transition duration-500 group-hover:scale-105 ${masonry ? "h-auto" : "size-full"}`}
+          />
+        )}
           type="button"
           aria-label={isFav ? "Retirer des favoris" : "Ajouter aux favoris"}
           onClick={toggleFav}
