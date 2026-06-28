@@ -2,7 +2,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { SUB_PRICES, BOOST_PRICES, type SubPlan } from "@/data/pricing";
+import { SUB_PRICES, PROMO_ACTIVE, PROMO_PRICES, BOOST_PRICES, type SubPlan } from "@/data/pricing";
 
 async function getServerOrigin(): Promise<string> {
   try {
@@ -26,7 +26,9 @@ export const startSubscriptionPayment = createServerFn({ method: "POST" })
   }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const plan = SUB_PRICES[data.plan as SubPlan];
+    const base = SUB_PRICES[data.plan as SubPlan];
+    const promo = PROMO_ACTIVE ? PROMO_PRICES[data.plan as SubPlan] : undefined;
+    const plan = promo ? { ...base, amount: promo.amount, days: promo.days, label: `${base.label} (PROMO)` } : base;
 
     const { createPaydunyaInvoice } = await import("./paydunya.server");
     const userOrigin = data.origin;
