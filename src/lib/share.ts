@@ -1,14 +1,19 @@
 import { toast } from "sonner";
 
-export const SHARE_TEXT =
-  "Rejoins moi sur Afrique Business, la plateforme pour acheter, vendre et gagner de l'argent facilement en Afrique de l'Ouest.\n👉 afrique-afrique.com";
-
 export const SHARE_URL = "https://afrique-afrique.com";
 
-export async function shareApp(): Promise<void> {
+// Texte par défaut (page "Plus" → Inviter mes amis)
+export const SHARE_TEXT =
+  "Rejoins Afrique Business, la plateforme pour acheter et vendre en Afrique de l'Ouest 👉 afrique-afrique.com";
+
+// Texte pour le bouton Partager du header de la page d'accueil
+export const SHARE_TEXT_HOME =
+  "Découvre Afrique Business, la marketplace de l'Afrique de l'Ouest 👉 afrique-afrique.com";
+
+export async function shareApp(text: string = SHARE_TEXT): Promise<void> {
   const payload = {
     title: "Afrique Business",
-    text: SHARE_TEXT,
+    text,
     url: SHARE_URL,
   };
 
@@ -18,13 +23,12 @@ export async function shareApp(): Promise<void> {
       return;
     }
   } catch (err) {
-    // L'utilisateur a annulé : ne rien faire de bruyant.
     if (err instanceof Error && err.name === "AbortError") return;
   }
 
   try {
     if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(SHARE_TEXT);
+      await navigator.clipboard.writeText(text);
       toast.success("Message copié — collez-le où vous voulez !");
       return;
     }
@@ -32,10 +36,9 @@ export async function shareApp(): Promise<void> {
     /* fallback ci-dessous */
   }
 
-  // Dernier recours
   try {
     const ta = document.createElement("textarea");
-    ta.value = SHARE_TEXT;
+    ta.value = text;
     ta.style.position = "fixed";
     ta.style.opacity = "0";
     document.body.appendChild(ta);
