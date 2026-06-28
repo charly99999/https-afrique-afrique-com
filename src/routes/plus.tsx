@@ -42,7 +42,7 @@ function PlusPage() {
 
       <section className="space-y-2 px-5 pt-6">
         <p className="text-[10px] font-extrabold uppercase tracking-[0.25em] text-muted-foreground">Communauté</p>
-        <button type="button" onClick={shareApp} className="row">
+        <button type="button" onClick={() => shareApp()} className="row">
           <span className="ico"><Share2 className="size-4" /></span>
           <span className="flex-1 text-left">Inviter mes amis</span>
           <ChevronRight className="size-4 text-muted-foreground" />
@@ -54,7 +54,10 @@ function PlusPage() {
           <span className="flex-1 text-left">Nous contacter sur WhatsApp</span>
           <ChevronRight className="size-4 text-muted-foreground" />
         </a>
-        <a href="mailto:contact@afrique-afrique.com" className="row">
+        <a
+          href={`mailto:marcarnaudkonan2@gmail.com?subject=${encodeURIComponent("Contact Afrique Business")}`}
+          className="row"
+        >
           <span className="ico"><Mail className="size-4" /></span>
           <span className="flex-1 text-left">Nous contacter par mail</span>
           <ChevronRight className="size-4 text-muted-foreground" />

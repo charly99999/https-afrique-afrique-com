@@ -2,10 +2,15 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { MobileShell } from "@/components/MobileShell";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Phone, KeyRound, BellRing, LogOut, Trash2, Save } from "lucide-react";
+import { Phone, KeyRound, BellRing, LogOut, Trash2, Save, Camera, Globe, User } from "lucide-react";
 import { deleteMyAccount } from "@/lib/account.functions";
+import { PushOptIn } from "@/components/PushOptIn";
+import { COUNTRIES } from "@/lib/currency";
+
+const DB_COUNTRY_CODES = ["CI","SN","ML","BF","TG","BJ","NE","GN","CM","GA","CD"] as const;
+type DbCountry = typeof DB_COUNTRY_CODES[number];
 
 export const Route = createFileRoute("/profil/modifier")({
   head: () => ({ meta: [{ title: "Modifier mon profil — Afrique-business" }] }),
@@ -18,19 +23,35 @@ function EditProfilePage() {
   const [phone, setPhone] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [country, setCountry] = useState<DbCountry>("CI");
   const [emailOptIn, setEmailOptIn] = useState(true);
   const [password, setPassword] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarPath, setAvatarPath] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("profiles").select("display_name, phone, whatsapp, email_opt_in").eq("id", user.id).maybeSingle()
-      .then(({ data }) => {
+    supabase.from("profiles")
+      .select("display_name, phone, whatsapp, email_opt_in, country, avatar_url")
+      .eq("id", user.id).maybeSingle()
+      .then(async ({ data }) => {
         if (!data) return;
         setDisplayName(data.display_name ?? "");
         setPhone(data.phone ?? "");
         setWhatsapp(data.whatsapp ?? "");
         setEmailOptIn(data.email_opt_in ?? true);
+        if (data.country && (DB_COUNTRY_CODES as readonly string[]).includes(data.country)) {
+          setCountry(data.country as DbCountry);
+        }
+        if (data.avatar_url) {
+          setAvatarPath(data.avatar_url);
+          const { data: signed } = await supabase.storage
+            .from("avatars")
+            .createSignedUrl(data.avatar_url, 60 * 60 * 24 * 30);
+          if (signed?.signedUrl) setAvatarUrl(signed.signedUrl);
+        }
       });
   }, [user]);
 
@@ -46,13 +67,44 @@ function EditProfilePage() {
     );
   }
 
-  async function saveContacts() {
+  async function uploadAvatar(file: File) {
+    if (!user) return;
+    if (!file.type.startsWith("image/")) { toast.error("Veuillez choisir une image."); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image trop lourde (5 Mo max)."); return; }
+    setBusy(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, {
+        upsert: true,
+        contentType: file.type,
+      });
+      if (upErr) throw upErr;
+      // Supprime l'ancien fichier
+      if (avatarPath && avatarPath !== path) {
+        await supabase.storage.from("avatars").remove([avatarPath]).catch(() => {});
+      }
+      const { error: dbErr } = await supabase.from("profiles").update({ avatar_url: path }).eq("id", user.id);
+      if (dbErr) throw dbErr;
+      const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 30);
+      setAvatarPath(path);
+      if (signed?.signedUrl) setAvatarUrl(signed.signedUrl);
+      toast.success("Photo de profil mise à jour");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur lors de l'envoi de l'image");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function saveProfile() {
     if (!user) return;
     setBusy(true);
     const { error } = await supabase.from("profiles").update({
       display_name: displayName || null,
       phone: phone || null,
       whatsapp: whatsapp || null,
+      country,
       email_opt_in: emailOptIn,
     }).eq("id", user.id);
     setBusy(false);
@@ -97,22 +149,89 @@ function EditProfilePage() {
       </header>
 
       <div className="space-y-6 px-5 py-6">
+        {/* Avatar */}
+        <section className="rounded-2xl border border-border bg-card p-4">
+          <div className="mb-3 flex items-center gap-2 text-sm font-extrabold">
+            <Camera className="size-4 text-brand-green" /> Photo de profil
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Photo de profil" className="size-20 rounded-full object-cover ring-2 ring-brand-green/30" />
+              ) : (
+                <div className="grid size-20 place-items-center rounded-full bg-muted text-muted-foreground">
+                  <User className="size-8" />
+                </div>
+              )}
+            </div>
+            <div className="flex-1">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) uploadAvatar(f);
+                  e.target.value = "";
+                }}
+              />
+              <button
+                disabled={busy}
+                onClick={() => fileRef.current?.click()}
+                className="inline-flex items-center gap-2 rounded-xl bg-brand-green px-4 py-2 text-xs font-bold text-primary-foreground disabled:opacity-60"
+              >
+                <Camera className="size-3.5" /> Changer la photo
+              </button>
+              <p className="mt-2 text-[11px] text-muted-foreground">JPG ou PNG, 5 Mo max.</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Identité */}
+        <section className="rounded-2xl border border-border bg-card p-4">
+          <div className="mb-3 flex items-center gap-2 text-sm font-extrabold">
+            <User className="size-4 text-brand-green" /> Identité
+          </div>
+          <div className="space-y-2">
+            <Field label="Nom et prénom" value={displayName} onChange={setDisplayName} placeholder="Votre nom complet" />
+          </div>
+        </section>
+
         {/* Contacts */}
         <section className="rounded-2xl border border-border bg-card p-4">
           <div className="mb-3 flex items-center gap-2 text-sm font-extrabold">
-            <Phone className="size-4 text-brand-green" /> Changer mes contacts
+            <Phone className="size-4 text-brand-green" /> Contacts
           </div>
           <div className="space-y-2">
-            <Field label="Nom affiché" value={displayName} onChange={setDisplayName} placeholder="Votre nom" />
             <Field label="Téléphone" value={phone} onChange={setPhone} placeholder="+225 ..." />
             <Field label="WhatsApp" value={whatsapp} onChange={setWhatsapp} placeholder="+225 ..." />
           </div>
-          <button disabled={busy} onClick={saveContacts} className="mt-3 inline-flex items-center gap-2 rounded-xl bg-brand-green px-4 py-2 text-xs font-bold text-primary-foreground disabled:opacity-60">
-            <Save className="size-3.5" /> Enregistrer
-          </button>
         </section>
 
-        {/* Password */}
+        {/* Pays */}
+        <section className="rounded-2xl border border-border bg-card p-4">
+          <div className="mb-3 flex items-center gap-2 text-sm font-extrabold">
+            <Globe className="size-4 text-brand-green" /> Pays
+          </div>
+          <select
+            value={country}
+            onChange={(e) => setCountry(e.target.value as DbCountry)}
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+          >
+            {COUNTRIES
+              .filter((c) => (DB_COUNTRY_CODES as readonly string[]).includes(c.code))
+              .map((c) => (
+                <option key={c.code} value={c.code}>{c.flag} {c.name}</option>
+              ))}
+          </select>
+        </section>
+
+        <button disabled={busy} onClick={saveProfile} className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-green py-3 text-sm font-extrabold text-primary-foreground disabled:opacity-60">
+          <Save className="size-4" /> Enregistrer les modifications
+        </button>
+
+        {/* Mot de passe */}
         <section className="rounded-2xl border border-border bg-card p-4">
           <div className="mb-3 flex items-center gap-2 text-sm font-extrabold">
             <KeyRound className="size-4 text-brand-green" /> Changer le mot de passe
@@ -144,12 +263,9 @@ function EditProfilePage() {
               className="relative h-6 w-11 cursor-pointer appearance-none rounded-full bg-slate-300 transition checked:bg-brand-green before:absolute before:left-0.5 before:top-0.5 before:size-5 before:rounded-full before:bg-white before:shadow before:transition checked:before:translate-x-5"
             />
           </label>
-          <button disabled={busy} onClick={saveContacts} className="mt-3 inline-flex items-center gap-2 rounded-xl bg-brand-green px-4 py-2 text-xs font-bold text-primary-foreground disabled:opacity-60">
-            <Save className="size-3.5" /> Enregistrer
-          </button>
-          <p className="mt-2 text-[11px] text-muted-foreground">
-            Pour activer les notifications push, allez dans <Link to="/mes-annonces" className="underline">Mes annonces</Link>.
-          </p>
+          <div className="mt-3">
+            <PushOptIn />
+          </div>
         </section>
 
         {/* Actions */}

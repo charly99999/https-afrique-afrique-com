@@ -106,7 +106,7 @@ function ProfilPage() {
             <span className="flex-1">Notifications</span>
             <span className="text-muted-foreground">→</span>
           </Link>
-          <button type="button" onClick={shareApp} className="row-link w-full">
+          <button type="button" onClick={() => shareApp()} className="row-link w-full">
             <span className="row-ico"><Share2 className="size-4" /></span>
             <span className="flex-1 text-left">Partager l'application</span>
             <span className="text-muted-foreground">→</span>

@@ -23,9 +23,13 @@ export function mapPaydunyaStatus(status: string): "completed" | "cancelled" | "
 
 async function activatePayment(payment: PaymentRow) {
   if (payment.kind === "subscription" && payment.related_plan) {
-    const { SUB_PRICES } = await import("@/data/pricing");
-    const plan = SUB_PRICES[payment.related_plan as keyof typeof SUB_PRICES];
-    if (!plan) return;
+    const { SUB_PRICES, PROMO_PRICES } = await import("@/data/pricing");
+    const base = SUB_PRICES[payment.related_plan as keyof typeof SUB_PRICES];
+    if (!base) return;
+    // Si le montant payé correspond au prix promo connu, on étend la durée à 2 mois.
+    const promo = PROMO_PRICES[payment.related_plan as keyof typeof SUB_PRICES];
+    const days = promo && payment.amount_fcfa === promo.amount ? promo.days : base.days;
+    const plan = { ...base, days };
 
     const expires = new Date(Date.now() + plan.days * 86400 * 1000).toISOString();
 
