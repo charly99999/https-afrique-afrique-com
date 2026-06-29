@@ -7,9 +7,11 @@ export const Route = createFileRoute("/api/public/hooks/push-boost-nudge")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        // Light auth — apikey header must match Supabase anon key
-        const expected = process.env.SUPABASE_PUBLISHABLE_KEY;
-        const got = request.headers.get("apikey");
+        // Auth: CRON_SECRET (server-only). Accept via Authorization: Bearer or x-cron-secret header.
+        const expected = process.env.CRON_SECRET;
+        const auth = request.headers.get("authorization") ?? "";
+        const bearer = auth.toLowerCase().startsWith("bearer ") ? auth.slice(7).trim() : "";
+        const got = bearer || request.headers.get("x-cron-secret") || "";
         if (!expected || got !== expected) {
           return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
         }
