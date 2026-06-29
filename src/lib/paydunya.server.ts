@@ -64,13 +64,27 @@ export async function createPaydunyaInvoice(p: PaydunyaCreatePayload): Promise<P
   const itemsObj: Record<string, PaydunyaInvoiceItem> = {};
   p.items.forEach((it, i) => { itemsObj[`item_${i}`] = it; });
 
+  const storeWebsite = process.env.PAYDUNYA_STORE_WEBSITE || process.env.PUBLIC_SITE_URL || "https://afrique-afrique.com";
+  const storeLogo = process.env.PAYDUNYA_STORE_LOGO || `${storeWebsite}/icon-512.png`;
+  const storePhone = process.env.PAYDUNYA_STORE_PHONE || undefined;
+
+  // PayDunya exige un Store complet (nom + site web + logo) pour activer
+  // Orange Money CI, MTN MoMo CI, Moov Money CI et Djamo. Sans ces champs,
+  // seul Wave est proposé et les autres canaux renvoient "Échec de paiement".
   const body = {
     invoice: {
       total_amount: p.totalAmount,
       description: p.description,
       items: itemsObj,
     },
-    store: { name: p.storeName ?? "Afrique-business" },
+    store: {
+      name: p.storeName ?? "Afrique-business",
+      tagline: "Marketplace panafricaine",
+      phone: storePhone,
+      postal_address: "Abidjan, Côte d'Ivoire",
+      website_url: storeWebsite,
+      logo_url: storeLogo,
+    },
     custom_data: p.customData,
     actions: {
       cancel_url: p.cancelUrl,
@@ -79,19 +93,64 @@ export async function createPaydunyaInvoice(p: PaydunyaCreatePayload): Promise<P
     },
   };
 
+  const mode = getMode();
+  const url = `${getBaseUrl()}/checkout-invoice/create`;
+  const startedAt = Date.now();
+
   try {
-    const res = await fetch(`${getBaseUrl()}/checkout-invoice/create`, {
+    const res = await fetch(url, {
       method: "POST",
       headers: getHeaders(),
       body: JSON.stringify(body),
     });
-    const json = await res.json().catch(() => ({}));
-    if (json?.response_code === "00") {
-      return { ok: true, token: json.token, invoiceUrl: json.response_text, raw: json };
+    const text = await res.text();
+    let json: Record<string, unknown> = {};
+    try { json = text ? JSON.parse(text) : {}; } catch { json = { raw_text: text }; }
+
+    // Logging détaillé — n'expose JAMAIS les clés (headers omis volontairement)
+    console.log("[PayDunya] checkout-invoice/create", JSON.stringify({
+      mode,
+      url,
+      http_status: res.status,
+      duration_ms: Date.now() - startedAt,
+      request: {
+        total_amount: p.totalAmount,
+        description: p.description,
+        items_count: p.items.length,
+        custom_data_keys: Object.keys(p.customData ?? {}),
+        store_has_website: !!storeWebsite,
+        store_has_logo: !!storeLogo,
+      },
+      response: {
+        response_code: (json as { response_code?: string }).response_code,
+        response_text: (json as { response_text?: string }).response_text,
+        token_present: !!(json as { token?: string }).token,
+        full: json,
+      },
+    }));
+
+    if ((json as { response_code?: string }).response_code === "00") {
+      return {
+        ok: true,
+        token: (json as { token?: string }).token,
+        invoiceUrl: (json as { response_text?: string }).response_text,
+        raw: json,
+      };
     }
-    return { ok: false, error: translatePaydunyaError(json?.response_text, res.status), raw: json };
+    return {
+      ok: false,
+      error: translatePaydunyaError((json as { response_text?: string }).response_text, res.status),
+      raw: json,
+    };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? `Connexion à PayDunya impossible (${e.message}). Vérifiez votre connexion internet et réessayez.` : "Erreur réseau lors du paiement.", raw: null };
+    console.error("[PayDunya] network error", { mode, url, message: e instanceof Error ? e.message : String(e) });
+    return {
+      ok: false,
+      error: e instanceof Error
+        ? `Connexion à PayDunya impossible (${e.message}). Vérifiez votre connexion internet et réessayez.`
+        : "Erreur réseau lors du paiement.",
+      raw: null,
+    };
   }
 }
 
