@@ -3,6 +3,7 @@ import { Star, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { fetchSellerRating } from "@/lib/listings-client";
 
 type Review = {
   id: string;
@@ -32,14 +33,14 @@ export function SellerReviews({ sellerId }: { sellerId: string }) {
 
   async function load() {
     setLoading(true);
-    const [{ data: rows }, { data: rpc }] = await Promise.all([
+    const [{ data: rows }, ratingStats] = await Promise.all([
       (supabase as any)
         .from("reviews")
         .select("id, author_id, rating, comment, created_at")
         .eq("seller_id", sellerId)
         .order("created_at", { ascending: false })
         .limit(50),
-      (supabase as any).rpc("get_seller_rating", { _seller_id: sellerId }).maybeSingle(),
+      fetchSellerRating(sellerId),
     ]);
     const list = (rows ?? []) as Review[];
     // fetch author display names
@@ -53,7 +54,7 @@ export function SellerReviews({ sellerId }: { sellerId: string }) {
       list.forEach((r) => (r.author_name = byId.get(r.author_id) ?? "Utilisateur"));
     }
     setReviews(list);
-    if (rpc) setAvg({ avg: Number(rpc.avg_rating ?? 0), total: Number(rpc.total ?? 0) });
+    setAvg(ratingStats);
     setLoading(false);
   }
 
