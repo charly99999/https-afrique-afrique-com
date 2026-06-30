@@ -52,6 +52,79 @@ export function sortListingsByPriority(items: DbListing[]): DbListing[] {
 
 type PubProfile = Database["public"]["Views"]["public_profiles"]["Row"];
 
+export type SellerStats = {
+  active_listings: number;
+  member_since: string;
+  verified: boolean;
+  verified_at: string | null;
+  trust_score: number;
+};
+
+export async function fetchSellerStats(sellerId: string): Promise<SellerStats | null> {
+  const [{ count }, { data: profile }] = await Promise.all([
+    supabase
+      .from("listings")
+      .select("id", { count: "exact", head: true })
+      .eq("owner_id", sellerId)
+      .eq("status", "active"),
+    supabase
+      .from("public_profiles")
+      .select("created_at, verified, verified_at")
+      .eq("id", sellerId)
+      .maybeSingle<Pick<PubProfile, "created_at" | "verified" | "verified_at">>(),
+  ]);
+
+  if (!profile?.created_at) return null;
+  const active = count ?? 0;
+  const months = Math.max(0, Math.floor((Date.now() - new Date(profile.created_at).getTime()) / 2_592_000_000));
+  return {
+    active_listings: active,
+    member_since: profile.created_at,
+    verified: !!profile.verified,
+    verified_at: profile.verified_at ?? null,
+    trust_score: (profile.verified ? 30 : 0) + Math.min(active, 30) + Math.min(months, 40),
+  };
+}
+
+export async function fetchSellerRating(sellerId: string): Promise<{ avg: number; total: number }> {
+  const { data } = await supabase
+    .from("reviews")
+    .select("rating")
+    .eq("seller_id", sellerId)
+    .limit(500);
+
+  const ratings = (data ?? []).map((row) => Number(row.rating)).filter(Number.isFinite);
+  if (ratings.length === 0) return { avg: 0, total: 0 };
+  const avg = ratings.reduce((sum, value) => sum + value, 0) / ratings.length;
+  return { avg: Math.round(avg * 100) / 100, total: ratings.length };
+}
+
+export async function fetchListingContact(listingId: string): Promise<{ phone?: string; whatsapp?: string }> {
+  const { data: listing } = await supabase
+    .from("listings")
+    .select("owner_id, status")
+    .eq("id", listingId)
+    .maybeSingle();
+  if (!listing?.owner_id || listing.status !== "active") return {};
+
+  const { data: sessionData } = await supabase.auth.getSession();
+  const userId = sessionData.session?.user.id;
+  if (!userId) return {};
+
+  const isOwner = userId === listing.owner_id;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("phone, whatsapp")
+    .eq("id", listing.owner_id)
+    .maybeSingle();
+
+  if (!isOwner && !profile) return {};
+  return {
+    phone: profile?.phone ?? undefined,
+    whatsapp: profile?.whatsapp ?? profile?.phone ?? undefined,
+  };
+}
+
 async function fetchPublicProfiles(ids: string[]): Promise<Map<string, PubProfile>> {
   const map = new Map<string, PubProfile>();
   if (ids.length === 0) return map;
@@ -132,16 +205,7 @@ export async function fetchListing(id: string, userId?: string): Promise<DbListi
   }
   const tier = prof?.account_type as SellerBadge | undefined;
 
-  // Contact uniquement pour les utilisateurs connectés (RPC SECURITY DEFINER)
-  let phone: string | undefined;
-  let whatsapp: string | undefined;
-  const { data: sess } = await supabase.auth.getSession();
-  if (sess.session) {
-    const { data: c } = await supabase.rpc("get_listing_contact", { _listing_id: id });
-    const row = Array.isArray(c) ? (c[0] as { phone?: string; whatsapp?: string } | undefined) : undefined;
-    phone = row?.phone ?? undefined;
-    whatsapp = row?.whatsapp ?? row?.phone ?? undefined;
-  }
+  const { phone, whatsapp } = await fetchListingContact(id);
 
   const image = await resolveListingImage(data.cover_url);
 

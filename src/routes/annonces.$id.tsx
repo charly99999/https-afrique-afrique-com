@@ -5,7 +5,7 @@ import { formatFcfa, getListing, LISTINGS } from "@/data/catalog";
 import { MobileShell } from "@/components/MobileShell";
 import { ListingCard } from "@/components/ListingCard";
 import { ContactBar } from "@/components/ContactBar";
-import { fetchListing, fetchPhotos, fetchSimilarListings, type DbListing } from "@/lib/listings-client";
+import { fetchListing, fetchPhotos, fetchSellerStats, fetchSimilarListings, type DbListing } from "@/lib/listings-client";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -124,8 +124,8 @@ function ListingDetail() {
             setSimilar(sim);
           }
           if (l.ownerId) {
-            const [{ data: statsRow }, { data: prof }] = await Promise.all([
-              supabase.rpc("get_seller_stats", { _seller_id: l.ownerId }).maybeSingle(),
+            const [statsRow, { data: prof }] = await Promise.all([
+              fetchSellerStats(l.ownerId),
               supabase.from("public_profiles").select("verified").eq("id", l.ownerId).maybeSingle<Pick<Database["public"]["Views"]["public_profiles"]["Row"], "verified">>(),
             ]);
             if (!cancelled) {

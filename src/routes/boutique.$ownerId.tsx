@@ -6,7 +6,7 @@ import { ListingCard } from "@/components/ListingCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { resolveListingImages } from "@/lib/listing-images";
-import type { DbListing } from "@/lib/listings-client";
+import { fetchSellerStats, type DbListing } from "@/lib/listings-client";
 import type { CountryCode, SellerBadge } from "@/data/catalog";
 import { VerifiedBadge, TrustChip, memberSinceLabel, type SellerStats } from "@/components/TrustBadge";
 import { SellerReviews } from "@/components/SellerReviews";
@@ -94,12 +94,12 @@ function BoutiquePage() {
         const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(ownerId);
         if (!isUuid) { setNotFound(true); setLoading(false); return; }
 
-        const [{ data: prof }, { data: statsRow }] = await Promise.all([
+        const [{ data: prof }, statsRow] = await Promise.all([
           supabase.from("public_profiles")
             .select("id, display_name, account_type, city, country, verified")
             .eq("id", ownerId)
             .maybeSingle(),
-          supabase.rpc("get_seller_stats", { _seller_id: ownerId }).maybeSingle(),
+          fetchSellerStats(ownerId),
         ]);
 
         if (cancelled) return;
