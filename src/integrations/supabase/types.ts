@@ -689,6 +689,7 @@ export type Database = {
       }
     }
     Functions: {
+      auto_review_kyc_submissions: { Args: never; Returns: undefined }
       get_listing_contact: {
         Args: { _listing_id: string }
         Returns: {
