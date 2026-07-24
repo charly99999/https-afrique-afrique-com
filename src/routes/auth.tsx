@@ -139,7 +139,60 @@ function AuthPage() {
           >
             {loading ? "..." : mode === "signin" ? "Se connecter" : "Créer mon compte"}
           </button>
+
+          {mode === "signin" && (
+            <button
+              type="button"
+              onClick={() => { setForgotEmail(email); setForgotOpen(true); }}
+              className="mx-auto block text-xs font-semibold text-brand-green underline underline-offset-4"
+            >
+              Mot de passe oublié ?
+            </button>
+          )}
         </form>
+
+        {forgotOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center"
+            onClick={() => setForgotOpen(false)}
+          >
+            <div
+              className="w-full max-w-sm rounded-2xl bg-background p-5 shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="font-display text-xl italic">Réinitialiser le mot de passe</h2>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Entrez votre e-mail. Nous vous enverrons un lien pour définir un nouveau mot de passe.
+              </p>
+              <form onSubmit={handleForgot} className="mt-4 space-y-3">
+                <input
+                  type="email"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  placeholder="Adresse e-mail"
+                  required
+                  className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-brand-green/30"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setForgotOpen(false)}
+                    className="flex-1 rounded-xl border border-border py-3 text-sm font-bold"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={forgotLoading}
+                    className="flex-1 rounded-xl bg-brand-green py-3 text-sm font-bold text-primary-foreground disabled:opacity-60"
+                  >
+                    {forgotLoading ? "..." : "Envoyer le lien"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
           En continuant, vous acceptez nos conditions d'utilisation.
