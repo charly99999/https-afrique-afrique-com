@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SitemapStaticDotxmlRouteImport } from './routes/sitemap-static[.]xml'
 import { Route as SitemapCountryCodeDotxmlRouteImport } from './routes/sitemap-country-$code[.]xml'
 import { Route as SitemapCategorySlugDotxmlRouteImport } from './routes/sitemap-category-$slug[.]xml'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PublierRouteImport } from './routes/publier'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as PlusRouteImport } from './routes/plus'
@@ -63,6 +64,11 @@ const SitemapCategorySlugDotxmlRoute =
     path: '/sitemap-category-$slug.xml',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PublierRoute = PublierRouteImport.update({
   id: '/publier',
   path: '/publier',
@@ -215,6 +221,7 @@ export interface FileRoutesByFullPath {
   '/plus': typeof PlusRoute
   '/profil': typeof ProfilRouteWithChildren
   '/publier': typeof PublierRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sitemap-category-$slug.xml': typeof SitemapCategorySlugDotxmlRoute
   '/sitemap-country-$code.xml': typeof SitemapCountryCodeDotxmlRoute
   '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
@@ -248,6 +255,7 @@ export interface FileRoutesByTo {
   '/plus': typeof PlusRoute
   '/profil': typeof ProfilRouteWithChildren
   '/publier': typeof PublierRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sitemap-category-$slug.xml': typeof SitemapCategorySlugDotxmlRoute
   '/sitemap-country-$code.xml': typeof SitemapCountryCodeDotxmlRoute
   '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
@@ -282,6 +290,7 @@ export interface FileRoutesById {
   '/plus': typeof PlusRoute
   '/profil': typeof ProfilRouteWithChildren
   '/publier': typeof PublierRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sitemap-category-$slug.xml': typeof SitemapCategorySlugDotxmlRoute
   '/sitemap-country-$code.xml': typeof SitemapCountryCodeDotxmlRoute
   '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
@@ -317,6 +326,7 @@ export interface FileRouteTypes {
     | '/plus'
     | '/profil'
     | '/publier'
+    | '/reset-password'
     | '/sitemap-category-$slug.xml'
     | '/sitemap-country-$code.xml'
     | '/sitemap-static.xml'
@@ -350,6 +360,7 @@ export interface FileRouteTypes {
     | '/plus'
     | '/profil'
     | '/publier'
+    | '/reset-password'
     | '/sitemap-category-$slug.xml'
     | '/sitemap-country-$code.xml'
     | '/sitemap-static.xml'
@@ -383,6 +394,7 @@ export interface FileRouteTypes {
     | '/plus'
     | '/profil'
     | '/publier'
+    | '/reset-password'
     | '/sitemap-category-$slug.xml'
     | '/sitemap-country-$code.xml'
     | '/sitemap-static.xml'
@@ -417,6 +429,7 @@ export interface RootRouteChildren {
   PlusRoute: typeof PlusRoute
   ProfilRoute: typeof ProfilRouteWithChildren
   PublierRoute: typeof PublierRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapCategorySlugDotxmlRoute: typeof SitemapCategorySlugDotxmlRoute
   SitemapCountryCodeDotxmlRoute: typeof SitemapCountryCodeDotxmlRoute
   SitemapStaticDotxmlRoute: typeof SitemapStaticDotxmlRoute
@@ -457,6 +470,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap-category-$slug.xml'
       fullPath: '/sitemap-category-$slug.xml'
       preLoaderRoute: typeof SitemapCategorySlugDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/publier': {
@@ -707,6 +727,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlusRoute: PlusRoute,
   ProfilRoute: ProfilRouteWithChildren,
   PublierRoute: PublierRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SitemapCategorySlugDotxmlRoute: SitemapCategorySlugDotxmlRoute,
   SitemapCountryCodeDotxmlRoute: SitemapCountryCodeDotxmlRoute,
   SitemapStaticDotxmlRoute: SitemapStaticDotxmlRoute,
@@ -721,13 +742,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
