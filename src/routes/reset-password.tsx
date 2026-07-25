@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Lock, ArrowLeft } from "lucide-react";
+import { Lock, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/reset-password")({
@@ -17,7 +17,6 @@ function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Supabase auto-parses the recovery hash and fires PASSWORD_RECOVERY
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") setReady(true);
     });
@@ -62,22 +61,8 @@ function ResetPasswordPage() {
 
         {ready && (
           <form onSubmit={handleSubmit} className="mt-6 space-y-3">
-            <label className="relative block">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"><Lock className="size-4" /></span>
-              <input
-                type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                placeholder="Nouveau mot de passe" required minLength={8}
-                className="w-full rounded-xl border border-border bg-card py-3.5 pl-11 pr-4 text-sm outline-none focus:ring-2 focus:ring-brand-green/30"
-              />
-            </label>
-            <label className="relative block">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"><Lock className="size-4" /></span>
-              <input
-                type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)}
-                placeholder="Confirmer le mot de passe" required minLength={8}
-                className="w-full rounded-xl border border-border bg-card py-3.5 pl-11 pr-4 text-sm outline-none focus:ring-2 focus:ring-brand-green/30"
-              />
-            </label>
+            <PasswordField value={password} onChange={setPassword} placeholder="Nouveau mot de passe" />
+            <PasswordField value={confirm} onChange={setConfirm} placeholder="Confirmer le mot de passe" />
             <button
               type="submit" disabled={loading}
               className="mt-2 w-full rounded-xl bg-brand-green py-3.5 text-sm font-bold text-primary-foreground transition active:scale-[0.98] disabled:opacity-60"
@@ -90,3 +75,31 @@ function ResetPasswordPage() {
     </main>
   );
 }
+
+function PasswordField({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
+  const [show, setShow] = useState(false);
+  return (
+    <label className="relative block">
+      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"><Lock className="size-4" /></span>
+      <input
+        type={show ? "text" : "password"}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        required
+        minLength={8}
+        autoComplete="new-password"
+        className="w-full rounded-xl border border-border bg-card py-3.5 pl-11 pr-12 text-sm outline-none focus:ring-2 focus:ring-brand-green/30"
+      />
+      <button
+        type="button"
+        onClick={() => setShow((s) => !s)}
+        aria-label={show ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+        className="absolute right-2 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground hover:bg-muted"
+      >
+        {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+      </button>
+    </label>
+  );
+}
+
