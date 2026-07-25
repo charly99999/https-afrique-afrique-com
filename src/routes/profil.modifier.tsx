@@ -26,6 +26,7 @@ function EditProfilePage() {
   const [country, setCountry] = useState<DbCountry>("CI");
   const [emailOptIn, setEmailOptIn] = useState(true);
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarPath, setAvatarPath] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
