@@ -1,5 +1,4 @@
-import { Link } from "@tanstack/react-router";
-import { Phone, X } from "lucide-react";
+import { Gift, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const KEY = "afb-promo-banner-dismissed-at";
@@ -23,7 +22,7 @@ export function PromoBanner() {
   }
 
   return (
-    <div className="mx-4 mt-4 overflow-hidden rounded-2xl bg-red-600 text-white shadow-lg shadow-red-600/25 ring-1 ring-red-700/40">
+    <div className="mx-4 mt-4 overflow-hidden rounded-2xl bg-gradient-to-r from-brand-green to-emerald-600 text-white shadow-lg shadow-emerald-600/25 ring-1 ring-emerald-700/40">
       <div className="relative px-4 py-3.5 pr-10">
         <button
           type="button"
@@ -35,21 +34,15 @@ export function PromoBanner() {
         </button>
         <div className="flex items-start gap-3">
           <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full bg-white/15">
-            <Phone className="size-4" />
+            <Gift className="size-4" />
           </span>
-          <p className="text-[13px] font-medium leading-snug">
-            Pour toutes questions concernant nos offres ou toutes autres informations, contactez-nous :{" "}
-            <a href="tel:+2250565242349" className="font-extrabold underline underline-offset-2">
-              +225 0565242349
-            </a>
-          </p>
+          <div>
+            <p className="text-sm font-extrabold uppercase tracking-wide">🎉 Application 100% gratuite</p>
+            <p className="mt-1 text-[13px] font-medium leading-snug opacity-95">
+              Toutes les fonctionnalités <span className="font-extrabold">Business</span> (annonces illimitées, boosts permanents, badge premium) sont offertes à tous pendant <span className="font-extrabold">4 mois</span>. Profitez-en !
+            </p>
+          </div>
         </div>
-        <Link
-          to="/abonnements"
-          className="mt-3 inline-block w-full rounded-xl bg-white py-2.5 text-center text-xs font-extrabold uppercase tracking-wider text-red-600 shadow-sm transition active:scale-[0.98]"
-        >
-          Découvrir nos offres
-        </Link>
       </div>
     </div>
   );
