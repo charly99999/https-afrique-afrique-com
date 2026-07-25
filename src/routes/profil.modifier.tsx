@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Phone, KeyRound, BellRing, LogOut, Trash2, Save, Camera, Globe, User } from "lucide-react";
+import { Phone, KeyRound, BellRing, LogOut, Trash2, Save, Camera, Globe, User, Eye, EyeOff } from "lucide-react";
 import { deleteMyAccount } from "@/lib/account.functions";
 import { PushOptIn } from "@/components/PushOptIn";
 import { COUNTRIES } from "@/lib/currency";
