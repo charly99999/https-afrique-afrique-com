@@ -208,18 +208,32 @@ function Field({
   icon: React.ReactNode; placeholder: string; value: string; onChange: (v: string) => void;
   type?: string; required?: boolean; minLength?: number;
 }) {
+  const [show, setShow] = useState(false);
+  const isPassword = type === "password";
+  const inputType = isPassword && show ? "text" : type;
   return (
     <label className="relative block">
       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">{icon}</span>
       <input
-        type={type}
+        type={inputType}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
         minLength={minLength}
-        className="w-full rounded-xl border border-border bg-card py-3.5 pl-11 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-brand-green/30"
+        autoComplete={isPassword ? "current-password" : undefined}
+        className={`w-full rounded-xl border border-border bg-card py-3.5 pl-11 ${isPassword ? "pr-12" : "pr-4"} text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-brand-green/30`}
       />
+      {isPassword && (
+        <button
+          type="button"
+          onClick={() => setShow((s) => !s)}
+          aria-label={show ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+          className="absolute right-2 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground hover:bg-muted"
+        >
+          {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+        </button>
+      )}
     </label>
   );
 }
