@@ -237,13 +237,24 @@ function EditProfilePage() {
           <div className="mb-3 flex items-center gap-2 text-sm font-extrabold">
             <KeyRound className="size-4 text-brand-green" /> Changer le mot de passe
           </div>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Nouveau mot de passe (8+ caractères)"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Nouveau mot de passe (8+ caractères)"
+              autoComplete="new-password"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 pr-11 text-sm"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((s) => !s)}
+              aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+              className="absolute right-1 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:bg-muted"
+            >
+              {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            </button>
+          </div>
           <button disabled={busy} onClick={changePassword} className="mt-3 inline-flex items-center gap-2 rounded-xl bg-brand-green px-4 py-2 text-xs font-bold text-primary-foreground disabled:opacity-60">
             <Save className="size-3.5" /> Mettre à jour
           </button>
