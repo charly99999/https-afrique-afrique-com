@@ -444,6 +444,39 @@ export type Database = {
         }
         Relationships: []
       }
+      publish_errors: {
+        Row: {
+          context: Json | null
+          created_at: string
+          error_code: string | null
+          id: string
+          listing_id: string | null
+          message: string
+          step: string
+          user_id: string | null
+        }
+        Insert: {
+          context?: Json | null
+          created_at?: string
+          error_code?: string | null
+          id?: string
+          listing_id?: string | null
+          message: string
+          step: string
+          user_id?: string | null
+        }
+        Update: {
+          context?: Json | null
+          created_at?: string
+          error_code?: string | null
+          id?: string
+          listing_id?: string | null
+          message?: string
+          step?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       push_send_log: {
         Row: {
           id: string
