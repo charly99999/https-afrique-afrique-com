@@ -12,6 +12,8 @@ import { compressMany } from "@/lib/image-compress";
 import { useDraft } from "@/hooks/use-draft";
 import { moderateListing } from "@/lib/ai-moderation.functions";
 import { estimatePrice } from "@/lib/ai-price.functions";
+import { ensureFreshSession, withAuthRetry, logPublishError } from "@/lib/publish-guard";
+
 
 const DRAFT_KEY = "ab_publier_draft_v1";
 type DraftShape = {
@@ -137,8 +139,20 @@ function PublierPage() {
     if (!title.trim() || !description.trim()) return toast.error("Champs requis");
     if (!isFree && !price) return toast.error("Prix requis");
 
-    // Modération IA — bloque les rejets, prévient sur "review"
     setSubmitting(true);
+
+    // 0. Garantir un jeton d'authentification valide (cause racine des échecs récurrents)
+    const sess = await ensureFreshSession();
+    if (!sess.ok) {
+      await logPublishError({ userId: currentUser.id, step: "session", error: new Error(sess.reason) });
+      toast.error(sess.reason);
+      setSubmitting(false);
+      navigate({ to: "/auth" });
+      return;
+    }
+    const ownerId = sess.userId;
+
+    // Modération IA — bloque les rejets, prévient sur "review"
     try {
       const mod = await moderateFn({ data: { title: title.trim(), description: description.trim(), category } });
       if (mod.decision === "reject") {
@@ -157,58 +171,76 @@ function PublierPage() {
 
     let listingId: string | null = null;
     const uploadedPaths: string[] = [];
+    let step = "insert";
 
     try {
       // 1. Insert listing en pending (atomicité : actif après upload réussi)
-      const { data: listing, error: insErr } = await supabase
-        .from("listings")
-        .insert({
-          owner_id: currentUser.id,
-          title: title.trim(),
-          description: description.trim(),
-          price_fcfa: Math.max(0, Number(price.replace(/\D/g, "")) || 0),
-          negotiable,
-          category_slug: category,
-          subcategory_slug: subCategory || null,
-          country,
-          city,
-          status: "pending",
-        })
-        .select("id")
-        .single();
-      if (insErr || !listing) throw insErr ?? new Error("Insertion impossible");
+      const listing = await withAuthRetry(async () => {
+        const { data, error } = await supabase
+          .from("listings")
+          .insert({
+            owner_id: ownerId,
+            title: title.trim(),
+            description: description.trim(),
+            price_fcfa: Math.max(0, Number(price.replace(/\D/g, "")) || 0),
+            negotiable,
+            category_slug: category,
+            subcategory_slug: subCategory || null,
+            country,
+            city,
+            status: "pending",
+          })
+          .select("id")
+          .single();
+        if (error) throw error;
+        if (!data) throw new Error("Insertion impossible");
+        return data;
+      });
       listingId = listing.id;
 
       // 2. Upload photos une par une avec feedback
+      step = "upload";
       const photoRows: { listing_id: string; url: string; position: number }[] = [];
       for (let i = 0; i < photos.length; i++) {
         setProgress({ current: i + 1, total: photos.length });
         const file = photos[i].file;
         const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-        const path = `${currentUser.id}/${listing.id}/${Date.now()}-${i}.${ext}`;
-        const { error: upErr } = await supabase.storage.from("listings").upload(path, file, {
-          cacheControl: "31536000", upsert: false, contentType: file.type,
+        const path = `${ownerId}/${listing.id}/${Date.now()}-${i}.${ext}`;
+        await withAuthRetry(async () => {
+          const { error: upErr } = await supabase.storage.from("listings").upload(path, file, {
+            cacheControl: "31536000", upsert: false, contentType: file.type,
+          });
+          if (upErr) throw upErr;
         });
-        if (upErr) throw upErr;
         uploadedPaths.push(path);
         photoRows.push({ listing_id: listing.id, url: path, position: i });
       }
 
       // 3. Insert photos + cover, puis activer
-      const { error: phErr } = await supabase.from("listing_photos").insert(photoRows);
-      if (phErr) throw phErr;
+      step = "photos";
+      await withAuthRetry(async () => {
+        const { error: phErr } = await supabase.from("listing_photos").insert(photoRows);
+        if (phErr) throw phErr;
+      });
 
-      const { error: actErr } = await supabase.from("listings").update({
-        cover_url: photoRows[0].url,
-        status: "active",
-        published_at: new Date().toISOString(),
-      }).eq("id", listing.id);
-      if (actErr) throw actErr;
+      step = "activation";
+      await withAuthRetry(async () => {
+        const { error: actErr } = await supabase.from("listings").update({
+          cover_url: photoRows[0].url,
+          status: "active",
+          published_at: new Date().toISOString(),
+        }).eq("id", listing.id);
+        if (actErr) throw actErr;
+      });
 
       toast.success("Annonce publiée !");
       clearDraft();
       navigate({ to: "/annonces/$id", params: { id: listing.id } });
     } catch (err) {
+      await logPublishError({
+        userId: ownerId, listingId, step, error: err,
+        context: { photos: photos.length, category, country },
+      });
       // Rollback : supprimer fichiers uploadés et listing créé
       if (uploadedPaths.length > 0) {
         try { await supabase.storage.from("listings").remove(uploadedPaths); } catch { /* noop */ }
@@ -216,12 +248,18 @@ function PublierPage() {
       if (listingId) {
         try { await supabase.from("listings").delete().eq("id", listingId); } catch { /* noop */ }
       }
-      toast.error(err instanceof Error ? err.message : "Erreur publication");
+      const raw = err instanceof Error ? err.message : "Erreur publication";
+      toast.error(
+        /jwt|token|row-level security|unauthorized/i.test(raw)
+          ? "Session expirée pendant l'envoi. Reconnectez-vous puis réessayez — votre brouillon est conservé."
+          : `Publication impossible (${step}) : ${raw}`,
+      );
     } finally {
       setSubmitting(false);
       setProgress(null);
     }
   }
+
 
   return (
     <MobileShell>

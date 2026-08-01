@@ -23,8 +23,8 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
-const DARK_GREEN = "#0B3D2E";
-const GOLD = "#D4AF37";
+const DARK_GREEN = "#7A2E12";
+const GOLD = "#E8A02C";
 
 type Tile = { label: string; emoji: string; cat: string; free?: boolean };
 const TILES: Tile[] = [
@@ -89,7 +89,7 @@ function HomePage() {
           <div className="mb-4 flex items-center justify-between gap-2 text-white">
             <ShareAppButton />
             <div className="flex flex-1 items-center justify-center gap-2 px-2">
-              <span className="grid size-9 place-items-center rounded-full" style={{ backgroundColor: "rgba(212,175,55,0.15)" }}>
+              <span className="grid size-9 place-items-center rounded-full" style={{ backgroundColor: "rgba(232,160,44,0.18)" }}>
                 <span className="text-base">🌍</span>
               </span>
               <div className="leading-tight">
@@ -109,12 +109,12 @@ function HomePage() {
 
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Rechercher une villa, une voiture..."
-              className="w-full rounded-full bg-white py-3 pl-11 pr-12 text-sm text-slate-800 shadow-md outline-none placeholder:text-slate-400"
+              className="w-full rounded-full bg-white py-3 pl-11 pr-12 text-sm text-foreground shadow-md outline-none placeholder:text-muted-foreground"
             />
             <Link to="/explorer" search={{ q: query } as never} aria-label="Rechercher" className="absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full" style={{ backgroundColor: GOLD }}>
               <Search className="size-4 text-white" />
@@ -124,13 +124,13 @@ function HomePage() {
 
         {/* HERO BANNER */}
         <section className="px-5 pb-6">
-          <div className="relative overflow-hidden rounded-2xl p-5" style={{ background: "linear-gradient(135deg, #0B3D2E 0%, #155e44 60%, #0B3D2E 100%)", boxShadow: "0 8px 28px -10px rgba(0,0,0,0.5)" }}>
+          <div className="relative overflow-hidden rounded-2xl p-5" style={{ background: "linear-gradient(135deg, #7A2E12 0%, #C25A1E 55%, #E8A02C 100%)", boxShadow: "0 8px 28px -10px rgba(0,0,0,0.5)" }}>
             <div className="relative z-10 max-w-[58%]">
               <h2 className="text-3xl font-extrabold leading-none text-white">Trouvez tout</h2>
               <p className="mt-1 text-base font-medium text-white/90">en un seul clic</p>
               <Link
                 to="/explorer"
-                className="mt-4 inline-block rounded-full px-4 py-2 text-xs font-extrabold text-[#0B3D2E] shadow-md active:scale-95"
+                className="mt-4 inline-block rounded-full px-4 py-2 text-xs font-extrabold text-[#7A2E12] shadow-md active:scale-95"
                 style={{ backgroundColor: GOLD }}
               >
                 Partout en Afrique
@@ -151,9 +151,9 @@ function HomePage() {
       <PromoBanner />
 
       {/* CATEGORIES GRID */}
-      <section className="bg-white px-4 pt-5">
+      <section className="bg-card px-4 pt-5">
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-base font-extrabold text-slate-900">Catégories</h3>
+          <h3 className="text-base font-extrabold text-foreground">Catégories</h3>
           <Link to="/explorer" className="text-xs font-semibold" style={{ color: DARK_GREEN }}>Voir tout</Link>
         </div>
         <div className="grid grid-cols-4 gap-3">
@@ -166,7 +166,7 @@ function HomePage() {
             >
               <div
                 className={`relative grid aspect-square w-full place-items-center rounded-2xl shadow-sm ring-1 transition active:scale-95 ${t.free ? "ring-2" : "ring-black/5"}`}
-                style={t.free ? { backgroundColor: "#F0FDF4", borderColor: DARK_GREEN, ['--tw-ring-color' as string]: DARK_GREEN } : { backgroundColor: "#F8FAFC" }}
+                style={t.free ? { backgroundColor: "#FDF3E7", borderColor: DARK_GREEN, ['--tw-ring-color' as string]: DARK_GREEN } : { backgroundColor: "#FAF7F2" }}
               >
                 <span className="text-3xl">{t.emoji}</span>
                 {t.free && (
@@ -175,21 +175,21 @@ function HomePage() {
                   </span>
                 )}
               </div>
-              <span className="mt-1.5 text-center text-[10px] font-semibold leading-tight text-slate-800">{t.label}</span>
+              <span className="mt-1.5 text-center text-[10px] font-semibold leading-tight text-foreground">{t.label}</span>
             </Link>
           ))}
         </div>
       </section>
 
       {/* ANNONCES — GRILLE MASONRY VERTICALE */}
-      <section className="bg-white px-4 py-6">
+      <section className="bg-card px-4 py-6">
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-base font-extrabold text-slate-900">Annonces récentes</h3>
+          <h3 className="text-base font-extrabold text-foreground">Annonces récentes</h3>
           <Link to="/explorer" className="text-xs font-semibold" style={{ color: DARK_GREEN }}>Voir tout</Link>
         </div>
 
         {feed.length === 0 ? (
-          <p className="py-10 text-center text-sm text-slate-500">Aucune annonce pour l'instant.</p>
+          <p className="py-10 text-center text-sm text-muted-foreground">Aucune annonce pour l'instant.</p>
         ) : (
           <div className="columns-2 gap-3 md:columns-3 lg:columns-4 xl:columns-5">
             {feed.map((l) => (
@@ -204,12 +204,12 @@ function HomePage() {
         <Link
           to="/abonnements"
           className="block rounded-2xl p-5 text-white shadow-lg"
-          style={{ background: "linear-gradient(135deg, #0B3D2E 0%, #155e44 100%)" }}
+          style={{ background: "linear-gradient(135deg, #7A2E12 0%, #C25A1E 100%)" }}
         >
           <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: GOLD }}>Boostez vos ventes</p>
           <h4 className="mt-1 text-lg font-extrabold">Passez Pro ou Business</h4>
           <p className="mt-1 text-xs text-white/80">Visibilité prioritaire, boutique perso, statistiques avancées.</p>
-          <span className="mt-3 inline-block rounded-full px-4 py-1.5 text-xs font-extrabold text-[#0B3D2E]" style={{ backgroundColor: GOLD }}>Voir les offres</span>
+          <span className="mt-3 inline-block rounded-full px-4 py-1.5 text-xs font-extrabold text-[#7A2E12]" style={{ backgroundColor: GOLD }}>Voir les offres</span>
         </Link>
       </section>
     </MobileShell>

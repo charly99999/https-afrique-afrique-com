@@ -47,46 +47,47 @@
   --color-pro: var(--brand-green);
   --color-business: var(--brand-gold);
 
-  --font-display: "Instrument Serif", "Playfair Display", Georgia, serif;
-  --font-sans: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-display: "Sora", "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-sans: "Manrope", "Plus Jakarta Sans", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  --shadow-pro-glow: 0 0 24px rgb(212 175 55 / 0.35);
-  --shadow-soft: 0 8px 32px -12px rgb(6 78 59 / 0.18);
-  --shadow-luxury: 0 24px 60px -28px rgb(6 78 59 / 0.35);
+  --shadow-pro-glow: 0 0 24px rgb(232 154 44 / 0.4);
+  --shadow-soft: 0 10px 30px -14px rgb(92 42 20 / 0.28);
+  --shadow-luxury: 0 26px 64px -30px rgb(92 42 20 / 0.45);
 }
 
 :root {
-  --radius: 1rem;
+  --radius: 1.1rem;
 
-  /* Brand — Editorial Luxury (#064E3B / #D4AF37 / #FAF9F6) */
-  --brand-green: oklch(0.36 0.08 158);
-  --brand-green-deep: oklch(0.28 0.07 158);
-  --brand-gold: oklch(0.78 0.13 86);
-  --brand-gold-soft: oklch(0.94 0.06 86);
-  --surface: oklch(0.985 0.005 85);
+  /* Brand — "Sahel Sunset" : terre cuite chaude + ambre doré sur ivoire */
+  --brand-green: oklch(0.53 0.16 42);        /* terre cuite profonde (primaire) */
+  --brand-green-deep: oklch(0.41 0.13 38);   /* acajou */
+  --brand-gold: oklch(0.79 0.15 76);         /* ambre doré */
+  --brand-gold-soft: oklch(0.95 0.045 78);   /* sable clair */
+  --surface: oklch(0.986 0.008 72);          /* ivoire chaud */
 
   /* shadcn semantic */
-  --background: oklch(0.985 0.005 85);
-  --foreground: oklch(0.2 0.025 158);
-  --card: oklch(1 0.002 85);
-  --card-foreground: oklch(0.2 0.025 158);
+  --background: oklch(0.986 0.008 72);
+  --foreground: oklch(0.24 0.035 42);
+  --card: oklch(1 0.004 80);
+  --card-foreground: oklch(0.24 0.035 42);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.025 158);
+  --popover-foreground: oklch(0.24 0.035 42);
   --primary: var(--brand-green);
-  --primary-foreground: oklch(0.985 0.005 85);
-  --secondary: oklch(0.96 0.008 85);
+  --primary-foreground: oklch(0.99 0.006 80);
+  --secondary: oklch(0.955 0.016 72);
   --secondary-foreground: var(--brand-green);
-  --muted: oklch(0.96 0.006 85);
-  --muted-foreground: oklch(0.5 0.02 158);
+  --muted: oklch(0.955 0.014 72);
+  --muted-foreground: oklch(0.52 0.035 45);
   --accent: var(--brand-gold-soft);
-  --accent-foreground: oklch(0.4 0.1 86);
-  --destructive: oklch(0.6 0.22 27);
+  --accent-foreground: oklch(0.42 0.11 62);
+  --destructive: oklch(0.58 0.21 27);
   --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.92 0.006 85);
-  --input: oklch(0.94 0.006 85);
-  --ring: var(--brand-green);
+  --border: oklch(0.915 0.012 72);
+  --input: oklch(0.94 0.012 72);
+  --ring: var(--brand-gold);
 }
+
 
 @layer base {
   * {
@@ -117,4 +118,31 @@
 
 @utility animate-fade-up {
   animation: fade-up 0.7s cubic-bezier(0.19, 1, 0.22, 1) both;
+}
+
+/* ── Typographie de la refonte (non-layered : écrase les utilitaires) ────── */
+.font-display {
+  font-family: var(--font-display);
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+body {
+  font-weight: 400;
+}
+
+@utility surface-warm {
+  background-image:
+    radial-gradient(120% 90% at 0% 0%, color-mix(in oklab, var(--brand-gold) 16%, transparent) 0%, transparent 55%),
+    radial-gradient(110% 80% at 100% 0%, color-mix(in oklab, var(--brand-green) 12%, transparent) 0%, transparent 50%);
+}
+
+@utility gradient-warm {
+  background-image: linear-gradient(135deg, var(--brand-green), color-mix(in oklab, var(--brand-gold) 70%, var(--brand-green)));
 }
