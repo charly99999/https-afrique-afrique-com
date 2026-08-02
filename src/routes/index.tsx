@@ -23,23 +23,31 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
-const DARK_GREEN = "#7A2E12";
+const DARK_GREEN = "#1B6E3C";
 const GOLD = "#E8A02C";
 
-type Tile = { label: string; emoji: string; cat: string; free?: boolean };
+type Tile = { label: string; emoji: string; cat: string; free?: boolean; grad: string; tint: string };
 const TILES: Tile[] = [
-  { label: "Véhicules", emoji: "🚗", cat: "vehicules" },
-  { label: "Immobilier", emoji: "🏠", cat: "immobilier" },
-  { label: "Électronique", emoji: "📱", cat: "electronique" },
-  { label: "Électroménager", emoji: "🧊", cat: "electromenager" },
-  { label: "Mode & Beauté", emoji: "👗", cat: "mode" },
-  { label: "Pour l'Enfant", emoji: "🧸", cat: "enfant" },
-  { label: "Emploi & Services", emoji: "💼", cat: "services", free: true },
-  { label: "Maison & Loisirs", emoji: "🛋️", cat: "maison" },
-  { label: "Agricole", emoji: "🚜", cat: "pro-agricole" },
-  { label: "Alimentation", emoji: "🍎", cat: "alimentation" },
-  { label: "Animaux", emoji: "🐕", cat: "animaux" },
-  { label: "Autres", emoji: "📦", cat: "autres" },
+  { label: "Véhicules", emoji: "🚗", cat: "vehicules", grad: "linear-gradient(140deg,#1B6E3C,#2E9B57)", tint: "#E9F6EE" },
+  { label: "Immobilier", emoji: "🏠", cat: "immobilier", grad: "linear-gradient(140deg,#0F5C86,#2E9BC4)", tint: "#E8F3F9" },
+  { label: "Électronique", emoji: "📱", cat: "electronique", grad: "linear-gradient(140deg,#4A2B86,#7B54C9)", tint: "#F0EBFA" },
+  { label: "Électroménager", emoji: "🧊", cat: "electromenager", grad: "linear-gradient(140deg,#166A6A,#2FA8A0)", tint: "#E7F5F4" },
+  { label: "Mode & Beauté", emoji: "👗", cat: "mode", grad: "linear-gradient(140deg,#A02455,#DB5A8C)", tint: "#FBEBF1" },
+  { label: "Pour l'Enfant", emoji: "🧸", cat: "enfant", grad: "linear-gradient(140deg,#B4651A,#EFA044)", tint: "#FDF2E4" },
+  { label: "Emploi & Services", emoji: "💼", cat: "services", free: true, grad: "linear-gradient(140deg,#1B6E3C,#E8A02C)", tint: "#FDF6E7" },
+  { label: "Maison & Loisirs", emoji: "🛋️", cat: "maison", grad: "linear-gradient(140deg,#5C4630,#997352)", tint: "#F5EFE8" },
+  { label: "Agricole", emoji: "🚜", cat: "pro-agricole", grad: "linear-gradient(140deg,#3F6B12,#7CA82C)", tint: "#F0F6E4" },
+  { label: "Alimentation", emoji: "🍎", cat: "alimentation", grad: "linear-gradient(140deg,#9B1C25,#DD5A48)", tint: "#FBEBEA" },
+  { label: "Animaux", emoji: "🐕", cat: "animaux", grad: "linear-gradient(140deg,#8A5A11,#D2952C)", tint: "#FBF2E0" },
+  { label: "Autres", emoji: "📦", cat: "autres", grad: "linear-gradient(140deg,#3C4653,#6C7A8C)", tint: "#EEF1F4" },
+];
+
+const TRUST = [
+  "🏠 100% Gratuit",
+  "✅ Aucune commission",
+  "🔒 Vendeurs vérifiés",
+  "📱 Mobile Money accepté",
+  "🌍 11 pays d'Afrique",
 ];
 
 function HomePage() {
