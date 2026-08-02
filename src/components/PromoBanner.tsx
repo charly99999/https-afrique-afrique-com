@@ -22,7 +22,7 @@ export function PromoBanner() {
   }
 
   return (
-    <div className="mx-4 mt-4 overflow-hidden rounded-2xl gradient-warm text-primary-foreground shadow-luxury ring-1 ring-brand-green/40">
+    <div className="mx-4 mt-4 overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#14532D_0%,#1B6E3C_100%)] text-white shadow-soft ring-1 ring-black/5">
       <div className="relative px-4 py-3.5 pr-10">
         <button
           type="button"
