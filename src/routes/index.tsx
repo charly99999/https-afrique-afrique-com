@@ -23,23 +23,31 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
-const DARK_GREEN = "#7A2E12";
+const DARK_GREEN = "#1B6E3C";
 const GOLD = "#E8A02C";
 
-type Tile = { label: string; emoji: string; cat: string; free?: boolean };
+type Tile = { label: string; emoji: string; cat: string; free?: boolean; grad: string; tint: string };
 const TILES: Tile[] = [
-  { label: "Véhicules", emoji: "🚗", cat: "vehicules" },
-  { label: "Immobilier", emoji: "🏠", cat: "immobilier" },
-  { label: "Électronique", emoji: "📱", cat: "electronique" },
-  { label: "Électroménager", emoji: "🧊", cat: "electromenager" },
-  { label: "Mode & Beauté", emoji: "👗", cat: "mode" },
-  { label: "Pour l'Enfant", emoji: "🧸", cat: "enfant" },
-  { label: "Emploi & Services", emoji: "💼", cat: "services", free: true },
-  { label: "Maison & Loisirs", emoji: "🛋️", cat: "maison" },
-  { label: "Agricole", emoji: "🚜", cat: "pro-agricole" },
-  { label: "Alimentation", emoji: "🍎", cat: "alimentation" },
-  { label: "Animaux", emoji: "🐕", cat: "animaux" },
-  { label: "Autres", emoji: "📦", cat: "autres" },
+  { label: "Véhicules", emoji: "🚗", cat: "vehicules", grad: "linear-gradient(140deg,#1B6E3C,#2E9B57)", tint: "#E9F6EE" },
+  { label: "Immobilier", emoji: "🏠", cat: "immobilier", grad: "linear-gradient(140deg,#0F5C86,#2E9BC4)", tint: "#E8F3F9" },
+  { label: "Électronique", emoji: "📱", cat: "electronique", grad: "linear-gradient(140deg,#4A2B86,#7B54C9)", tint: "#F0EBFA" },
+  { label: "Électroménager", emoji: "🧊", cat: "electromenager", grad: "linear-gradient(140deg,#166A6A,#2FA8A0)", tint: "#E7F5F4" },
+  { label: "Mode & Beauté", emoji: "👗", cat: "mode", grad: "linear-gradient(140deg,#A02455,#DB5A8C)", tint: "#FBEBF1" },
+  { label: "Pour l'Enfant", emoji: "🧸", cat: "enfant", grad: "linear-gradient(140deg,#B4651A,#EFA044)", tint: "#FDF2E4" },
+  { label: "Emploi & Services", emoji: "💼", cat: "services", free: true, grad: "linear-gradient(140deg,#1B6E3C,#E8A02C)", tint: "#FDF6E7" },
+  { label: "Maison & Loisirs", emoji: "🛋️", cat: "maison", grad: "linear-gradient(140deg,#5C4630,#997352)", tint: "#F5EFE8" },
+  { label: "Agricole", emoji: "🚜", cat: "pro-agricole", grad: "linear-gradient(140deg,#3F6B12,#7CA82C)", tint: "#F0F6E4" },
+  { label: "Alimentation", emoji: "🍎", cat: "alimentation", grad: "linear-gradient(140deg,#9B1C25,#DD5A48)", tint: "#FBEBEA" },
+  { label: "Animaux", emoji: "🐕", cat: "animaux", grad: "linear-gradient(140deg,#8A5A11,#D2952C)", tint: "#FBF2E0" },
+  { label: "Autres", emoji: "📦", cat: "autres", grad: "linear-gradient(140deg,#3C4653,#6C7A8C)", tint: "#EEF1F4" },
+];
+
+const TRUST = [
+  "🏠 100% Gratuit",
+  "✅ Aucune commission",
+  "🔒 Vendeurs vérifiés",
+  "📱 Mobile Money accepté",
+  "🌍 11 pays d'Afrique",
 ];
 
 function HomePage() {
@@ -124,16 +132,17 @@ function HomePage() {
 
         {/* HERO BANNER */}
         <section className="px-5 pb-6">
-          <div className="relative overflow-hidden rounded-2xl p-5" style={{ background: "linear-gradient(135deg, #7A2E12 0%, #C25A1E 55%, #E8A02C 100%)", boxShadow: "0 8px 28px -10px rgba(0,0,0,0.5)" }}>
+          <div className="relative overflow-hidden rounded-2xl p-5" style={{ background: "linear-gradient(135deg, #14532D 0%, #1B6E3C 55%, #2E9B57 100%)", boxShadow: "0 8px 28px -10px rgba(0,0,0,0.5)" }}>
+            <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1/3 animate-sheen bg-white/15 blur-md" />
             <div className="relative z-10 max-w-[58%]">
-              <h2 className="text-3xl font-extrabold leading-none text-white">Trouvez tout</h2>
-              <p className="mt-1 text-base font-medium text-white/90">en un seul clic</p>
+              <h2 className="text-3xl font-extrabold leading-none text-white">100% Gratuit</h2>
+              <p className="mt-1 text-base font-medium text-white/90">Aucune commission</p>
               <Link
                 to="/explorer"
-                className="mt-4 inline-block rounded-full px-4 py-2 text-xs font-extrabold text-[#7A2E12] shadow-md active:scale-95"
+                className="mt-4 inline-block rounded-full px-4 py-2 text-xs font-extrabold text-[#14532D] shadow-md active:scale-95"
                 style={{ backgroundColor: GOLD }}
               >
-                Partout en Afrique
+                Voir les annonces
               </Link>
             </div>
             <img
@@ -145,6 +154,15 @@ function HomePage() {
             />
           </div>
         </section>
+
+        {/* BANDEAU DE CONFIANCE DÉFILANT */}
+        <div className="overflow-hidden border-y border-white/10" style={{ backgroundColor: "rgba(255,255,255,0.08)" }}>
+          <div className="flex w-max animate-marquee gap-8 py-2">
+            {[...TRUST, ...TRUST].map((t, i) => (
+              <span key={`${t}-${i}`} className="whitespace-nowrap text-[11px] font-bold text-white/90">{t}</span>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* PROMO BANNER */}
@@ -157,20 +175,25 @@ function HomePage() {
           <Link to="/explorer" className="text-xs font-semibold" style={{ color: DARK_GREEN }}>Voir tout</Link>
         </div>
         <div className="grid grid-cols-4 gap-3">
-          {TILES.map((t) => (
+          {TILES.map((t, i) => (
             <Link
               key={t.cat + t.label}
               to="/explorer"
               search={{ category: t.cat } as never}
-              className="group flex flex-col items-center"
+              className="group flex animate-tile-pop flex-col items-center"
+              style={{ animationDelay: `${i * 35}ms` }}
             >
               <div
-                className={`relative grid aspect-square w-full place-items-center rounded-2xl shadow-sm ring-1 transition active:scale-95 ${t.free ? "ring-2" : "ring-black/5"}`}
-                style={t.free ? { backgroundColor: "#FDF3E7", borderColor: DARK_GREEN, ['--tw-ring-color' as string]: DARK_GREEN } : { backgroundColor: "#FAF7F2" }}
+                className={`relative grid aspect-square w-full place-items-center overflow-hidden rounded-2xl shadow-sm ring-1 transition duration-300 group-hover:-translate-y-0.5 group-hover:shadow-lg active:scale-95 ${t.free ? "ring-2" : "ring-black/5"}`}
+                style={t.free
+                  ? { backgroundColor: t.tint, ['--tw-ring-color' as string]: DARK_GREEN }
+                  : { backgroundColor: t.tint }}
               >
-                <span className="text-3xl">{t.emoji}</span>
+                <span aria-hidden className="absolute inset-x-0 top-0 h-1/2 opacity-90" style={{ background: t.grad, clipPath: "ellipse(120% 100% at 50% 0%)" }} />
+                <span aria-hidden className="absolute -right-3 -top-3 size-10 rounded-full bg-white/25" />
+                <span className="relative z-10 text-3xl drop-shadow-sm transition duration-300 group-hover:scale-110">{t.emoji}</span>
                 {t.free && (
-                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full px-1.5 py-0.5 text-[7px] font-extrabold uppercase tracking-tight text-white shadow whitespace-nowrap" style={{ backgroundColor: DARK_GREEN }}>
+                  <span className="absolute -bottom-1 left-1/2 z-10 -translate-x-1/2 rounded-full px-1.5 py-0.5 text-[7px] font-extrabold uppercase tracking-tight text-white shadow whitespace-nowrap" style={{ backgroundColor: DARK_GREEN }}>
                     100% GRATUIT
                   </span>
                 )}
@@ -180,6 +203,7 @@ function HomePage() {
           ))}
         </div>
       </section>
+
 
       {/* ANNONCES — GRILLE MASONRY VERTICALE */}
       <section className="bg-card px-4 py-6">
@@ -203,13 +227,14 @@ function HomePage() {
       <section className="px-4 pb-8">
         <Link
           to="/abonnements"
-          className="block rounded-2xl p-5 text-white shadow-lg"
-          style={{ background: "linear-gradient(135deg, #7A2E12 0%, #C25A1E 100%)" }}
+          className="relative block overflow-hidden rounded-2xl p-5 text-white shadow-lg"
+          style={{ background: "linear-gradient(135deg, #14532D 0%, #1B6E3C 60%, #2E9B57 100%)" }}
         >
+          <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1/4 animate-sheen bg-white/15 blur-md" />
           <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: GOLD }}>Boostez vos ventes</p>
           <h4 className="mt-1 text-lg font-extrabold">Passez Pro ou Business</h4>
           <p className="mt-1 text-xs text-white/80">Visibilité prioritaire, boutique perso, statistiques avancées.</p>
-          <span className="mt-3 inline-block rounded-full px-4 py-1.5 text-xs font-extrabold text-[#7A2E12]" style={{ backgroundColor: GOLD }}>Voir les offres</span>
+          <span className="mt-3 inline-block rounded-full px-4 py-1.5 text-xs font-extrabold text-[#14532D]" style={{ backgroundColor: GOLD }}>Voir les offres</span>
         </Link>
       </section>
     </MobileShell>
