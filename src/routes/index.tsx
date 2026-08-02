@@ -30,28 +30,26 @@ export const Route = createFileRoute("/")({
 const DARK_GREEN = "#1B6E3C";
 const GOLD = "#E8A02C";
 
-type Tile = { label: string; emoji: string; cat: string; free?: boolean; grad: string; tint: string };
+type Tile = { label: string; Icon: LucideIcon; cat: string; free?: boolean; color: string; tint: string };
 const TILES: Tile[] = [
-  { label: "Véhicules", emoji: "🚗", cat: "vehicules", grad: "linear-gradient(140deg,#1B6E3C,#2E9B57)", tint: "#E9F6EE" },
-  { label: "Immobilier", emoji: "🏠", cat: "immobilier", grad: "linear-gradient(140deg,#0F5C86,#2E9BC4)", tint: "#E8F3F9" },
-  { label: "Électronique", emoji: "📱", cat: "electronique", grad: "linear-gradient(140deg,#4A2B86,#7B54C9)", tint: "#F0EBFA" },
-  { label: "Électroménager", emoji: "🧊", cat: "electromenager", grad: "linear-gradient(140deg,#166A6A,#2FA8A0)", tint: "#E7F5F4" },
-  { label: "Mode & Beauté", emoji: "👗", cat: "mode", grad: "linear-gradient(140deg,#A02455,#DB5A8C)", tint: "#FBEBF1" },
-  { label: "Pour l'Enfant", emoji: "🧸", cat: "enfant", grad: "linear-gradient(140deg,#B4651A,#EFA044)", tint: "#FDF2E4" },
-  { label: "Emploi & Services", emoji: "💼", cat: "services", free: true, grad: "linear-gradient(140deg,#1B6E3C,#E8A02C)", tint: "#FDF6E7" },
-  { label: "Maison & Loisirs", emoji: "🛋️", cat: "maison", grad: "linear-gradient(140deg,#5C4630,#997352)", tint: "#F5EFE8" },
-  { label: "Agricole", emoji: "🚜", cat: "pro-agricole", grad: "linear-gradient(140deg,#3F6B12,#7CA82C)", tint: "#F0F6E4" },
-  { label: "Alimentation", emoji: "🍎", cat: "alimentation", grad: "linear-gradient(140deg,#9B1C25,#DD5A48)", tint: "#FBEBEA" },
-  { label: "Animaux", emoji: "🐕", cat: "animaux", grad: "linear-gradient(140deg,#8A5A11,#D2952C)", tint: "#FBF2E0" },
-  { label: "Autres", emoji: "📦", cat: "autres", grad: "linear-gradient(140deg,#3C4653,#6C7A8C)", tint: "#EEF1F4" },
+  { label: "Véhicules", Icon: Car, cat: "vehicules", color: "#1B6E3C", tint: "#E9F6EE" },
+  { label: "Immobilier", Icon: Home, cat: "immobilier", color: "#0F5C86", tint: "#E8F3F9" },
+  { label: "Électronique", Icon: Smartphone, cat: "electronique", color: "#4A2B86", tint: "#F0EBFA" },
+  { label: "Électroménager", Icon: Refrigerator, cat: "electromenager", color: "#166A6A", tint: "#E7F5F4" },
+  { label: "Mode & Beauté", Icon: Shirt, cat: "mode", color: "#A02455", tint: "#FBEBF1" },
+  { label: "Pour l'Enfant", Icon: Baby, cat: "enfant", color: "#B4651A", tint: "#FDF2E4" },
+  { label: "Emploi & Services", Icon: Briefcase, cat: "services", free: true, color: "#B07A00", tint: "#FDF6E7" },
+  { label: "Maison & Loisirs", Icon: Sofa, cat: "maison", color: "#5C4630", tint: "#F5EFE8" },
+  { label: "Agricole", Icon: Tractor, cat: "pro-agricole", color: "#3F6B12", tint: "#F0F6E4" },
+  { label: "Alimentation", Icon: Apple, cat: "alimentation", color: "#9B1C25", tint: "#FBEBEA" },
+  { label: "Animaux", Icon: Dog, cat: "animaux", color: "#8A5A11", tint: "#FBF2E0" },
+  { label: "Autres", Icon: Package, cat: "autres", color: "#3C4653", tint: "#EEF1F4" },
 ];
 
-const TRUST = [
-  "🏠 100% Gratuit",
-  "✅ Aucune commission",
-  "🔒 Vendeurs vérifiés",
-  "📱 Mobile Money accepté",
-  "🌍 11 pays d'Afrique",
+const TRUST: { Icon: LucideIcon; label: string }[] = [
+  { Icon: ShieldCheck, label: "Vendeurs vérifiés" },
+  { Icon: Wallet, label: "Mobile Money" },
+  { Icon: Globe2, label: "11 pays" },
 ];
 
 function HomePage() {
