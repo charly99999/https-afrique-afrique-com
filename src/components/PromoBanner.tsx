@@ -22,7 +22,7 @@ export function PromoBanner() {
   }
 
   return (
-    <div className="mx-4 mt-4 overflow-hidden rounded-2xl gradient-warm text-primary-foreground shadow-luxury ring-1 ring-brand-green/40">
+    <div className="mx-4 mt-4 overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#14532D_0%,#1B6E3C_100%)] text-white shadow-soft ring-1 ring-black/5">
       <div className="relative px-4 py-3.5 pr-10">
         <button
           type="button"
@@ -37,7 +37,7 @@ export function PromoBanner() {
             <Gift className="size-4" />
           </span>
           <div>
-            <p className="text-sm font-extrabold uppercase tracking-wide">🎉 Application 100% gratuite</p>
+            <p className="text-sm font-extrabold uppercase tracking-wide text-[#E8A02C]">Application 100% gratuite</p>
             <p className="mt-1 text-[13px] font-medium leading-snug opacity-95">
               Toutes les fonctionnalités <span className="font-extrabold">Business</span> (annonces illimitées, boosts permanents, badge premium) sont offertes à tous pendant <span className="font-extrabold">4 mois</span>. Profitez-en !
             </p>

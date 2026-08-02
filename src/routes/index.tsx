@@ -1,6 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, Bell } from "lucide-react";
+import {
+  Search, Bell, Car, Home, Smartphone, Refrigerator, Shirt, Baby,
+  Briefcase, Sofa, Tractor, Apple, Dog, Package, ShieldCheck, Wallet, Globe2,
+  type LucideIcon,
+} from "lucide-react";
 import { MobileShell } from "@/components/MobileShell";
 import { ListingCard } from "@/components/ListingCard";
 import { ShareAppButton } from "@/components/ShareAppButton";
@@ -26,28 +30,26 @@ export const Route = createFileRoute("/")({
 const DARK_GREEN = "#1B6E3C";
 const GOLD = "#E8A02C";
 
-type Tile = { label: string; emoji: string; cat: string; free?: boolean; grad: string; tint: string };
+type Tile = { label: string; Icon: LucideIcon; cat: string; free?: boolean; color: string; tint: string };
 const TILES: Tile[] = [
-  { label: "Véhicules", emoji: "🚗", cat: "vehicules", grad: "linear-gradient(140deg,#1B6E3C,#2E9B57)", tint: "#E9F6EE" },
-  { label: "Immobilier", emoji: "🏠", cat: "immobilier", grad: "linear-gradient(140deg,#0F5C86,#2E9BC4)", tint: "#E8F3F9" },
-  { label: "Électronique", emoji: "📱", cat: "electronique", grad: "linear-gradient(140deg,#4A2B86,#7B54C9)", tint: "#F0EBFA" },
-  { label: "Électroménager", emoji: "🧊", cat: "electromenager", grad: "linear-gradient(140deg,#166A6A,#2FA8A0)", tint: "#E7F5F4" },
-  { label: "Mode & Beauté", emoji: "👗", cat: "mode", grad: "linear-gradient(140deg,#A02455,#DB5A8C)", tint: "#FBEBF1" },
-  { label: "Pour l'Enfant", emoji: "🧸", cat: "enfant", grad: "linear-gradient(140deg,#B4651A,#EFA044)", tint: "#FDF2E4" },
-  { label: "Emploi & Services", emoji: "💼", cat: "services", free: true, grad: "linear-gradient(140deg,#1B6E3C,#E8A02C)", tint: "#FDF6E7" },
-  { label: "Maison & Loisirs", emoji: "🛋️", cat: "maison", grad: "linear-gradient(140deg,#5C4630,#997352)", tint: "#F5EFE8" },
-  { label: "Agricole", emoji: "🚜", cat: "pro-agricole", grad: "linear-gradient(140deg,#3F6B12,#7CA82C)", tint: "#F0F6E4" },
-  { label: "Alimentation", emoji: "🍎", cat: "alimentation", grad: "linear-gradient(140deg,#9B1C25,#DD5A48)", tint: "#FBEBEA" },
-  { label: "Animaux", emoji: "🐕", cat: "animaux", grad: "linear-gradient(140deg,#8A5A11,#D2952C)", tint: "#FBF2E0" },
-  { label: "Autres", emoji: "📦", cat: "autres", grad: "linear-gradient(140deg,#3C4653,#6C7A8C)", tint: "#EEF1F4" },
+  { label: "Véhicules", Icon: Car, cat: "vehicules", color: "#1B6E3C", tint: "#E9F6EE" },
+  { label: "Immobilier", Icon: Home, cat: "immobilier", color: "#0F5C86", tint: "#E8F3F9" },
+  { label: "Électronique", Icon: Smartphone, cat: "electronique", color: "#4A2B86", tint: "#F0EBFA" },
+  { label: "Électroménager", Icon: Refrigerator, cat: "electromenager", color: "#166A6A", tint: "#E7F5F4" },
+  { label: "Mode & Beauté", Icon: Shirt, cat: "mode", color: "#A02455", tint: "#FBEBF1" },
+  { label: "Pour l'Enfant", Icon: Baby, cat: "enfant", color: "#B4651A", tint: "#FDF2E4" },
+  { label: "Emploi & Services", Icon: Briefcase, cat: "services", free: true, color: "#B07A00", tint: "#FDF6E7" },
+  { label: "Maison & Loisirs", Icon: Sofa, cat: "maison", color: "#5C4630", tint: "#F5EFE8" },
+  { label: "Agricole", Icon: Tractor, cat: "pro-agricole", color: "#3F6B12", tint: "#F0F6E4" },
+  { label: "Alimentation", Icon: Apple, cat: "alimentation", color: "#9B1C25", tint: "#FBEBEA" },
+  { label: "Animaux", Icon: Dog, cat: "animaux", color: "#8A5A11", tint: "#FBF2E0" },
+  { label: "Autres", Icon: Package, cat: "autres", color: "#3C4653", tint: "#EEF1F4" },
 ];
 
-const TRUST = [
-  "🏠 100% Gratuit",
-  "✅ Aucune commission",
-  "🔒 Vendeurs vérifiés",
-  "📱 Mobile Money accepté",
-  "🌍 11 pays d'Afrique",
+const TRUST: { Icon: LucideIcon; label: string }[] = [
+  { Icon: ShieldCheck, label: "Vendeurs vérifiés" },
+  { Icon: Wallet, label: "Mobile Money" },
+  { Icon: Globe2, label: "11 pays" },
 ];
 
 function HomePage() {
@@ -131,12 +133,19 @@ function HomePage() {
         </header>
 
         {/* HERO BANNER */}
-        <section className="px-5 pb-6">
-          <div className="relative overflow-hidden rounded-2xl p-5" style={{ background: "linear-gradient(135deg, #14532D 0%, #1B6E3C 55%, #2E9B57 100%)", boxShadow: "0 8px 28px -10px rgba(0,0,0,0.5)" }}>
-            <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1/3 animate-sheen bg-white/15 blur-md" />
-            <div className="relative z-10 max-w-[58%]">
-              <h2 className="text-3xl font-extrabold leading-none text-white">100% Gratuit</h2>
-              <p className="mt-1 text-base font-medium text-white/90">Aucune commission</p>
+        <section className="px-5 pb-5">
+          <div className="relative overflow-hidden rounded-2xl" style={{ background: "linear-gradient(135deg, #14532D 0%, #1B6E3C 60%, #2E9B57 100%)", boxShadow: "0 10px 30px -14px rgba(0,0,0,0.55)" }}>
+            <img
+              src={africaMap}
+              alt=""
+              aria-hidden
+              width={768}
+              height={768}
+              className="pointer-events-none absolute -right-8 top-1/2 h-[150%] w-auto -translate-y-1/2 opacity-60"
+            />
+            <div className="relative z-10 max-w-[60%] p-5">
+              <h2 className="text-[26px] font-extrabold leading-tight text-white">100% Gratuit</h2>
+              <p className="mt-0.5 text-sm font-medium text-white/85">Aucune commission sur vos ventes</p>
               <Link
                 to="/explorer"
                 className="mt-4 inline-block rounded-full px-4 py-2 text-xs font-extrabold text-[#14532D] shadow-md active:scale-95"
@@ -145,23 +154,19 @@ function HomePage() {
                 Voir les annonces
               </Link>
             </div>
-            <img
-              src={africaMap}
-              alt="Carte de l'Afrique"
-              width={768}
-              height={768}
-              className="pointer-events-none absolute -right-6 top-1/2 h-[170%] w-auto -translate-y-1/2 opacity-95"
-            />
           </div>
         </section>
 
-        {/* BANDEAU DE CONFIANCE DÉFILANT */}
-        <div className="overflow-hidden border-y border-white/10" style={{ backgroundColor: "rgba(255,255,255,0.08)" }}>
-          <div className="flex w-max animate-marquee gap-8 py-2">
-            {[...TRUST, ...TRUST].map((t, i) => (
-              <span key={`${t}-${i}`} className="whitespace-nowrap text-[11px] font-bold text-white/90">{t}</span>
+        {/* BANDEAU DE CONFIANCE */}
+        <div className="border-t border-white/10 px-5 py-2.5" style={{ backgroundColor: "rgba(0,0,0,0.12)" }}>
+          <ul className="flex items-center justify-between gap-2">
+            {TRUST.map(({ Icon, label }) => (
+              <li key={label} className="flex min-w-0 items-center gap-1.5 text-white/85">
+                <Icon className="size-3.5 shrink-0" style={{ color: GOLD }} />
+                <span className="truncate text-[11px] font-semibold">{label}</span>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </div>
 
@@ -174,31 +179,27 @@ function HomePage() {
           <h3 className="text-base font-extrabold text-foreground">Catégories</h3>
           <Link to="/explorer" className="text-xs font-semibold" style={{ color: DARK_GREEN }}>Voir tout</Link>
         </div>
-        <div className="grid grid-cols-4 gap-3">
-          {TILES.map((t, i) => (
+        <div className="grid grid-cols-4 gap-x-3 gap-y-4">
+          {TILES.map(({ label, Icon, cat, free, color, tint }, i) => (
             <Link
-              key={t.cat + t.label}
+              key={cat + label}
               to="/explorer"
-              search={{ category: t.cat } as never}
+              search={{ category: cat } as never}
               className="group flex animate-tile-pop flex-col items-center"
               style={{ animationDelay: `${i * 35}ms` }}
             >
               <div
-                className={`relative grid aspect-square w-full place-items-center overflow-hidden rounded-2xl shadow-sm ring-1 transition duration-300 group-hover:-translate-y-0.5 group-hover:shadow-lg active:scale-95 ${t.free ? "ring-2" : "ring-black/5"}`}
-                style={t.free
-                  ? { backgroundColor: t.tint, ['--tw-ring-color' as string]: DARK_GREEN }
-                  : { backgroundColor: t.tint }}
+                className={`relative grid aspect-square w-full place-items-center rounded-2xl border transition duration-300 group-hover:-translate-y-0.5 group-hover:shadow-md active:scale-95 ${free ? "border-2" : "border-black/5"}`}
+                style={{ backgroundColor: tint, borderColor: free ? GOLD : undefined }}
               >
-                <span aria-hidden className="absolute inset-x-0 top-0 h-1/2 opacity-90" style={{ background: t.grad, clipPath: "ellipse(120% 100% at 50% 0%)" }} />
-                <span aria-hidden className="absolute -right-3 -top-3 size-10 rounded-full bg-white/25" />
-                <span className="relative z-10 text-3xl drop-shadow-sm transition duration-300 group-hover:scale-110">{t.emoji}</span>
-                {t.free && (
-                  <span className="absolute -bottom-1 left-1/2 z-10 -translate-x-1/2 rounded-full px-1.5 py-0.5 text-[7px] font-extrabold uppercase tracking-tight text-white shadow whitespace-nowrap" style={{ backgroundColor: DARK_GREEN }}>
-                    100% GRATUIT
-                  </span>
-                )}
+                <Icon className="size-6 transition duration-300 group-hover:scale-110" style={{ color }} strokeWidth={1.8} />
               </div>
-              <span className="mt-1.5 text-center text-[10px] font-semibold leading-tight text-foreground">{t.label}</span>
+              <span className="mt-1.5 line-clamp-2 text-center text-[10px] font-semibold leading-tight text-foreground">{label}</span>
+              {free && (
+                <span className="mt-1 rounded-full px-1.5 py-0.5 text-[7px] font-extrabold uppercase tracking-tight text-white" style={{ backgroundColor: DARK_GREEN }}>
+                  100% Gratuit
+                </span>
+              )}
             </Link>
           ))}
         </div>
