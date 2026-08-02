@@ -37,7 +37,7 @@ export function PromoBanner() {
             <Gift className="size-4" />
           </span>
           <div>
-            <p className="text-sm font-extrabold uppercase tracking-wide">🎉 Application 100% gratuite</p>
+            <p className="text-sm font-extrabold uppercase tracking-wide text-[#E8A02C]">Application 100% gratuite</p>
             <p className="mt-1 text-[13px] font-medium leading-snug opacity-95">
               Toutes les fonctionnalités <span className="font-extrabold">Business</span> (annonces illimitées, boosts permanents, badge premium) sont offertes à tous pendant <span className="font-extrabold">4 mois</span>. Profitez-en !
             </p>
