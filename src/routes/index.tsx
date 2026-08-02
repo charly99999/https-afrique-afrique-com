@@ -1,6 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, Bell } from "lucide-react";
+import {
+  Search, Bell, Car, Home, Smartphone, Refrigerator, Shirt, Baby,
+  Briefcase, Sofa, Tractor, Apple, Dog, Package, ShieldCheck, Wallet, Globe2,
+  type LucideIcon,
+} from "lucide-react";
 import { MobileShell } from "@/components/MobileShell";
 import { ListingCard } from "@/components/ListingCard";
 import { ShareAppButton } from "@/components/ShareAppButton";
