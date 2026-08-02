@@ -133,12 +133,19 @@ function HomePage() {
         </header>
 
         {/* HERO BANNER */}
-        <section className="px-5 pb-6">
-          <div className="relative overflow-hidden rounded-2xl p-5" style={{ background: "linear-gradient(135deg, #14532D 0%, #1B6E3C 55%, #2E9B57 100%)", boxShadow: "0 8px 28px -10px rgba(0,0,0,0.5)" }}>
-            <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1/3 animate-sheen bg-white/15 blur-md" />
-            <div className="relative z-10 max-w-[58%]">
-              <h2 className="text-3xl font-extrabold leading-none text-white">100% Gratuit</h2>
-              <p className="mt-1 text-base font-medium text-white/90">Aucune commission</p>
+        <section className="px-5 pb-5">
+          <div className="relative overflow-hidden rounded-2xl" style={{ background: "linear-gradient(135deg, #14532D 0%, #1B6E3C 60%, #2E9B57 100%)", boxShadow: "0 10px 30px -14px rgba(0,0,0,0.55)" }}>
+            <img
+              src={africaMap}
+              alt=""
+              aria-hidden
+              width={768}
+              height={768}
+              className="pointer-events-none absolute -right-8 top-1/2 h-[150%] w-auto -translate-y-1/2 opacity-60"
+            />
+            <div className="relative z-10 max-w-[60%] p-5">
+              <h2 className="text-[26px] font-extrabold leading-tight text-white">100% Gratuit</h2>
+              <p className="mt-0.5 text-sm font-medium text-white/85">Aucune commission sur vos ventes</p>
               <Link
                 to="/explorer"
                 className="mt-4 inline-block rounded-full px-4 py-2 text-xs font-extrabold text-[#14532D] shadow-md active:scale-95"
@@ -147,23 +154,19 @@ function HomePage() {
                 Voir les annonces
               </Link>
             </div>
-            <img
-              src={africaMap}
-              alt="Carte de l'Afrique"
-              width={768}
-              height={768}
-              className="pointer-events-none absolute -right-6 top-1/2 h-[170%] w-auto -translate-y-1/2 opacity-95"
-            />
           </div>
         </section>
 
-        {/* BANDEAU DE CONFIANCE DÉFILANT */}
-        <div className="overflow-hidden border-y border-white/10" style={{ backgroundColor: "rgba(255,255,255,0.08)" }}>
-          <div className="flex w-max animate-marquee gap-8 py-2">
-            {[...TRUST, ...TRUST].map((t, i) => (
-              <span key={`${t}-${i}`} className="whitespace-nowrap text-[11px] font-bold text-white/90">{t}</span>
+        {/* BANDEAU DE CONFIANCE */}
+        <div className="border-t border-white/10 px-5 py-2.5" style={{ backgroundColor: "rgba(0,0,0,0.12)" }}>
+          <ul className="flex items-center justify-between gap-2">
+            {TRUST.map(({ Icon, label }) => (
+              <li key={label} className="flex min-w-0 items-center gap-1.5 text-white/85">
+                <Icon className="size-3.5 shrink-0" style={{ color: GOLD }} />
+                <span className="truncate text-[11px] font-semibold">{label}</span>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </div>
 
@@ -176,31 +179,27 @@ function HomePage() {
           <h3 className="text-base font-extrabold text-foreground">Catégories</h3>
           <Link to="/explorer" className="text-xs font-semibold" style={{ color: DARK_GREEN }}>Voir tout</Link>
         </div>
-        <div className="grid grid-cols-4 gap-3">
-          {TILES.map((t, i) => (
+        <div className="grid grid-cols-4 gap-x-3 gap-y-4">
+          {TILES.map(({ label, Icon, cat, free, color, tint }, i) => (
             <Link
-              key={t.cat + t.label}
+              key={cat + label}
               to="/explorer"
-              search={{ category: t.cat } as never}
+              search={{ category: cat } as never}
               className="group flex animate-tile-pop flex-col items-center"
               style={{ animationDelay: `${i * 35}ms` }}
             >
               <div
-                className={`relative grid aspect-square w-full place-items-center overflow-hidden rounded-2xl shadow-sm ring-1 transition duration-300 group-hover:-translate-y-0.5 group-hover:shadow-lg active:scale-95 ${t.free ? "ring-2" : "ring-black/5"}`}
-                style={t.free
-                  ? { backgroundColor: t.tint, ['--tw-ring-color' as string]: DARK_GREEN }
-                  : { backgroundColor: t.tint }}
+                className={`relative grid aspect-square w-full place-items-center rounded-2xl border transition duration-300 group-hover:-translate-y-0.5 group-hover:shadow-md active:scale-95 ${free ? "border-2" : "border-black/5"}`}
+                style={{ backgroundColor: tint, borderColor: free ? GOLD : undefined }}
               >
-                <span aria-hidden className="absolute inset-x-0 top-0 h-1/2 opacity-90" style={{ background: t.grad, clipPath: "ellipse(120% 100% at 50% 0%)" }} />
-                <span aria-hidden className="absolute -right-3 -top-3 size-10 rounded-full bg-white/25" />
-                <span className="relative z-10 text-3xl drop-shadow-sm transition duration-300 group-hover:scale-110">{t.emoji}</span>
-                {t.free && (
-                  <span className="absolute -bottom-1 left-1/2 z-10 -translate-x-1/2 rounded-full px-1.5 py-0.5 text-[7px] font-extrabold uppercase tracking-tight text-white shadow whitespace-nowrap" style={{ backgroundColor: DARK_GREEN }}>
-                    100% GRATUIT
-                  </span>
-                )}
+                <Icon className="size-6 transition duration-300 group-hover:scale-110" style={{ color }} strokeWidth={1.8} />
               </div>
-              <span className="mt-1.5 text-center text-[10px] font-semibold leading-tight text-foreground">{t.label}</span>
+              <span className="mt-1.5 line-clamp-2 text-center text-[10px] font-semibold leading-tight text-foreground">{label}</span>
+              {free && (
+                <span className="mt-1 rounded-full px-1.5 py-0.5 text-[7px] font-extrabold uppercase tracking-tight text-white" style={{ backgroundColor: DARK_GREEN }}>
+                  100% Gratuit
+                </span>
+              )}
             </Link>
           ))}
         </div>
