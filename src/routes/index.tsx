@@ -227,13 +227,14 @@ function HomePage() {
       <section className="px-4 pb-8">
         <Link
           to="/abonnements"
-          className="block rounded-2xl p-5 text-white shadow-lg"
-          style={{ background: "linear-gradient(135deg, #7A2E12 0%, #C25A1E 100%)" }}
+          className="relative block overflow-hidden rounded-2xl p-5 text-white shadow-lg"
+          style={{ background: "linear-gradient(135deg, #14532D 0%, #1B6E3C 60%, #2E9B57 100%)" }}
         >
+          <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1/4 animate-sheen bg-white/15 blur-md" />
           <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: GOLD }}>Boostez vos ventes</p>
           <h4 className="mt-1 text-lg font-extrabold">Passez Pro ou Business</h4>
           <p className="mt-1 text-xs text-white/80">Visibilité prioritaire, boutique perso, statistiques avancées.</p>
-          <span className="mt-3 inline-block rounded-full px-4 py-1.5 text-xs font-extrabold text-[#7A2E12]" style={{ backgroundColor: GOLD }}>Voir les offres</span>
+          <span className="mt-3 inline-block rounded-full px-4 py-1.5 text-xs font-extrabold text-[#14532D]" style={{ backgroundColor: GOLD }}>Voir les offres</span>
         </Link>
       </section>
     </MobileShell>
