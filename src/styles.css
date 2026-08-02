@@ -146,3 +146,32 @@ body {
 @utility gradient-warm {
   background-image: linear-gradient(135deg, var(--brand-green), color-mix(in oklab, var(--brand-gold) 70%, var(--brand-green)));
 }
+
+/* ── Interface dynamique (refonte vidéo) ─────────────────────────────────── */
+@keyframes marquee-x {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@utility animate-marquee {
+  animation: marquee-x 22s linear infinite;
+}
+
+@keyframes tile-pop {
+  from { opacity: 0; transform: translateY(10px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@utility animate-tile-pop {
+  animation: tile-pop 0.5s cubic-bezier(0.19, 1, 0.22, 1) both;
+}
+
+@keyframes sheen {
+  0% { transform: translateX(-120%) skewX(-18deg); }
+  60%, 100% { transform: translateX(320%) skewX(-18deg); }
+}
+@utility animate-sheen {
+  animation: sheen 3.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee, .animate-tile-pop, .animate-sheen { animation: none !important; }
+}
