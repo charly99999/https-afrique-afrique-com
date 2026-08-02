@@ -132,16 +132,17 @@ function HomePage() {
 
         {/* HERO BANNER */}
         <section className="px-5 pb-6">
-          <div className="relative overflow-hidden rounded-2xl p-5" style={{ background: "linear-gradient(135deg, #7A2E12 0%, #C25A1E 55%, #E8A02C 100%)", boxShadow: "0 8px 28px -10px rgba(0,0,0,0.5)" }}>
+          <div className="relative overflow-hidden rounded-2xl p-5" style={{ background: "linear-gradient(135deg, #14532D 0%, #1B6E3C 55%, #2E9B57 100%)", boxShadow: "0 8px 28px -10px rgba(0,0,0,0.5)" }}>
+            <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1/3 animate-sheen bg-white/15 blur-md" />
             <div className="relative z-10 max-w-[58%]">
-              <h2 className="text-3xl font-extrabold leading-none text-white">Trouvez tout</h2>
-              <p className="mt-1 text-base font-medium text-white/90">en un seul clic</p>
+              <h2 className="text-3xl font-extrabold leading-none text-white">100% Gratuit</h2>
+              <p className="mt-1 text-base font-medium text-white/90">Aucune commission</p>
               <Link
                 to="/explorer"
-                className="mt-4 inline-block rounded-full px-4 py-2 text-xs font-extrabold text-[#7A2E12] shadow-md active:scale-95"
+                className="mt-4 inline-block rounded-full px-4 py-2 text-xs font-extrabold text-[#14532D] shadow-md active:scale-95"
                 style={{ backgroundColor: GOLD }}
               >
-                Partout en Afrique
+                Voir les annonces
               </Link>
             </div>
             <img
@@ -153,6 +154,15 @@ function HomePage() {
             />
           </div>
         </section>
+
+        {/* BANDEAU DE CONFIANCE DÉFILANT */}
+        <div className="overflow-hidden border-y border-white/10" style={{ backgroundColor: "rgba(255,255,255,0.08)" }}>
+          <div className="flex w-max animate-marquee gap-8 py-2">
+            {[...TRUST, ...TRUST].map((t, i) => (
+              <span key={`${t}-${i}`} className="whitespace-nowrap text-[11px] font-bold text-white/90">{t}</span>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* PROMO BANNER */}
@@ -165,20 +175,25 @@ function HomePage() {
           <Link to="/explorer" className="text-xs font-semibold" style={{ color: DARK_GREEN }}>Voir tout</Link>
         </div>
         <div className="grid grid-cols-4 gap-3">
-          {TILES.map((t) => (
+          {TILES.map((t, i) => (
             <Link
               key={t.cat + t.label}
               to="/explorer"
               search={{ category: t.cat } as never}
-              className="group flex flex-col items-center"
+              className="group flex animate-tile-pop flex-col items-center"
+              style={{ animationDelay: `${i * 35}ms` }}
             >
               <div
-                className={`relative grid aspect-square w-full place-items-center rounded-2xl shadow-sm ring-1 transition active:scale-95 ${t.free ? "ring-2" : "ring-black/5"}`}
-                style={t.free ? { backgroundColor: "#FDF3E7", borderColor: DARK_GREEN, ['--tw-ring-color' as string]: DARK_GREEN } : { backgroundColor: "#FAF7F2" }}
+                className={`relative grid aspect-square w-full place-items-center overflow-hidden rounded-2xl shadow-sm ring-1 transition duration-300 group-hover:-translate-y-0.5 group-hover:shadow-lg active:scale-95 ${t.free ? "ring-2" : "ring-black/5"}`}
+                style={t.free
+                  ? { backgroundColor: t.tint, ['--tw-ring-color' as string]: DARK_GREEN }
+                  : { backgroundColor: t.tint }}
               >
-                <span className="text-3xl">{t.emoji}</span>
+                <span aria-hidden className="absolute inset-x-0 top-0 h-1/2 opacity-90" style={{ background: t.grad, clipPath: "ellipse(120% 100% at 50% 0%)" }} />
+                <span aria-hidden className="absolute -right-3 -top-3 size-10 rounded-full bg-white/25" />
+                <span className="relative z-10 text-3xl drop-shadow-sm transition duration-300 group-hover:scale-110">{t.emoji}</span>
                 {t.free && (
-                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full px-1.5 py-0.5 text-[7px] font-extrabold uppercase tracking-tight text-white shadow whitespace-nowrap" style={{ backgroundColor: DARK_GREEN }}>
+                  <span className="absolute -bottom-1 left-1/2 z-10 -translate-x-1/2 rounded-full px-1.5 py-0.5 text-[7px] font-extrabold uppercase tracking-tight text-white shadow whitespace-nowrap" style={{ backgroundColor: DARK_GREEN }}>
                     100% GRATUIT
                   </span>
                 )}
@@ -188,6 +203,7 @@ function HomePage() {
           ))}
         </div>
       </section>
+
 
       {/* ANNONCES — GRILLE MASONRY VERTICALE */}
       <section className="bg-card px-4 py-6">
