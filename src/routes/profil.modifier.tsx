@@ -113,7 +113,7 @@ function EditProfilePage() {
   }
 
   async function changePassword() {
-    if (password.length < 8) { toast.error("Le mot de passe doit faire au moins 8 caractères."); return; }
+    if (password.length < 6) { toast.error("Le mot de passe doit faire au moins 6 caractères."); return; }
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password });
     setBusy(false);
