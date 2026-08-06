@@ -130,7 +130,7 @@ function AuthPage() {
             </>
           )}
           <Field icon={<Mail className="size-4" />} placeholder="Adresse e-mail" value={email} onChange={setEmail} type="email" required />
-          <Field icon={<Lock className="size-4" />} placeholder="Mot de passe (8+ caractères)" value={password} onChange={setPassword} type="password" required minLength={8} />
+          <Field icon={<Lock className="size-4" />} placeholder="Mot de passe" value={password} onChange={setPassword} type="password" required minLength={6} />
 
           <button
             type="submit"
