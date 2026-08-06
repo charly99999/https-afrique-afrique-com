@@ -189,11 +189,15 @@ function HomePage() {
               style={{ animationDelay: `${i * 35}ms` }}
             >
               <div
-                className={`relative grid aspect-square w-full place-items-center rounded-2xl border transition duration-300 group-hover:-translate-y-0.5 group-hover:shadow-md active:scale-95 ${free ? "border-2" : "border-black/5"}`}
-                style={{ backgroundColor: tint, borderColor: free ? GOLD : undefined }}
+                className={`tile-3d gloss-3d relative grid aspect-square w-full place-items-center rounded-2xl border group-hover:-translate-y-1 ${free ? "border-2" : "border-black/5"}`}
+                style={{
+                  background: `linear-gradient(160deg, #ffffff 0%, ${tint} 45%, color-mix(in oklab, ${tint} 78%, #000000) 100%)`,
+                  borderColor: free ? GOLD : undefined,
+                }}
               >
-                <Icon className="size-6 transition duration-300 group-hover:scale-110" style={{ color }} strokeWidth={1.8} />
+                <Icon className="relative z-10 size-6 transition duration-300 group-hover:scale-110" style={{ color, filter: "drop-shadow(0 2px 2px rgba(0,0,0,0.18))" }} strokeWidth={1.9} />
               </div>
+
               <span className="mt-1.5 line-clamp-2 text-center text-[10px] font-semibold leading-tight text-foreground">{label}</span>
               {free && (
                 <span className="mt-1 rounded-full px-1.5 py-0.5 text-[7px] font-extrabold uppercase tracking-tight text-white" style={{ backgroundColor: DARK_GREEN }}>

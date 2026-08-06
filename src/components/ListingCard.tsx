@@ -60,8 +60,9 @@ export function ListingCard({ listing, masonry = false }: { listing: ListingItem
   }
 
   return (
-    <Link to="/annonces/$id" params={{ id: listing.id }} className="group mb-3 flex break-inside-avoid flex-col">
-      <div className={`relative mb-3 overflow-hidden rounded-2xl bg-muted ${masonry ? "" : "aspect-square"}`}>
+    <Link to="/annonces/$id" params={{ id: listing.id }} className="group card-3d mb-3 flex break-inside-avoid flex-col rounded-2xl bg-card p-2">
+      <div className={`relative mb-3 overflow-hidden rounded-xl bg-muted shadow-[inset_0_0_0_1px_rgba(0,0,0,0.06)] ${masonry ? "" : "aspect-square"}`}>
+
         {lite && !showImage ? (
           <button
             type="button"

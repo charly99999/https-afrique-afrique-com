@@ -28,7 +28,7 @@ function ResetPasswordPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (password.length < 8) return toast.error("Mot de passe : 8 caractères minimum");
+    if (password.length < 6) return toast.error("Mot de passe : 6 caractères minimum");
     if (password !== confirm) return toast.error("Les mots de passe ne correspondent pas");
     setLoading(true);
     try {
@@ -54,7 +54,7 @@ function ResetPasswordPage() {
           <h1 className="font-display text-3xl italic leading-tight">Nouveau mot de passe</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {ready
-              ? "Choisissez un nouveau mot de passe sécurisé (8 caractères minimum)."
+              ? "Choisissez un nouveau mot de passe (6 caractères minimum)."
               : "Vérification du lien de réinitialisation..."}
           </p>
         </header>
@@ -87,7 +87,7 @@ function PasswordField({ value, onChange, placeholder }: { value: string; onChan
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required
-        minLength={8}
+        minLength={6}
         autoComplete="new-password"
         className="w-full rounded-xl border border-border bg-card py-3.5 pl-11 pr-12 text-sm outline-none focus:ring-2 focus:ring-brand-green/30"
       />

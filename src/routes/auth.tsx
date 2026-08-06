@@ -130,7 +130,7 @@ function AuthPage() {
             </>
           )}
           <Field icon={<Mail className="size-4" />} placeholder="Adresse e-mail" value={email} onChange={setEmail} type="email" required />
-          <Field icon={<Lock className="size-4" />} placeholder="Mot de passe (8+ caractères)" value={password} onChange={setPassword} type="password" required minLength={8} />
+          <Field icon={<Lock className="size-4" />} placeholder="Mot de passe" value={password} onChange={setPassword} type="password" required minLength={6} />
 
           <button
             type="submit"
@@ -244,7 +244,7 @@ function traduireErreur(msg: string): string {
   if (m.includes("invalid login")) return "E-mail ou mot de passe incorrect";
   if (m.includes("already registered") || m.includes("user already")) return "Cette adresse est déjà inscrite";
   if (m.includes("password") && m.includes("pwned")) return "Mot de passe trop courant. Choisissez-en un autre.";
-  if (m.includes("password")) return "Mot de passe invalide (8 caractères minimum)";
+  if (m.includes("password")) return "Mot de passe invalide (6 caractères minimum)";
   if (m.includes("email")) return "Adresse e-mail invalide";
   return msg;
 }

@@ -172,6 +172,54 @@ body {
   animation: sheen 3.6s ease-in-out infinite;
 }
 
+/* ── Relief 3D (tuiles & cartes) ─────────────────────────────────────────── */
+@utility tile-3d {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.07),
+    0 6px 14px -6px rgba(15, 42, 26, 0.28),
+    0 2px 4px -2px rgba(15, 42, 26, 0.18);
+  transform: translateZ(0);
+  transition: transform 0.28s cubic-bezier(0.19, 1, 0.22, 1), box-shadow 0.28s ease;
+  &:active {
+    transform: translateY(2px) scale(0.97);
+    box-shadow:
+      inset 0 2px 5px rgba(0, 0, 0, 0.16),
+      0 2px 5px -3px rgba(15, 42, 26, 0.25);
+  }
+}
+
+@utility card-3d {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 10px 22px -12px rgba(15, 42, 26, 0.42),
+    0 3px 8px -5px rgba(15, 42, 26, 0.22);
+  transition: transform 0.35s cubic-bezier(0.19, 1, 0.22, 1), box-shadow 0.35s ease;
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 18px 34px -16px rgba(15, 42, 26, 0.5),
+      0 6px 12px -8px rgba(15, 42, 26, 0.3);
+  }
+  &:active {
+    transform: translateY(-1px) scale(0.995);
+  }
+}
+
+@utility gloss-3d {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 45%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-marquee, .animate-tile-pop, .animate-sheen { animation: none !important; }
+  .card-3d:hover { transform: none; }
 }
+
