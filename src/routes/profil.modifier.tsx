@@ -242,7 +242,7 @@ function EditProfilePage() {
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Nouveau mot de passe (8+ caractères)"
+              placeholder="Nouveau mot de passe (6+ caractères)"
               autoComplete="new-password"
               className="w-full rounded-lg border border-border bg-background px-3 py-2 pr-11 text-sm"
             />
