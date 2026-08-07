@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { MobileShell } from "@/components/MobileShell";
-import { Settings, Store, CreditCard, Bell, LogIn, LogOut, MoreHorizontal, UserCog, Share2 } from "lucide-react";
+import { Settings, Store, CreditCard, Bell, LogIn, LogOut, MoreHorizontal, UserCog, Share2, Eye, Heart, LayoutGrid } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { shareApp } from "@/lib/share";
+import { StatSkeleton } from "@/components/ListingSkeleton";
 
 export const Route = createFileRoute("/profil")({
   head: () => ({ meta: [{ title: "Mon profil — Afrique-business" }] }),
@@ -14,9 +16,40 @@ export const Route = createFileRoute("/profil")({
 const GOLD = "#D4AF37";
 const DARK_GREEN = "#0B3D2E";
 
+type Stats = { active: number; views: number; favorites: number };
+
 function ProfilPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!user) { setStats(null); return; }
+    let cancelled = false;
+    setStatsLoading(true);
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from("listings")
+          .select("status, views_count, favorites_count")
+          .eq("owner_id", user.id);
+        if (error) throw error;
+        if (cancelled) return;
+        const rows = data ?? [];
+        setStats({
+          active: rows.filter((r) => r.status === "active").length,
+          views: rows.reduce((s, r) => s + (r.views_count ?? 0), 0),
+          favorites: rows.reduce((s, r) => s + (r.favorites_count ?? 0), 0),
+        });
+      } catch {
+        if (!cancelled) setStats(null);
+      } finally {
+        if (!cancelled) setStatsLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
 
   async function handleSignOut() {
     const { error } = await supabase.auth.signOut();
@@ -29,6 +62,7 @@ function ProfilPage() {
 
   const initial = (user?.user_metadata?.display_name || user?.email || "?").charAt(0).toUpperCase();
   const name = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Visiteur";
+
 
   return (
     <MobileShell>
