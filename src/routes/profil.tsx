@@ -98,6 +98,22 @@ function ProfilPage() {
           </Link>
         )}
 
+        {user && (
+          <div className="mt-6 grid grid-cols-3 gap-3">
+            {statsLoading && !stats ? (
+              <><StatSkeleton /><StatSkeleton /><StatSkeleton /></>
+            ) : (
+              <>
+                <StatCard Icon={LayoutGrid} value={stats?.active ?? 0} label="Annonces actives" />
+                <StatCard Icon={Eye} value={stats?.views ?? 0} label="Vues totales" />
+                <StatCard Icon={Heart} value={stats?.favorites ?? 0} label="Favoris reçus" />
+              </>
+            )}
+          </div>
+        )}
+
+
+
         {/* BANNIÈRE ABONNEMENT */}
         <Link
           to="/abonnements"
