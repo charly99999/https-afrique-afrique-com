@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { MobileShell } from "@/components/MobileShell";
+import type { LucideIcon } from "lucide-react";
 import { Settings, Store, CreditCard, Bell, LogIn, LogOut, MoreHorizontal, UserCog, Share2, Eye, Heart, LayoutGrid } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -185,5 +186,15 @@ function ProfilPage() {
         .row-ico { display:grid; place-items:center; width:2rem; height:2rem; border-radius:0.5rem; background:hsl(var(--muted)); color: ${DARK_GREEN}; }
       `}</style>
     </MobileShell>
+  );
+}
+
+function StatCard({ Icon, value, label }: { Icon: LucideIcon; value: number; label: string }) {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-3 text-center shadow-sm">
+      <Icon className="mx-auto size-4 text-brand-green" />
+      <p className="mt-1 text-lg font-extrabold leading-none text-foreground">{value}</p>
+      <p className="mt-1 text-[10px] font-semibold leading-tight text-muted-foreground">{label}</p>
+    </div>
   );
 }
