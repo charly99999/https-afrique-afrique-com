@@ -9,7 +9,10 @@ import { MobileShell } from "@/components/MobileShell";
 import { ListingCard } from "@/components/ListingCard";
 import { ShareAppButton } from "@/components/ShareAppButton";
 import { PromoBanner } from "@/components/PromoBanner";
-import { LISTINGS, type CountryCode } from "@/data/catalog";
+import { IndependenceBanner } from "@/components/IndependenceBanner";
+import { ListingGridSkeleton } from "@/components/ListingSkeleton";
+import { toast } from "sonner";
+import { type CountryCode } from "@/data/catalog";
 import { fetchListings, type DbListing } from "@/lib/listings-client";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -56,12 +59,30 @@ function HomePage() {
   const { user } = useAuth();
   const [country] = useState<CountryCode>("CI");
   const [query, setQuery] = useState("");
-  const [dbListings, setDbListings] = useState<DbListing[] | null>(null);
+  const [dbListings, setDbListings] = useState<DbListing[]>([]);
+  const [loadingFeed, setLoadingFeed] = useState(true);
   const [unread, setUnread] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
-    fetchListings(country).then((d) => { if (!cancelled) setDbListings(d); });
+    setLoadingFeed(true);
+    (async () => {
+      try {
+        const d = await fetchListings(country);
+        if (!cancelled) setDbListings(d ?? []);
+      } catch (err) {
+        if (!cancelled) {
+          setDbListings([]);
+          toast.error(
+            err instanceof Error && /fetch|network/i.test(err.message)
+              ? "Connexion instable : impossible de charger les annonces."
+              : "Impossible de charger les annonces pour le moment.",
+          );
+        }
+      } finally {
+        if (!cancelled) setLoadingFeed(false);
+      }
+    })();
     return () => { cancelled = true; };
   }, [country]);
 
@@ -84,12 +105,8 @@ function HomePage() {
     return () => { cancelled = true; supabase.removeChannel(channel); };
   }, [user]);
 
-  const feed = useMemo(() => {
-    const src = (dbListings && dbListings.length > 0)
-      ? dbListings
-      : (LISTINGS.filter((l) => l.country === country) as unknown as DbListing[]);
-    return src;
-  }, [dbListings, country]);
+  const feed = useMemo(() => dbListings, [dbListings]);
+
 
   return (
     <MobileShell>
@@ -170,6 +187,9 @@ function HomePage() {
         </div>
       </div>
 
+      {/* BANNIÈRE ÉVÉNEMENTIELLE (7–8 août) */}
+      <IndependenceBanner />
+
       {/* PROMO BANNER */}
       <PromoBanner />
 
@@ -217,8 +237,16 @@ function HomePage() {
           <Link to="/explorer" className="text-xs font-semibold" style={{ color: DARK_GREEN }}>Voir tout</Link>
         </div>
 
-        {feed.length === 0 ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">Aucune annonce pour l'instant.</p>
+        {loadingFeed ? (
+          <ListingGridSkeleton count={6} />
+        ) : feed.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border py-12 text-center">
+            <p className="text-sm font-semibold text-foreground">Aucune annonce pour l'instant</p>
+            <p className="mt-1 text-xs text-muted-foreground">Soyez le premier à publier dans votre ville.</p>
+            <Link to="/publier" className="mt-4 inline-block rounded-full bg-brand-green px-5 py-2 text-xs font-extrabold text-primary-foreground">
+              Publier une annonce
+            </Link>
+          </div>
         ) : (
           <div className="columns-2 gap-3 md:columns-3 lg:columns-4 xl:columns-5">
             {feed.map((l) => (

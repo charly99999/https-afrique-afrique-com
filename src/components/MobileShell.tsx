@@ -39,11 +39,15 @@ function NavItem({ to, icon, label, active }: { to: string; icon: ReactNode; lab
   return (
     <Link
       to={to}
-      className={`group relative flex flex-col items-center gap-1 transition ${active ? "text-brand-green" : "text-muted-foreground hover:text-foreground"}`}
+      className={`group relative flex flex-col items-center gap-1 px-2 py-1 transition-all duration-300 ${active ? "text-brand-green" : "text-muted-foreground hover:text-foreground"}`}
     >
-      {active && <span aria-hidden className="absolute -top-2 h-1 w-6 rounded-full bg-brand-gold" />}
-      {icon}
-      <span className="text-[10px] font-bold">{label}</span>
+      {active && (
+        <span aria-hidden className="animate-nav-pop absolute -top-2 h-1 w-6 rounded-full bg-brand-gold" />
+      )}
+      <span className={`transition-transform duration-300 ${active ? "-translate-y-0.5 scale-110" : "group-active:scale-90"}`}>
+        {icon}
+      </span>
+      <span className={`text-[10px] transition-all duration-300 ${active ? "font-extrabold" : "font-bold opacity-80"}`}>{label}</span>
     </Link>
   );
 }

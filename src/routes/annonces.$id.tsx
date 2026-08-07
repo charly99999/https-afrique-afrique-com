@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Flag, Rocket, ShieldCheck, MapPin, Heart } from "lucide-react";
-import { formatFcfa, getListing, LISTINGS } from "@/data/catalog";
+import { formatFcfa, getListing } from "@/data/catalog";
 import { MobileShell } from "@/components/MobileShell";
 import { ListingCard } from "@/components/ListingCard";
 import { ContactBar } from "@/components/ContactBar";
@@ -104,7 +104,7 @@ function ListingDetail() {
           if (!cancelled) {
             setListing(demo ? ({ ...demo, ownerId: undefined, sellerPhone: undefined, sellerWhatsapp: undefined, isFavorite: false } as DbListing) : null);
             setPhotos(demo ? [demo.image] : []);
-            setSimilar(demo ? (LISTINGS.filter((l) => l.id !== demo.id && l.category === demo.category).slice(0, 4) as unknown as DbListing[]) : []);
+            setSimilar([]);
             setIsFav(false);
             setLoading(false);
           }
