@@ -59,12 +59,30 @@ function HomePage() {
   const { user } = useAuth();
   const [country] = useState<CountryCode>("CI");
   const [query, setQuery] = useState("");
-  const [dbListings, setDbListings] = useState<DbListing[] | null>(null);
+  const [dbListings, setDbListings] = useState<DbListing[]>([]);
+  const [loadingFeed, setLoadingFeed] = useState(true);
   const [unread, setUnread] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
-    fetchListings(country).then((d) => { if (!cancelled) setDbListings(d); });
+    setLoadingFeed(true);
+    (async () => {
+      try {
+        const d = await fetchListings(country);
+        if (!cancelled) setDbListings(d ?? []);
+      } catch (err) {
+        if (!cancelled) {
+          setDbListings([]);
+          toast.error(
+            err instanceof Error && /fetch|network/i.test(err.message)
+              ? "Connexion instable : impossible de charger les annonces."
+              : "Impossible de charger les annonces pour le moment.",
+          );
+        }
+      } finally {
+        if (!cancelled) setLoadingFeed(false);
+      }
+    })();
     return () => { cancelled = true; };
   }, [country]);
 
@@ -87,12 +105,8 @@ function HomePage() {
     return () => { cancelled = true; supabase.removeChannel(channel); };
   }, [user]);
 
-  const feed = useMemo(() => {
-    const src = (dbListings && dbListings.length > 0)
-      ? dbListings
-      : (LISTINGS.filter((l) => l.country === country) as unknown as DbListing[]);
-    return src;
-  }, [dbListings, country]);
+  const feed = useMemo(() => dbListings, [dbListings]);
+
 
   return (
     <MobileShell>
