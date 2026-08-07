@@ -187,6 +187,9 @@ function HomePage() {
         </div>
       </div>
 
+      {/* BANNIÈRE ÉVÉNEMENTIELLE (7–8 août) */}
+      <IndependenceBanner />
+
       {/* PROMO BANNER */}
       <PromoBanner />
 
