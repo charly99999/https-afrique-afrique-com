@@ -22,7 +22,7 @@ export function IndependenceBanner() {
           <p className="text-[10px] font-extrabold uppercase tracking-widest text-white/80">
             7 août • Fête nationale
           </p>
-          <p className="truncate text-sm font-extrabold text-white">
+          <p className="text-[13px] font-extrabold leading-snug text-white">
             Bonne Fête de l'Indépendance à la Côte d'Ivoire ! 🇨🇮
           </p>
         </div>
