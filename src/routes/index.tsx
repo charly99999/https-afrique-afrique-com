@@ -234,8 +234,16 @@ function HomePage() {
           <Link to="/explorer" className="text-xs font-semibold" style={{ color: DARK_GREEN }}>Voir tout</Link>
         </div>
 
-        {feed.length === 0 ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">Aucune annonce pour l'instant.</p>
+        {loadingFeed ? (
+          <ListingGridSkeleton count={6} />
+        ) : feed.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border py-12 text-center">
+            <p className="text-sm font-semibold text-foreground">Aucune annonce pour l'instant</p>
+            <p className="mt-1 text-xs text-muted-foreground">Soyez le premier à publier dans votre ville.</p>
+            <Link to="/publier" className="mt-4 inline-block rounded-full bg-brand-green px-5 py-2 text-xs font-extrabold text-primary-foreground">
+              Publier une annonce
+            </Link>
+          </div>
         ) : (
           <div className="columns-2 gap-3 md:columns-3 lg:columns-4 xl:columns-5">
             {feed.map((l) => (
