@@ -22,18 +22,18 @@ export function PromoBanner() {
   }
 
   return (
-    <div className="mx-4 mt-4 overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#14532D_0%,#1B6E3C_100%)] text-white shadow-soft ring-1 ring-black/5">
+    <div className="mx-4 mt-4 overflow-hidden rounded-2xl border border-brand-gold/25 bg-[linear-gradient(135deg,oklch(0.19_0.01_85)_0%,oklch(0.26_0.03_82)_100%)] text-foreground shadow-soft">
       <div className="relative px-4 py-3.5 pr-10">
         <button
           type="button"
           onClick={dismiss}
           aria-label="Fermer la bannière"
-          className="absolute right-2 top-2 grid size-7 place-items-center rounded-full bg-white/15 transition hover:bg-white/25"
+          className="absolute right-2 top-2 grid size-7 place-items-center rounded-full bg-foreground/10 transition hover:bg-foreground/20"
         >
           <X className="size-4" />
         </button>
         <div className="flex items-start gap-3">
-          <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full bg-white/15">
+          <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full bg-foreground/10">
             <Gift className="size-4" />
           </span>
           <div>
