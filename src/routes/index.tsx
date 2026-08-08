@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Search, Bell, Car, Home, Smartphone, Refrigerator, Shirt, Baby,
   Briefcase, Sofa, Tractor, Apple, Dog, Package, ShieldCheck, Wallet, Globe2,
+  MapPin, ArrowRight, Sparkles,
   type LucideIcon,
 } from "lucide-react";
 import { MobileShell } from "@/components/MobileShell";
@@ -21,32 +22,31 @@ import africaMap from "@/assets/africa-map-green.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Afrique-Business — Trouvez tout en un seul clic" },
-      { name: "description", content: "Marketplace n°1 d'Afrique francophone : immobilier, véhicules, téléphones, emploi, services. 11 pays couverts." },
-      { property: "og:title", content: "Afrique-Business — Afrique-business" },
-      { property: "og:description", content: "Trouvez tout en un seul clic. Partout en Afrique." },
+      { title: "Afrique-Afrique — Vendez, achetez, développez" },
+      { name: "description", content: "Marketplace premium d'Afrique francophone : immobilier, véhicules, téléphones, emploi, services. Inscription gratuite, 11 pays couverts." },
+      { property: "og:title", content: "Afrique-Afrique — Marketplace panafricaine" },
+      { property: "og:description", content: "Inscription gratuite. Vendez • Achetez • Développez, partout en Afrique." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: HomePage,
 });
 
-const DARK_GREEN = "#1B6E3C";
-const GOLD = "#E8A02C";
-
-type Tile = { label: string; Icon: LucideIcon; cat: string; free?: boolean; color: string; tint: string };
+type Tile = { label: string; Icon: LucideIcon; cat: string; free?: boolean };
 const TILES: Tile[] = [
-  { label: "Véhicules", Icon: Car, cat: "vehicules", color: "#1B6E3C", tint: "#E9F6EE" },
-  { label: "Immobilier", Icon: Home, cat: "immobilier", color: "#0F5C86", tint: "#E8F3F9" },
-  { label: "Électronique", Icon: Smartphone, cat: "electronique", color: "#4A2B86", tint: "#F0EBFA" },
-  { label: "Électroménager", Icon: Refrigerator, cat: "electromenager", color: "#166A6A", tint: "#E7F5F4" },
-  { label: "Mode & Beauté", Icon: Shirt, cat: "mode", color: "#A02455", tint: "#FBEBF1" },
-  { label: "Pour l'Enfant", Icon: Baby, cat: "enfant", color: "#B4651A", tint: "#FDF2E4" },
-  { label: "Emploi & Services", Icon: Briefcase, cat: "services", free: true, color: "#B07A00", tint: "#FDF6E7" },
-  { label: "Maison & Loisirs", Icon: Sofa, cat: "maison", color: "#5C4630", tint: "#F5EFE8" },
-  { label: "Agricole", Icon: Tractor, cat: "pro-agricole", color: "#3F6B12", tint: "#F0F6E4" },
-  { label: "Alimentation", Icon: Apple, cat: "alimentation", color: "#9B1C25", tint: "#FBEBEA" },
-  { label: "Animaux", Icon: Dog, cat: "animaux", color: "#8A5A11", tint: "#FBF2E0" },
-  { label: "Autres", Icon: Package, cat: "autres", color: "#3C4653", tint: "#EEF1F4" },
+  { label: "Immobilier", Icon: Home, cat: "immobilier" },
+  { label: "Véhicules", Icon: Car, cat: "vehicules" },
+  { label: "Électronique", Icon: Smartphone, cat: "electronique" },
+  { label: "Électroménager", Icon: Refrigerator, cat: "electromenager" },
+  { label: "Mode & Beauté", Icon: Shirt, cat: "mode" },
+  { label: "Pour l'Enfant", Icon: Baby, cat: "enfant" },
+  { label: "Emploi & Services", Icon: Briefcase, cat: "services", free: true },
+  { label: "Maison & Loisirs", Icon: Sofa, cat: "maison" },
+  { label: "Agricole", Icon: Tractor, cat: "pro-agricole" },
+  { label: "Alimentation", Icon: Apple, cat: "alimentation" },
+  { label: "Animaux", Icon: Dog, cat: "animaux" },
+  { label: "Autres", Icon: Package, cat: "autres" },
 ];
 
 const TRUST: { Icon: LucideIcon; label: string }[] = [
@@ -107,167 +107,216 @@ function HomePage() {
 
   const feed = useMemo(() => dbListings, [dbListings]);
 
-
   return (
     <MobileShell>
-      {/* HEADER VERT FONCÉ */}
-      <div className="relative" style={{ backgroundColor: DARK_GREEN }}>
-        <header className="px-5 pb-5 pt-6">
-          <div className="mb-4 flex items-center justify-between gap-2 text-white">
+      {/* ── HEADER COMPACT ─────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 px-4 py-3 backdrop-blur-xl">
+        <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+          <Link to="/" className="flex min-w-0 items-center gap-2">
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-brand-gold/15 ring-1 ring-brand-gold/30">
+              <Globe2 className="size-4 text-brand-gold" />
+            </span>
+            <span className="hidden min-w-0 leading-tight sm:block">
+              <span className="block truncate font-display text-sm text-brand-gold">AFRIQUE-AFRIQUE</span>
+              <span className="block truncate text-[10px] text-muted-foreground">Vendez • Achetez • Développez</span>
+            </span>
+          </Link>
+
+          <nav className="hidden items-center justify-center gap-6 text-xs font-bold text-muted-foreground md:flex">
+            <Link to="/" className="text-foreground">Accueil</Link>
+            <a href="#categories" className="transition hover:text-foreground">Catégories</a>
+            <Link to="/explorer" className="transition hover:text-foreground">Explorer</Link>
+            <Link to="/abonnements" className="transition hover:text-foreground">Abonnements</Link>
+          </nav>
+          <span className="md:hidden" />
+
+          <div className="flex shrink-0 items-center gap-1.5">
             <ShareAppButton />
-            <div className="flex flex-1 items-center justify-center gap-2 px-2">
-              <span className="grid size-9 place-items-center rounded-full" style={{ backgroundColor: "rgba(232,160,44,0.18)" }}>
-                <span className="text-base">🌍</span>
-              </span>
-              <div className="leading-tight">
-                <h1 className="text-lg font-extrabold tracking-tight" style={{ color: GOLD }}>Afrique-Business</h1>
-                <p className="text-[10px] font-medium text-white/70">Afrique-business / Ivoire-business</p>
-              </div>
-            </div>
-            <Link to="/messages" aria-label="Notifications" className="relative grid size-10 place-items-center rounded-full bg-white/10">
-              <Bell className="size-5 text-white" />
+            <Link to="/messages" aria-label="Notifications" className="relative grid size-9 place-items-center rounded-full bg-secondary ring-1 ring-border">
+              <Bell className="size-4 text-foreground" />
               {unread > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 grid min-w-[18px] h-[18px] place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2" style={{ ['--tw-ring-color' as string]: DARK_GREEN }}>
+                <span className="absolute -right-0.5 -top-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
                   {unread > 99 ? "99+" : unread}
                 </span>
               )}
             </Link>
-          </div>
-
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Rechercher une villa, une voiture..."
-              className="w-full rounded-full bg-white py-3 pl-11 pr-12 text-sm text-foreground shadow-md outline-none placeholder:text-muted-foreground"
-            />
-            <Link to="/explorer" search={{ q: query } as never} aria-label="Rechercher" className="absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full" style={{ backgroundColor: GOLD }}>
-              <Search className="size-4 text-white" />
+            <Link
+              to="/publier"
+              className="hidden rounded-full bg-brand-green px-4 py-2 text-xs font-extrabold text-primary-foreground shadow-soft transition hover:brightness-110 sm:inline-block"
+            >
+              Publier une annonce
             </Link>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* HERO BANNER */}
-        <section className="px-5 pb-5">
-          <div className="relative overflow-hidden rounded-2xl" style={{ background: "linear-gradient(135deg, #14532D 0%, #1B6E3C 60%, #2E9B57 100%)", boxShadow: "0 10px 30px -14px rgba(0,0,0,0.55)" }}>
-            <img
-              src={africaMap}
-              alt=""
-              aria-hidden
-              width={768}
-              height={768}
-              className="pointer-events-none absolute -right-8 top-1/2 h-[150%] w-auto -translate-y-1/2 opacity-60"
-            />
-            <div className="relative z-10 max-w-[60%] p-5">
-              <h2 className="text-[26px] font-extrabold leading-tight text-white">100% Gratuit</h2>
-              <p className="mt-0.5 text-sm font-medium text-white/85">Aucune commission sur vos ventes</p>
+      {/* ── HERO PREMIUM ───────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden border-b border-border/70">
+        <img
+          src={africaMap}
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute inset-0 size-full object-cover opacity-[0.18]"
+        />
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(90%_70%_at_75%_0%,color-mix(in_oklab,var(--brand-gold)_22%,transparent),transparent_60%)]" />
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/60 via-background/85 to-background" />
+        <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full border border-brand-gold/25" />
+        <div aria-hidden className="pointer-events-none absolute -left-20 bottom-0 size-64 rounded-full border border-brand-gold/15" />
+
+        <div className="relative z-10 px-5 py-10 md:px-10 md:py-16 lg:py-20">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-gold/12 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] text-brand-gold ring-1 ring-brand-gold/30">
+            <Sparkles className="size-3" /> Inscription gratuite
+          </span>
+          <h1 className="mt-4 font-display text-3xl leading-[1.05] text-foreground sm:text-4xl lg:text-6xl">
+            AFRIQUE-AFRIQUE
+          </h1>
+          <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.22em] text-brand-gold sm:text-base">
+            Vendez • Achetez • Développez
+          </p>
+          <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+            Présentez vos produits, biens, services et opportunités à des milliers d'acheteurs
+            et de visiteurs qui cherchent exactement ce que vous proposez, partout en Afrique.
+          </p>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link
+              to="/auth"
+              className="rounded-full bg-brand-green px-6 py-3 text-xs font-extrabold uppercase tracking-wide text-primary-foreground shadow-luxury transition hover:brightness-110 active:scale-95"
+            >
+              Inscription gratuite
+            </Link>
+            <Link
+              to="/explorer"
+              className="inline-flex items-center gap-2 rounded-full border border-brand-gold/40 px-6 py-3 text-xs font-extrabold uppercase tracking-wide text-brand-gold transition hover:bg-brand-gold/10 active:scale-95"
+            >
+              Explorer les annonces <ArrowRight className="size-3.5" />
+            </Link>
+          </div>
+
+          {/* ── BARRE DE RECHERCHE ─────────────────────────────────────── */}
+          <div className="mt-8 rounded-3xl border border-border bg-card/80 p-2 shadow-luxury backdrop-blur-xl">
+            <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+              <div className="relative min-w-0 flex-1">
+                <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Que recherchez-vous ?"
+                  className="w-full rounded-2xl bg-secondary py-3.5 pl-11 pr-4 text-sm text-foreground outline-none ring-1 ring-transparent transition placeholder:text-muted-foreground focus:ring-brand-gold/50"
+                />
+              </div>
               <Link
                 to="/explorer"
-                className="mt-4 inline-block rounded-full px-4 py-2 text-xs font-extrabold text-[#14532D] shadow-md active:scale-95"
-                style={{ backgroundColor: GOLD }}
+                className="flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-secondary px-4 py-3.5 text-xs font-bold text-muted-foreground ring-1 ring-border transition hover:text-foreground lg:w-44"
               >
-                Voir les annonces
+                <MapPin className="size-4 text-brand-gold" /> Toute l'Afrique
+              </Link>
+              <Link
+                to="/explorer"
+                search={{ q: query } as never}
+                className="flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-brand-green px-6 py-3.5 text-xs font-extrabold uppercase tracking-wide text-primary-foreground transition hover:brightness-110 active:scale-95"
+              >
+                <Search className="size-4" /> Rechercher
               </Link>
             </div>
           </div>
-        </section>
 
-        {/* BANDEAU DE CONFIANCE */}
-        <div className="border-t border-white/10 px-5 py-2.5" style={{ backgroundColor: "rgba(0,0,0,0.12)" }}>
-          <ul className="flex items-center justify-between gap-2">
+          {/* Confiance */}
+          <ul className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2">
             {TRUST.map(({ Icon, label }) => (
-              <li key={label} className="flex min-w-0 items-center gap-1.5 text-white/85">
-                <Icon className="size-3.5 shrink-0" style={{ color: GOLD }} />
+              <li key={label} className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
+                <Icon className="size-3.5 shrink-0 text-brand-gold" />
                 <span className="truncate text-[11px] font-semibold">{label}</span>
               </li>
             ))}
           </ul>
         </div>
-      </div>
+      </section>
 
-      {/* BANNIÈRE ÉVÉNEMENTIELLE (7–8 août) */}
       <IndependenceBanner />
-
-      {/* PROMO BANNER */}
       <PromoBanner />
 
-      {/* CATEGORIES GRID */}
-      <section className="bg-card px-4 pt-5">
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-base font-extrabold text-foreground">Catégories</h3>
-          <Link to="/explorer" className="text-xs font-semibold" style={{ color: DARK_GREEN }}>Voir tout</Link>
+      {/* ── CATÉGORIES ─────────────────────────────────────────────────── */}
+      <section id="categories" className="px-4 pt-8 md:px-8">
+        <div className="mb-4 flex items-end justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="truncate font-display text-lg text-foreground sm:text-xl">Explorer par catégorie</h2>
+            <p className="mt-1 truncate text-xs text-muted-foreground">12 univers, des milliers d'opportunités</p>
+          </div>
+          <Link to="/explorer" className="shrink-0 text-xs font-bold text-brand-gold">Voir tout</Link>
         </div>
-        <div className="grid grid-cols-4 gap-x-3 gap-y-4">
-          {TILES.map(({ label, Icon, cat, free, color, tint }, i) => (
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+          {TILES.map(({ label, Icon, cat, free }, i) => (
             <Link
-              key={cat + label}
+              key={cat}
               to="/explorer"
               search={{ category: cat } as never}
-              className="group flex animate-tile-pop flex-col items-center"
-              style={{ animationDelay: `${i * 35}ms` }}
+              className="group animate-tile-pop relative overflow-hidden rounded-2xl border border-border bg-card p-4 transition duration-300 hover:-translate-y-1 hover:border-brand-gold/45"
+              style={{ animationDelay: `${i * 30}ms` }}
             >
-              <div
-                className={`tile-3d gloss-3d relative grid aspect-square w-full place-items-center rounded-2xl border group-hover:-translate-y-1 ${free ? "border-2" : "border-black/5"}`}
-                style={{
-                  background: `linear-gradient(160deg, #ffffff 0%, ${tint} 45%, color-mix(in oklab, ${tint} 78%, #000000) 100%)`,
-                  borderColor: free ? GOLD : undefined,
-                }}
-              >
-                <Icon className="relative z-10 size-6 transition duration-300 group-hover:scale-110" style={{ color, filter: "drop-shadow(0 2px 2px rgba(0,0,0,0.18))" }} strokeWidth={1.9} />
-              </div>
-
-              <span className="mt-1.5 line-clamp-2 text-center text-[10px] font-semibold leading-tight text-foreground">{label}</span>
-              {free && (
-                <span className="mt-1 rounded-full px-1.5 py-0.5 text-[7px] font-extrabold uppercase tracking-tight text-white" style={{ backgroundColor: DARK_GREEN }}>
-                  100% Gratuit
+              <span aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_100%_at_100%_0%,color-mix(in_oklab,var(--brand-gold)_14%,transparent),transparent_65%)] opacity-0 transition duration-300 group-hover:opacity-100" />
+              <span className="relative grid size-10 place-items-center rounded-xl bg-secondary ring-1 ring-border transition group-hover:ring-brand-gold/40">
+                <Icon className="size-5 text-brand-gold" strokeWidth={1.9} />
+              </span>
+              <span className="relative mt-3 block truncate text-[13px] font-bold text-foreground">{label}</span>
+              {free ? (
+                <span className="relative mt-1 inline-block rounded-full bg-brand-green/15 px-2 py-0.5 text-[9px] font-extrabold uppercase text-brand-green">
+                  100% gratuit
                 </span>
+              ) : (
+                <span className="relative mt-1 block text-[10px] text-muted-foreground">Voir les annonces</span>
               )}
             </Link>
           ))}
         </div>
       </section>
 
-
-      {/* ANNONCES — GRILLE MASONRY VERTICALE */}
-      <section className="bg-card px-4 py-6">
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-base font-extrabold text-foreground">Annonces récentes</h3>
-          <Link to="/explorer" className="text-xs font-semibold" style={{ color: DARK_GREEN }}>Voir tout</Link>
+      {/* ── DERNIÈRES OPPORTUNITÉS ─────────────────────────────────────── */}
+      <section className="px-4 py-10 md:px-8">
+        <div className="mb-4 flex items-end justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="truncate font-display text-lg text-foreground sm:text-xl">Les dernières opportunités</h2>
+            <p className="mt-1 truncate text-xs text-muted-foreground">Annonces récemment publiées près de chez vous</p>
+          </div>
+          <Link to="/explorer" className="shrink-0 text-xs font-bold text-brand-gold">Voir tout</Link>
         </div>
 
         {loadingFeed ? (
-          <ListingGridSkeleton count={6} />
+          <ListingGridSkeleton count={8} />
         ) : feed.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border py-12 text-center">
-            <p className="text-sm font-semibold text-foreground">Aucune annonce pour l'instant</p>
+          <div className="rounded-3xl border border-dashed border-border py-14 text-center">
+            <p className="text-sm font-bold text-foreground">Aucune annonce pour l'instant</p>
             <p className="mt-1 text-xs text-muted-foreground">Soyez le premier à publier dans votre ville.</p>
-            <Link to="/publier" className="mt-4 inline-block rounded-full bg-brand-green px-5 py-2 text-xs font-extrabold text-primary-foreground">
+            <Link to="/publier" className="mt-5 inline-block rounded-full bg-brand-green px-5 py-2.5 text-xs font-extrabold text-primary-foreground">
               Publier une annonce
             </Link>
           </div>
         ) : (
-          <div className="columns-2 gap-3 md:columns-3 lg:columns-4 xl:columns-5">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
             {feed.map((l) => (
-              <ListingCard key={l.id} listing={l} masonry />
+              <ListingCard key={l.id} listing={l} />
             ))}
           </div>
         )}
       </section>
 
-      {/* PRO/BUSINESS CTA */}
-      <section className="px-4 pb-8">
+      {/* ── CTA PRO / BUSINESS ─────────────────────────────────────────── */}
+      <section className="px-4 pb-10 md:px-8">
         <Link
           to="/abonnements"
-          className="relative block overflow-hidden rounded-2xl p-5 text-white shadow-lg"
-          style={{ background: "linear-gradient(135deg, #14532D 0%, #1B6E3C 60%, #2E9B57 100%)" }}
+          className="relative block overflow-hidden rounded-3xl border border-brand-gold/25 bg-card p-6 shadow-luxury"
         >
-          <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1/4 animate-sheen bg-white/15 blur-md" />
-          <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: GOLD }}>Boostez vos ventes</p>
-          <h4 className="mt-1 text-lg font-extrabold">Passez Pro ou Business</h4>
-          <p className="mt-1 text-xs text-white/80">Visibilité prioritaire, boutique perso, statistiques avancées.</p>
-          <span className="mt-3 inline-block rounded-full px-4 py-1.5 text-xs font-extrabold text-[#14532D]" style={{ backgroundColor: GOLD }}>Voir les offres</span>
+          <span aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(90%_120%_at_100%_0%,color-mix(in_oklab,var(--brand-gold)_18%,transparent),transparent_60%)]" />
+          <span aria-hidden className="animate-sheen pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-foreground/5 blur-md" />
+          <p className="relative text-[10px] font-extrabold uppercase tracking-[0.2em] text-brand-gold">Boostez vos ventes</p>
+          <h3 className="relative mt-2 font-display text-xl text-foreground">Passez Pro ou Business</h3>
+          <p className="relative mt-1 max-w-md text-xs text-muted-foreground">
+            Visibilité prioritaire, boutique personnalisée et statistiques avancées.
+          </p>
+          <span className="relative mt-4 inline-flex items-center gap-2 rounded-full bg-brand-gold px-5 py-2 text-xs font-extrabold text-primary-foreground">
+            Voir les offres <ArrowRight className="size-3.5" />
+          </span>
         </Link>
       </section>
     </MobileShell>
