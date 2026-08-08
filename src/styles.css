@@ -52,8 +52,8 @@
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
   --shadow-pro-glow: 0 0 24px rgb(232 154 44 / 0.4);
-  --shadow-soft: 0 10px 30px -14px rgb(92 42 20 / 0.28);
-  --shadow-luxury: 0 26px 64px -30px rgb(92 42 20 / 0.45);
+  --shadow-soft: 0 10px 30px -14px rgb(0 0 0 / 0.6);
+  --shadow-luxury: 0 26px 64px -26px rgb(0 0 0 / 0.75);
 }
 
 :root {
@@ -140,8 +140,8 @@ body {
 
 @utility surface-warm {
   background-image:
-    radial-gradient(120% 90% at 0% 0%, color-mix(in oklab, var(--brand-gold) 16%, transparent) 0%, transparent 55%),
-    radial-gradient(110% 80% at 100% 0%, color-mix(in oklab, var(--brand-green) 12%, transparent) 0%, transparent 50%);
+    radial-gradient(120% 90% at 0% 0%, color-mix(in oklab, var(--brand-gold) 12%, transparent) 0%, transparent 55%),
+    radial-gradient(110% 80% at 100% 0%, color-mix(in oklab, var(--brand-green) 10%, transparent) 0%, transparent 50%);
 }
 
 @utility gradient-warm {
@@ -176,31 +176,31 @@ body {
 /* ── Relief 3D (tuiles & cartes) ─────────────────────────────────────────── */
 @utility tile-3d {
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.85),
-    inset 0 -3px 6px rgba(0, 0, 0, 0.07),
-    0 6px 14px -6px rgba(15, 42, 26, 0.28),
-    0 2px 4px -2px rgba(15, 42, 26, 0.18);
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.35),
+    0 6px 14px -6px rgba(0, 0, 0, 0.28),
+    0 2px 4px -2px rgba(0, 0, 0, 0.18);
   transform: translateZ(0);
   transition: transform 0.28s cubic-bezier(0.19, 1, 0.22, 1), box-shadow 0.28s ease;
   &:active {
     transform: translateY(2px) scale(0.97);
     box-shadow:
       inset 0 2px 5px rgba(0, 0, 0, 0.16),
-      0 2px 5px -3px rgba(15, 42, 26, 0.25);
+      0 2px 5px -3px rgba(0, 0, 0, 0.25);
   }
 }
 
 @utility card-3d {
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.7) inset,
-    0 10px 22px -12px rgba(15, 42, 26, 0.42),
-    0 3px 8px -5px rgba(15, 42, 26, 0.22);
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 10px 22px -12px rgba(0, 0, 0, 0.42),
+    0 3px 8px -5px rgba(0, 0, 0, 0.22);
   transition: transform 0.35s cubic-bezier(0.19, 1, 0.22, 1), box-shadow 0.35s ease;
   &:hover {
     transform: translateY(-4px);
     box-shadow:
-      0 18px 34px -16px rgba(15, 42, 26, 0.5),
-      0 6px 12px -8px rgba(15, 42, 26, 0.3);
+      0 18px 34px -16px rgba(0, 0, 0, 0.5),
+      0 6px 12px -8px rgba(0, 0, 0, 0.3);
   }
   &:active {
     transform: translateY(-1px) scale(0.995);
@@ -215,7 +215,7 @@ body {
     inset: 0;
     pointer-events: none;
     border-radius: inherit;
-    background: linear-gradient(160deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 45%);
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 45%);
   }
 }
 
@@ -234,7 +234,7 @@ body {
   background-image: linear-gradient(
     90deg,
     color-mix(in oklab, var(--muted) 92%, transparent) 25%,
-    color-mix(in oklab, var(--muted) 60%, #ffffff) 50%,
+    color-mix(in oklab, var(--muted) 55%, #ffffff) 50%,
     color-mix(in oklab, var(--muted) 92%, transparent) 75%
   );
   background-size: 200% 100%;
@@ -252,7 +252,7 @@ body {
 }
 @utility flag-3d {
   background: linear-gradient(100deg, #F77F00 0%, #0F5132 55%, #0B3D2E 100%);
-  box-shadow: 0 12px 28px -16px rgba(15, 42, 26, 0.6), inset 0 1px 0 rgba(255,255,255,0.25);
+  box-shadow: 0 12px 28px -16px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.25);
 }
 @utility flag-3d-wave {
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
