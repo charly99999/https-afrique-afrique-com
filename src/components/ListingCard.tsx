@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Heart, BadgeCheck, MessageCircle, ImageOff } from "lucide-react";
+import { Heart, BadgeCheck, MessageCircle, ImageOff, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Listing } from "@/data/catalog";
 import { formatFcfa, isFreeCategory } from "@/data/catalog";
@@ -60,14 +60,17 @@ export function ListingCard({ listing, masonry = false }: { listing: ListingItem
   }
 
   return (
-    <Link to="/annonces/$id" params={{ id: listing.id }} className="group card-3d mb-3 flex break-inside-avoid flex-col rounded-2xl bg-card p-2">
-      <div className={`relative mb-3 overflow-hidden rounded-xl bg-muted shadow-[inset_0_0_0_1px_rgba(0,0,0,0.06)] ${masonry ? "" : "aspect-square"}`}>
-
+    <Link
+      to="/annonces/$id"
+      params={{ id: listing.id }}
+      className={`group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition duration-300 hover:-translate-y-1 hover:border-brand-gold/40 hover:shadow-luxury ${masonry ? "mb-3 break-inside-avoid" : ""}`}
+    >
+      <div className={`relative overflow-hidden bg-secondary ${masonry ? "" : "aspect-[4/3]"}`}>
         {lite && !showImage ? (
           <button
             type="button"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowImage(true); }}
-            className={`flex w-full flex-col items-center justify-center gap-1 bg-muted text-muted-foreground ${masonry ? "aspect-square" : "size-full"}`}
+            className={`flex w-full flex-col items-center justify-center gap-1 bg-secondary text-muted-foreground ${masonry ? "aspect-[4/3]" : "size-full"}`}
             aria-label="Charger l'image"
           >
             <ImageOff className="size-6" />
@@ -79,67 +82,82 @@ export function ListingCard({ listing, masonry = false }: { listing: ListingItem
             src={listing.image}
             alt={listing.title}
             loading="lazy"
-            className={`w-full object-cover transition duration-500 group-hover:scale-105 ${masonry ? "h-auto" : "size-full"}`}
+            className={`w-full object-cover transition duration-500 group-hover:scale-[1.06] ${masonry ? "h-auto" : "size-full"}`}
           />
         )}
+        <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/55 to-transparent" />
+
         <button
           type="button"
           aria-label={isFav ? "Retirer des favoris" : "Ajouter aux favoris"}
           onClick={toggleFav}
           disabled={busy}
-          className="absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-background/90 text-brand-green shadow-sm backdrop-blur transition hover:bg-background disabled:opacity-60"
+          className="absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-background/70 text-foreground ring-1 ring-border backdrop-blur transition hover:bg-background disabled:opacity-60"
         >
           <Heart className={`size-4 transition ${isFav ? "fill-destructive text-destructive" : ""}`} />
         </button>
-        {listing.badge === "pro" && (
-          <span className="absolute bottom-2 left-2 rounded bg-brand-green px-2 py-0.5 text-[9px] font-extrabold uppercase text-primary-foreground shadow-sm">
-            <BadgeCheck className="mr-0.5 inline size-2.5" /> Pro
-          </span>
-        )}
-        {listing.badge === "business" && (
-          <span className="absolute bottom-2 left-2 rounded bg-foreground px-2 py-0.5 text-[9px] font-extrabold uppercase text-brand-gold shadow-sm">
-            👑 Business
-          </span>
-        )}
-        {isFreeCategory(listing.category) && (
-          <span className="absolute bottom-2 right-2 rounded-full bg-brand-green px-2 py-0.5 text-[9px] font-extrabold uppercase text-primary-foreground shadow-sm">
-            ✨ Gratuit
-          </span>
-        )}
-      </div>
-      <div className="mb-0.5 flex items-center gap-1.5">
-        <p className="text-[10px] font-bold uppercase tracking-wide text-brand-green">
-          {listing.subCategory ?? listing.category}
-        </p>
-        {(listing as DbListing).verified && (
-          <span title="Vendeur vérifié" className="inline-flex items-center gap-0.5 rounded bg-sky-500/15 px-1 py-0.5 text-[9px] font-extrabold text-sky-600">
-            <BadgeCheck className="size-2.5" /> Vérifié
-          </span>
-        )}
-      </div>
-      <h4 className="line-clamp-1 text-sm font-bold">{listing.title}</h4>
-      <p className="mt-1 font-mono text-sm font-bold text-foreground">
-        {isFreeCategory(listing.category) && (!listing.price || listing.price === 0)
-          ? <span className="text-brand-green">Opportunité gratuite</span>
-          : formatFcfa(listing.price)}
-        {"priceSuffix" in listing && listing.priceSuffix && (
-          <span className="ml-1 text-[10px] font-normal text-muted-foreground">{listing.priceSuffix}</span>
-        )}
-      </p>
 
-      <p className="mt-1 text-[10px] text-muted-foreground">
-        {listing.city} • {listing.postedAt}
-      </p>
-      {(listing.badge === "pro" || listing.badge === "business") && (
-        <span
-          className="mt-2 inline-flex items-center justify-center gap-1 rounded-full bg-[#25D366] py-1.5 text-[11px] font-bold text-white"
-        >
-          <MessageCircle className="size-3" /> Contacter sur WhatsApp
-        </span>
-      )}
+        <div className="absolute left-2 top-2 flex flex-wrap gap-1">
+          {listing.badge === "pro" && (
+            <span className="inline-flex items-center gap-0.5 rounded-full bg-brand-green px-2 py-0.5 text-[9px] font-extrabold uppercase text-primary-foreground">
+              <BadgeCheck className="size-2.5" /> Pro
+            </span>
+          )}
+          {listing.badge === "business" && (
+            <span className="rounded-full bg-brand-gold px-2 py-0.5 text-[9px] font-extrabold uppercase text-primary-foreground">
+              👑 Business
+            </span>
+          )}
+          {isFreeCategory(listing.category) && (
+            <span className="rounded-full bg-background/75 px-2 py-0.5 text-[9px] font-extrabold uppercase text-brand-gold ring-1 ring-brand-gold/30 backdrop-blur">
+              Gratuit
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="flex min-w-0 flex-1 flex-col p-3">
+        <div className="mb-1 flex min-w-0 items-center gap-1.5">
+          <p className="truncate text-[10px] font-bold uppercase tracking-wide text-brand-gold">
+            {listing.subCategory ?? listing.category}
+          </p>
+          {(listing as DbListing).verified && (
+            <span title="Vendeur vérifié" className="inline-flex shrink-0 items-center gap-0.5 rounded bg-sky-500/15 px-1 py-0.5 text-[9px] font-extrabold text-sky-400">
+              <BadgeCheck className="size-2.5" /> Vérifié
+            </span>
+          )}
+        </div>
+
+        <h3 className="line-clamp-2 text-[13px] font-bold leading-snug text-foreground">{listing.title}</h3>
+
+        <p className="mt-1.5 flex min-w-0 items-center gap-1 text-[10px] text-muted-foreground">
+          <MapPin className="size-3 shrink-0 text-brand-gold/80" />
+          <span className="truncate">{listing.city} • {listing.postedAt}</span>
+        </p>
+
+        <p className="mt-2 font-display text-sm text-brand-gold">
+          {isFreeCategory(listing.category) && (!listing.price || listing.price === 0)
+            ? <span className="text-brand-green">Opportunité gratuite</span>
+            : formatFcfa(listing.price)}
+          {"priceSuffix" in listing && listing.priceSuffix && (
+            <span className="ml-1 text-[10px] font-normal text-muted-foreground">{listing.priceSuffix}</span>
+          )}
+        </p>
+
+        {(listing.badge === "pro" || listing.badge === "business") ? (
+          <span className="mt-3 inline-flex items-center justify-center gap-1 rounded-xl bg-[#25D366] py-2 text-[11px] font-bold text-white">
+            <MessageCircle className="size-3" /> Contacter sur WhatsApp
+          </span>
+        ) : (
+          <span className="mt-3 inline-flex items-center justify-center gap-1 rounded-xl bg-secondary py-2 text-[11px] font-bold text-foreground ring-1 ring-border transition group-hover:bg-brand-green group-hover:text-primary-foreground group-hover:ring-transparent">
+            Voir l'annonce
+          </span>
+        )}
+      </div>
     </Link>
   );
 }
+
 
 export function BoostedCard({ listing }: { listing: ListingItem }) {
   return (

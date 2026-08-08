@@ -9,14 +9,14 @@ export function MobileShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="surface-warm min-h-screen bg-background">
-      <main className="mx-auto min-h-screen w-full max-w-[440px] bg-card pb-28 shadow-luxury ring-1 ring-border md:max-w-3xl lg:max-w-5xl xl:max-w-7xl">
+      <main className="mx-auto min-h-screen w-full max-w-[1440px] bg-background pb-28">
         {children}
       </main>
 
-      <nav className="fixed bottom-0 left-1/2 z-50 w-full max-w-[440px] -translate-x-1/2 border-t border-border bg-card/95 px-6 pb-5 pt-2 shadow-[0_-8px_28px_-14px_rgb(92_42_20_/_0.35)] backdrop-blur md:max-w-3xl lg:max-w-5xl xl:max-w-7xl">
+      <nav className="fixed bottom-0 left-1/2 z-50 w-full max-w-[560px] -translate-x-1/2 border-t border-border bg-card/90 px-6 pb-5 pt-2 shadow-luxury backdrop-blur-xl md:rounded-t-3xl md:border">
         <div className="flex items-end justify-between">
           <NavItem to="/" icon={<Home className="size-5" />} label="Accueil" active={isActive("/")} />
-          <NavItem to="/explorer" icon={<Heart className="size-5" />} label="Favoris" active={isActive("/explorer")} />
+          <NavItem to="/explorer" icon={<Heart className="size-5" />} label="Explorer" active={isActive("/explorer")} />
           <div className="-mt-8">
             <Link
               to="/publier"
@@ -34,6 +34,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
 
 function NavItem({ to, icon, label, active }: { to: string; icon: ReactNode; label: string; active: boolean }) {
   return (

@@ -144,7 +144,7 @@ function MyListingsPage() {
               key={t}
               type="button"
               onClick={() => setTab(t)}
-              className={`rounded-lg px-2 py-2 capitalize transition ${tab === t ? "bg-white text-brand-green shadow" : "text-muted-foreground"}`}
+              className={`rounded-lg px-2 py-2 capitalize transition ${tab === t ? "bg-card text-brand-gold shadow" : "text-muted-foreground"}`}
             >
               {t === "annonces" ? `Annonces (${rows?.length ?? 0})` : t === "boosts" ? `Boosts (${boosts?.length ?? 0})` : `Achats (${purchases?.length ?? 0})`}
             </button>
