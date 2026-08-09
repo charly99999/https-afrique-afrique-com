@@ -1,10 +1,15 @@
-// Client-side image compression — réduit la taille avant upload
-// Resize au max 1920px côté long, convertit en JPEG q=0.82.
+// Client-side image compression — réduit fortement la taille avant upload.
+// Objectif : des fichiers légers (~<900 Ko) pour que l'envoi passe même en 3G.
 // Conserve l'original si déjà petit ou si la compression échoue.
 
-const MAX_DIMENSION = 1920;
-const QUALITY = 0.82;
-const SKIP_BELOW = 300 * 1024; // <300KB : on n'y touche pas
+const MAX_DIMENSION = 1600;
+const QUALITY = 0.72;
+const SKIP_BELOW = 120 * 1024; // <120KB : on n'y touche pas
+const TARGET_BYTES = 900 * 1024; // au-delà, on recompresse plus fort
+
+function toBlob(canvas: HTMLCanvasElement, quality: number): Promise<Blob | null> {
+  return new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+}
 
 export async function compressImage(file: File): Promise<File> {
   if (!file.type.startsWith("image/")) return file;
@@ -26,9 +31,13 @@ export async function compressImage(file: File): Promise<File> {
     ctx.drawImage(bitmap, 0, 0, w, h);
     bitmap.close();
 
-    const blob: Blob | null = await new Promise((resolve) =>
-      canvas.toBlob(resolve, "image/jpeg", QUALITY),
-    );
+    let quality = QUALITY;
+    let blob = await toBlob(canvas, quality);
+    // Recompression progressive tant que le fichier reste lourd
+    while (blob && blob.size > TARGET_BYTES && quality > 0.4) {
+      quality -= 0.12;
+      blob = await toBlob(canvas, quality);
+    }
     if (!blob || blob.size >= file.size) return file;
 
     const newName = file.name.replace(/\.(png|webp|heic|heif|jpe?g)$/i, ".jpg");
@@ -41,6 +50,9 @@ export async function compressImage(file: File): Promise<File> {
   }
 }
 
+// Séquentiel : évite de saturer la mémoire des téléphones d'entrée de gamme.
 export async function compressMany(files: File[]): Promise<File[]> {
-  return Promise.all(files.map(compressImage));
+  const out: File[] = [];
+  for (const f of files) out.push(await compressImage(f));
+  return out;
 }
