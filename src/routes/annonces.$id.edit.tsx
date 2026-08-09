@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { resolveListingImages } from "@/lib/listing-images";
 import { compressMany } from "@/lib/image-compress";
+import { withAuthRetry } from "@/lib/publish-guard";
 
 export const Route = createFileRoute("/annonces/$id/edit")({
   head: () => ({ meta: [{ title: "Modifier l'annonce — Afrique-business" }] }),
