@@ -198,22 +198,38 @@ function PublierPage() {
       });
       listingId = listing.id;
 
-      // 2. Upload photos une par une avec feedback
+      // 2. Upload photos une par une, avec reprises automatiques.
+      //    Une photo qui échoue malgré les reprises n'annule PAS la publication :
+      //    l'annonce part avec les photos réussies (le vendeur pourra la compléter).
       step = "upload";
       const photoRows: { listing_id: string; url: string; position: number }[] = [];
+      let failedPhotos = 0;
       for (let i = 0; i < photos.length; i++) {
         setProgress({ current: i + 1, total: photos.length });
         const file = photos[i].file;
         const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
         const path = `${ownerId}/${listing.id}/${Date.now()}-${i}.${ext}`;
-        await withAuthRetry(async () => {
-          const { error: upErr } = await supabase.storage.from("listings").upload(path, file, {
-            cacheControl: "31536000", upsert: false, contentType: file.type,
+        try {
+          await withAuthRetry(async () => {
+            const { error: upErr } = await supabase.storage.from("listings").upload(path, file, {
+              cacheControl: "31536000", upsert: true, contentType: file.type,
+            });
+            if (upErr) throw upErr;
           });
-          if (upErr) throw upErr;
-        });
-        uploadedPaths.push(path);
-        photoRows.push({ listing_id: listing.id, url: path, position: i });
+          uploadedPaths.push(path);
+          photoRows.push({ listing_id: listing.id, url: path, position: photoRows.length });
+        } catch (upErr) {
+          failedPhotos++;
+          await logPublishError({
+            userId: ownerId, listingId: listing.id, step: "upload_photo", error: upErr,
+            context: { index: i, size: file.size, type: file.type },
+          });
+        }
+      }
+      if (photoRows.length === 0) {
+        throw new Error(
+          "Connexion trop instable : aucune photo n'a pu être envoyée. Réessayez en Wi-Fi ou avec une meilleure réception — votre brouillon est conservé.",
+        );
       }
 
       // 3. Insert photos + cover, puis activer
@@ -233,7 +249,11 @@ function PublierPage() {
         if (actErr) throw actErr;
       });
 
-      toast.success("Annonce publiée !");
+      toast.success(
+        failedPhotos > 0
+          ? `Annonce publiée (${failedPhotos} photo(s) non envoyée(s), ajoutez-les depuis « Modifier »).`
+          : "Annonce publiée !",
+      );
       clearDraft();
       navigate({ to: "/annonces/$id", params: { id: listing.id } });
     } catch (err) {
@@ -252,7 +272,9 @@ function PublierPage() {
       toast.error(
         /jwt|token|row-level security|unauthorized/i.test(raw)
           ? "Session expirée pendant l'envoi. Reconnectez-vous puis réessayez — votre brouillon est conservé."
-          : `Publication impossible (${step}) : ${raw}`,
+          : /failed to fetch|network|load failed|timeout|connection/i.test(raw)
+            ? "Connexion internet instable. Votre brouillon est conservé : réessayez dans un instant."
+            : `Publication impossible (${step}) : ${raw}`,
       );
     } finally {
       setSubmitting(false);
