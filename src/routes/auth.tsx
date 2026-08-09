@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Connexion — Afrique-business" }] }),
-  validateSearch: (search?: Record<string, unknown>) => ({
+  validateSearch: (search: { redirect?: string }) => ({
     redirect: typeof search?.redirect === "string" ? search.redirect : undefined,
   }),
   component: AuthPage,
