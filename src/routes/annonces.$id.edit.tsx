@@ -162,10 +162,12 @@ function EditListingPage() {
         const file = newPhotos[i].file;
         const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
         const path = `${user!.id}/${id}/${Date.now()}-${i}.${ext}`;
-        const { error } = await supabase.storage.from("listings").upload(path, file, {
-          cacheControl: "31536000", upsert: false, contentType: file.type,
+        await withAuthRetry(async () => {
+          const { error } = await supabase.storage.from("listings").upload(path, file, {
+            cacheControl: "31536000", upsert: true, contentType: file.type,
+          });
+          if (error) throw error;
         });
-        if (error) throw error;
         uploadedPaths.push(path);
         newRows.push({ listing_id: id, url: path, position: startPos + i });
       }
