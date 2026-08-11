@@ -30,6 +30,39 @@ async function logIpn(entry: {
   }
 }
 
+/**
+ * Reconstruit un objet imbriqué depuis des clés à crochets
+ * ("data[invoice][token]" -> { data: { invoice: { token } } }) puis
+ * renvoie le nœud "data" (ou la racine si déjà à plat en JSON).
+ */
+function extractIpnData(body: Record<string, unknown>): Record<string, unknown> {
+  const root: Record<string, unknown> = {};
+  let hadBracketKeys = false;
+
+  for (const [rawKey, value] of Object.entries(body)) {
+    const match = rawKey.match(/^([^[\]]+)((\[[^[\]]*\])*)$/);
+    if (!match || !match[2]) {
+      root[rawKey] = value;
+      continue;
+    }
+    hadBracketKeys = true;
+    const path = [match[1], ...Array.from(match[2].matchAll(/\[([^[\]]*)\]/g)).map((m) => m[1])];
+    let cursor: Record<string, unknown> = root;
+    for (let i = 0; i < path.length - 1; i++) {
+      const seg = path[i];
+      if (typeof cursor[seg] !== "object" || cursor[seg] === null) cursor[seg] = {};
+      cursor = cursor[seg] as Record<string, unknown>;
+    }
+    cursor[path[path.length - 1]] = value;
+  }
+
+  const source = hadBracketKeys ? root : body;
+  const nested = source.data;
+  if (nested && typeof nested === "object") return nested as Record<string, unknown>;
+  return source;
+}
+
+
 export const Route = createFileRoute("/api/public/paydunya-ipn")({
   server: {
     handlers: {
@@ -54,7 +87,10 @@ export const Route = createFileRoute("/api/public/paydunya-ipn")({
           return new Response("Invalid body", { status: 400 });
         }
 
-        const data = (body.data ?? body) as Record<string, unknown>;
+        // PayDunya envoie l'IPN en form-urlencoded avec des clés à crochets
+        // (ex: "data[invoice][token]"). On reconstruit l'objet imbriqué.
+        const data = extractIpnData(body);
+
         const receivedHash = String((data as { hash?: string }).hash ?? "");
         const expectedHash = createHash("sha512").update(masterKey).digest("hex");
         const recBuf = Buffer.from(receivedHash, "hex");

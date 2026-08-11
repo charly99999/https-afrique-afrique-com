@@ -10,7 +10,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { useSearchHistory } from "@/hooks/use-search-history";
 
 export const Route = createFileRoute("/explorer")({
-  validateSearch: (s: { category?: string; q?: string }) => ({
+  validateSearch: (s: Record<string, unknown>): { category?: string; q?: string } => ({
     category: typeof s?.category === "string" ? s.category : "",
     q: typeof s?.q === "string" ? s.q : "",
   }),
