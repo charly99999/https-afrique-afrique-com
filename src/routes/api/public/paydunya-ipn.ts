@@ -54,7 +54,10 @@ export const Route = createFileRoute("/api/public/paydunya-ipn")({
           return new Response("Invalid body", { status: 400 });
         }
 
-        const data = (body.data ?? body) as Record<string, unknown>;
+        // PayDunya envoie l'IPN en form-urlencoded avec des clés à crochets
+        // (ex: "data[invoice][token]"). On reconstruit l'objet imbriqué.
+        const data = extractIpnData(body);
+
         const receivedHash = String((data as { hash?: string }).hash ?? "");
         const expectedHash = createHash("sha512").update(masterKey).digest("hex");
         const recBuf = Buffer.from(receivedHash, "hex");
