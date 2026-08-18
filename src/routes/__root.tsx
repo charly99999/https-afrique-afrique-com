@@ -78,6 +78,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
+      { name: "google-site-verification", content: "xJfRhoMedRGduTFOUG72NiJVyrj1b9EeBgtLfBH8Tcc" },
       { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1" },
       { name: "theme-color", content: "#064E3B" },
       { title: "Afrique-business — Petites annonces en Afrique francophone" },
