@@ -7,33 +7,34 @@ import elephantGold from "@/assets/elephant-gold.png";
  */
 export function ElephantAfrica3D({ className = "" }: { className?: string }) {
   return (
-    <div
-      aria-hidden
-      className={`pointer-events-none relative select-none [perspective:1200px] ${className}`}
-    >
-      {/* Halo doré */}
-      <div className="absolute inset-0 -z-10 rounded-full bg-[radial-gradient(closest-side,color-mix(in_oklab,var(--brand-gold)_30%,transparent),transparent)] blur-2xl" />
+    <div aria-hidden className={`pointer-events-none select-none ${className}`}>
+      <div className="relative [perspective:1200px]">
+        {/* Halo doré */}
+        <div className="absolute inset-[10%] -z-10 rounded-full bg-[radial-gradient(closest-side,color-mix(in_oklab,var(--brand-gold)_28%,transparent),transparent)] blur-2xl" />
 
-      {/* Carte d'Afrique en relief, légère rotation 3D */}
-      <div className="animate-africa-tilt [transform-style:preserve-3d]">
-        <img
-          src={africaGold}
-          alt=""
-          width={1536}
-          height={1024}
-          className="mx-auto w-full max-w-[520px] object-contain mix-blend-screen opacity-90 drop-shadow-[0_30px_60px_rgba(0,0,0,0.65)]"
-        />
-      </div>
+        {/* Carte d'Afrique en relief, légère rotation 3D */}
+        <div className="animate-africa-tilt">
+          <img
+            src={africaGold}
+            alt=""
+            loading="lazy"
+            width={1536}
+            height={1024}
+            className="mx-auto w-full object-contain opacity-95 mix-blend-screen drop-shadow-[0_30px_60px_rgba(0,0,0,0.65)]"
+          />
+        </div>
 
-      {/* Éléphant doré qui défile / flotte en 3D au-dessus de la carte */}
-      <div className="absolute inset-0 grid place-items-center [transform-style:preserve-3d]">
-        <img
-          src={elephantGold}
-          alt=""
-          width={1024}
-          height={1024}
-          className="animate-elephant-orbit w-[46%] max-w-[240px] object-contain drop-shadow-[0_24px_44px_rgba(0,0,0,0.7)]"
-        />
+        {/* Éléphant doré qui défile / flotte en 3D au-dessus de la carte */}
+        <div className="absolute inset-0 grid place-items-center">
+          <img
+            src={elephantGold}
+            alt=""
+            loading="lazy"
+            width={1024}
+            height={1024}
+            className="animate-elephant-orbit w-[38%] object-contain drop-shadow-[0_24px_44px_rgba(0,0,0,0.7)]"
+          />
+        </div>
       </div>
     </div>
   );
