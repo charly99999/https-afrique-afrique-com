@@ -266,6 +266,39 @@ body {
   animation: flag-wave 2.6s ease-in-out infinite;
 }
 
+/* ── Scène 3D éléphant / Afrique ─────────────────────────────────────────── */
+@keyframes africa-tilt {
+  0%, 100% { transform: rotateY(-14deg) rotateX(6deg) translateZ(0); }
+  50% { transform: rotateY(14deg) rotateX(-4deg) translateZ(20px); }
+}
+@utility animate-africa-tilt {
+  animation: africa-tilt 14s ease-in-out infinite;
+  transform-style: preserve-3d;
+}
+
+@keyframes elephant-orbit {
+  0%   { transform: perspective(900px) rotateY(-22deg) translate3d(-6%, 4%, 60px) scale(1); }
+  25%  { transform: perspective(900px) rotateY(0deg)  translate3d(0, -2%, 110px) scale(1.06); }
+  50%  { transform: perspective(900px) rotateY(22deg) translate3d(6%, 4%, 60px) scale(1); }
+  75%  { transform: perspective(900px) rotateY(0deg)  translate3d(0, 8%, 40px) scale(0.97); }
+  100% { transform: perspective(900px) rotateY(-22deg) translate3d(-6%, 4%, 60px) scale(1); }
+}
+@utility animate-elephant-orbit {
+  animation: elephant-orbit 12s ease-in-out infinite;
+}
+
+@keyframes mark-sway {
+  0%, 100% { transform: perspective(300px) rotateY(-16deg); }
+  50% { transform: perspective(300px) rotateY(16deg); }
+}
+@utility animate-mark-sway {
+  animation: mark-sway 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-africa-tilt, .animate-elephant-orbit, .animate-mark-sway { animation: none !important; }
+}
+
 /* ── Navigation basse ────────────────────────────────────────────────────── */
 @keyframes nav-pop {
   from { transform: scale(0.6); opacity: 0; }
