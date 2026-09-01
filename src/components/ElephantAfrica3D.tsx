@@ -20,7 +20,7 @@ export function ElephantAfrica3D({ className = "" }: { className?: string }) {
             loading="lazy"
             width={1536}
             height={1024}
-            className="mx-auto w-full object-contain opacity-95 mix-blend-screen drop-shadow-[0_30px_60px_rgba(0,0,0,0.65)]"
+            className="mx-auto w-full object-contain opacity-95 mix-blend-screen drop-shadow-[0_30px_60px_rgba(0,0,0,0.65)] [mask-image:radial-gradient(70%_70%_at_50%_50%,#000_55%,transparent_100%)]"
           />
         </div>
 
