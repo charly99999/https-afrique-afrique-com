@@ -18,6 +18,8 @@ import { fetchListings, type DbListing } from "@/lib/listings-client";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import africaMap from "@/assets/africa-map-green.jpg";
+import { ElephantAfrica3D, ElephantMark } from "@/components/ElephantAfrica3D";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -113,9 +115,8 @@ function HomePage() {
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 px-4 py-3 backdrop-blur-xl">
         <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
           <Link to="/" className="flex min-w-0 items-center gap-2">
-            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-brand-gold/15 ring-1 ring-brand-gold/30">
-              <Globe2 className="size-4 text-brand-gold" />
-            </span>
+            <ElephantMark className="size-9" />
+
             <span className="hidden min-w-0 leading-tight sm:block">
               <span className="block truncate font-display text-sm text-brand-gold">AFRIQUE-AFRIQUE</span>
               <span className="block truncate text-[10px] text-muted-foreground">Vendez • Achetez • Développez</span>
