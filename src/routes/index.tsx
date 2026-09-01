@@ -163,7 +163,10 @@ function HomePage() {
         <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full border border-brand-gold/25" />
         <div aria-hidden className="pointer-events-none absolute -left-20 bottom-0 size-64 rounded-full border border-brand-gold/15" />
 
-        <div className="relative z-10 px-5 py-10 md:px-10 md:py-16 lg:py-20">
+        {/* Scène 3D : éléphant d'or sur la carte d'Afrique (desktop) */}
+        <ElephantAfrica3D className="absolute right-4 top-1/2 hidden w-[42%] max-w-[560px] -translate-y-1/2 lg:block" />
+
+        <div className="relative z-10 px-5 py-10 md:px-10 md:py-16 lg:max-w-[58%] lg:py-20">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-gold/12 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] text-brand-gold ring-1 ring-brand-gold/30">
             <Sparkles className="size-3" /> Inscription gratuite
           </span>
@@ -177,6 +180,10 @@ function HomePage() {
             Présentez vos produits, biens, services et opportunités à des milliers d'acheteurs
             et de visiteurs qui cherchent exactement ce que vous proposez, partout en Afrique.
           </p>
+
+          {/* Scène 3D (mobile / tablette) */}
+          <ElephantAfrica3D className="mx-auto mt-6 w-[86%] max-w-[380px] lg:hidden" />
+
 
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
