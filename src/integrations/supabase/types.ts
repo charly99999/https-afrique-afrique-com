@@ -730,6 +730,13 @@ export type Database = {
           whatsapp: string
         }[]
       }
+      get_my_contact: {
+        Args: never
+        Returns: {
+          phone: string
+          whatsapp: string
+        }[]
+      }
       get_seller_rating: {
         Args: { _seller_id: string }
         Returns: {
