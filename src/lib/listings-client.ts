@@ -100,30 +100,19 @@ export async function fetchSellerRating(sellerId: string): Promise<{ avg: number
 }
 
 export async function fetchListingContact(listingId: string): Promise<{ phone?: string; whatsapp?: string }> {
-  const { data: listing } = await supabase
-    .from("listings")
-    .select("owner_id, status")
-    .eq("id", listingId)
-    .maybeSingle();
-  if (!listing?.owner_id || listing.status !== "active") return {};
-
   const { data: sessionData } = await supabase.auth.getSession();
-  const userId = sessionData.session?.user.id;
-  if (!userId) return {};
+  if (!sessionData.session?.user.id) return {};
 
-  const isOwner = userId === listing.owner_id;
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("phone, whatsapp")
-    .eq("id", listing.owner_id)
-    .maybeSingle();
-
-  if (!isOwner && !profile) return {};
+  const { data, error } = await supabase.rpc("get_listing_contact", { _listing_id: listingId });
+  if (error) return {};
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row) return {};
   return {
-    phone: profile?.phone ?? undefined,
-    whatsapp: profile?.whatsapp ?? profile?.phone ?? undefined,
+    phone: row.phone ?? undefined,
+    whatsapp: row.whatsapp ?? row.phone ?? undefined,
   };
 }
+
 
 async function fetchPublicProfiles(ids: string[]): Promise<Map<string, PubProfile>> {
   const map = new Map<string, PubProfile>();

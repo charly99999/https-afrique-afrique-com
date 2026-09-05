@@ -35,13 +35,15 @@ function EditProfilePage() {
   useEffect(() => {
     if (!user) return;
     supabase.from("profiles")
-      .select("display_name, phone, whatsapp, email_opt_in, country, avatar_url")
+      .select("display_name, email_opt_in, country, avatar_url")
       .eq("id", user.id).maybeSingle()
       .then(async ({ data }) => {
+        const { data: contact } = await supabase.rpc("get_my_contact");
+        const c = Array.isArray(contact) ? contact[0] : contact;
+        setPhone(c?.phone ?? "");
+        setWhatsapp(c?.whatsapp ?? "");
         if (!data) return;
         setDisplayName(data.display_name ?? "");
-        setPhone(data.phone ?? "");
-        setWhatsapp(data.whatsapp ?? "");
         setEmailOptIn(data.email_opt_in ?? true);
         if (data.country && (DB_COUNTRY_CODES as readonly string[]).includes(data.country)) {
           setCountry(data.country as DbCountry);
@@ -55,6 +57,7 @@ function EditProfilePage() {
         }
       });
   }, [user]);
+
 
   if (loading) return <MobileShell><div className="p-10 text-center text-sm text-muted-foreground">…</div></MobileShell>;
   if (!user) {
