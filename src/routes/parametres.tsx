@@ -33,18 +33,22 @@ function ParametresPage() {
       return;
     }
     (async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("display_name,phone,whatsapp,city,country,bio")
-        .eq("id", user.id)
-        .maybeSingle();
+      const [{ data, error }, { data: contact }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("display_name,city,country,bio")
+          .eq("id", user.id)
+          .maybeSingle(),
+        supabase.rpc("get_my_contact"),
+      ]);
+      const c = Array.isArray(contact) ? contact[0] : contact;
       if (error) {
         toast.error("Impossible de charger le profil");
       } else if (data) {
         setForm({
           display_name: data.display_name ?? "",
-          phone: data.phone ?? "",
-          whatsapp: data.whatsapp ?? "",
+          phone: c?.phone ?? "",
+          whatsapp: c?.whatsapp ?? "",
           city: data.city ?? "",
           country: (data.country as string) ?? "CI",
           bio: data.bio ?? "",
@@ -52,6 +56,7 @@ function ParametresPage() {
       }
       setLoadingProfile(false);
     })();
+
   }, [user, loading, navigate]);
 
   async function handleSave(e: React.FormEvent) {
