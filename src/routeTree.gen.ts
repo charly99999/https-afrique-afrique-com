@@ -40,6 +40,7 @@ import { Route as BoostIdRouteImport } from './routes/boost.$id'
 import { Route as AnnoncesIdRouteImport } from './routes/annonces.$id'
 import { Route as ApiPublicPaydunyaIpnRouteImport } from './routes/api/public/paydunya-ipn'
 import { Route as AnnoncesIdEditRouteImport } from './routes/annonces.$id.edit'
+import { Route as ApiPublicHooksReconcilePaymentsRouteImport } from './routes/api/public/hooks/reconcile-payments'
 import { Route as ApiPublicHooksPushBoostNudgeRouteImport } from './routes/api/public/hooks/push-boost-nudge'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -199,6 +200,12 @@ const AnnoncesIdEditRoute = AnnoncesIdEditRouteImport.update({
   path: '/edit',
   getParentRoute: () => AnnoncesIdRoute,
 } as any)
+const ApiPublicHooksReconcilePaymentsRoute =
+  ApiPublicHooksReconcilePaymentsRouteImport.update({
+    id: '/api/public/hooks/reconcile-payments',
+    path: '/api/public/hooks/reconcile-payments',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksPushBoostNudgeRoute =
   ApiPublicHooksPushBoostNudgeRouteImport.update({
     id: '/api/public/hooks/push-boost-nudge',
@@ -239,6 +246,7 @@ export interface FileRoutesByFullPath {
   '/annonces/$id/edit': typeof AnnoncesIdEditRoute
   '/api/public/paydunya-ipn': typeof ApiPublicPaydunyaIpnRoute
   '/api/public/hooks/push-boost-nudge': typeof ApiPublicHooksPushBoostNudgeRoute
+  '/api/public/hooks/reconcile-payments': typeof ApiPublicHooksReconcilePaymentsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -273,6 +281,7 @@ export interface FileRoutesByTo {
   '/annonces/$id/edit': typeof AnnoncesIdEditRoute
   '/api/public/paydunya-ipn': typeof ApiPublicPaydunyaIpnRoute
   '/api/public/hooks/push-boost-nudge': typeof ApiPublicHooksPushBoostNudgeRoute
+  '/api/public/hooks/reconcile-payments': typeof ApiPublicHooksReconcilePaymentsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -308,6 +317,7 @@ export interface FileRoutesById {
   '/annonces/$id/edit': typeof AnnoncesIdEditRoute
   '/api/public/paydunya-ipn': typeof ApiPublicPaydunyaIpnRoute
   '/api/public/hooks/push-boost-nudge': typeof ApiPublicHooksPushBoostNudgeRoute
+  '/api/public/hooks/reconcile-payments': typeof ApiPublicHooksReconcilePaymentsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -344,6 +354,7 @@ export interface FileRouteTypes {
     | '/annonces/$id/edit'
     | '/api/public/paydunya-ipn'
     | '/api/public/hooks/push-boost-nudge'
+    | '/api/public/hooks/reconcile-payments'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -378,6 +389,7 @@ export interface FileRouteTypes {
     | '/annonces/$id/edit'
     | '/api/public/paydunya-ipn'
     | '/api/public/hooks/push-boost-nudge'
+    | '/api/public/hooks/reconcile-payments'
   id:
     | '__root__'
     | '/'
@@ -412,6 +424,7 @@ export interface FileRouteTypes {
     | '/annonces/$id/edit'
     | '/api/public/paydunya-ipn'
     | '/api/public/hooks/push-boost-nudge'
+    | '/api/public/hooks/reconcile-payments'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -440,6 +453,7 @@ export interface RootRouteChildren {
   PaiementSuccesRoute: typeof PaiementSuccesRoute
   ApiPublicPaydunyaIpnRoute: typeof ApiPublicPaydunyaIpnRoute
   ApiPublicHooksPushBoostNudgeRoute: typeof ApiPublicHooksPushBoostNudgeRoute
+  ApiPublicHooksReconcilePaymentsRoute: typeof ApiPublicHooksReconcilePaymentsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -661,6 +675,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnnoncesIdEditRouteImport
       parentRoute: typeof AnnoncesIdRoute
     }
+    '/api/public/hooks/reconcile-payments': {
+      id: '/api/public/hooks/reconcile-payments'
+      path: '/api/public/hooks/reconcile-payments'
+      fullPath: '/api/public/hooks/reconcile-payments'
+      preLoaderRoute: typeof ApiPublicHooksReconcilePaymentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/push-boost-nudge': {
       id: '/api/public/hooks/push-boost-nudge'
       path: '/api/public/hooks/push-boost-nudge'
@@ -738,6 +759,7 @@ const rootRouteChildren: RootRouteChildren = {
   PaiementSuccesRoute: PaiementSuccesRoute,
   ApiPublicPaydunyaIpnRoute: ApiPublicPaydunyaIpnRoute,
   ApiPublicHooksPushBoostNudgeRoute: ApiPublicHooksPushBoostNudgeRoute,
+  ApiPublicHooksReconcilePaymentsRoute: ApiPublicHooksReconcilePaymentsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
