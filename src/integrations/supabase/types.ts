@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_actions: {
+        Row: {
+          action: string
+          admin_id: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          reason: string | null
+          target_id: string | null
+          target_type: string
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          reason?: string | null
+          target_id?: string | null
+          target_type: string
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          reason?: string | null
+          target_id?: string | null
+          target_type?: string
+        }
+        Relationships: []
+      }
       boosts: {
         Row: {
           amount_fcfa: number
@@ -219,6 +252,7 @@ export type Database = {
           country: Database["public"]["Enums"]["country_code"]
           cover_url: string | null
           created_at: string
+          deal_type: Database["public"]["Enums"]["deal_type"]
           description: string
           expires_at: string | null
           favorites_count: number
@@ -240,6 +274,7 @@ export type Database = {
           country: Database["public"]["Enums"]["country_code"]
           cover_url?: string | null
           created_at?: string
+          deal_type?: Database["public"]["Enums"]["deal_type"]
           description: string
           expires_at?: string | null
           favorites_count?: number
@@ -261,6 +296,7 @@ export type Database = {
           country?: Database["public"]["Enums"]["country_code"]
           cover_url?: string | null
           created_at?: string
+          deal_type?: Database["public"]["Enums"]["deal_type"]
           description?: string
           expires_at?: string | null
           favorites_count?: number
@@ -428,6 +464,51 @@ export type Database = {
           },
         ]
       }
+      profile_reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          profile_id: string
+          reason: string
+          reporter_id: string
+          resolved: boolean
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          profile_id: string
+          reason: string
+          reporter_id: string
+          resolved?: boolean
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          profile_id?: string
+          reason?: string
+          reporter_id?: string
+          resolved?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_reports_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_reports_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           account_expires_at: string | null
@@ -442,6 +523,8 @@ export type Database = {
           free_boosts_remaining: number
           id: string
           phone: string | null
+          suspended_at: string | null
+          suspension_reason: string | null
           updated_at: string
           verified: boolean
           verified_at: string | null
@@ -460,6 +543,8 @@ export type Database = {
           free_boosts_remaining?: number
           id: string
           phone?: string | null
+          suspended_at?: string | null
+          suspension_reason?: string | null
           updated_at?: string
           verified?: boolean
           verified_at?: string | null
@@ -478,6 +563,8 @@ export type Database = {
           free_boosts_remaining?: number
           id?: string
           phone?: string | null
+          suspended_at?: string | null
+          suspension_reason?: string | null
           updated_at?: string
           verified?: boolean
           verified_at?: string | null
@@ -657,6 +744,60 @@ export type Database = {
           },
         ]
       }
+      saved_searches: {
+        Row: {
+          alerts_enabled: boolean
+          category_slug: string | null
+          city: string | null
+          country: Database["public"]["Enums"]["country_code"] | null
+          created_at: string
+          deal_type: Database["public"]["Enums"]["deal_type"] | null
+          id: string
+          label: string
+          last_notified_at: string | null
+          max_price: number | null
+          min_price: number | null
+          query: string | null
+          subcategory_slug: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          alerts_enabled?: boolean
+          category_slug?: string | null
+          city?: string | null
+          country?: Database["public"]["Enums"]["country_code"] | null
+          created_at?: string
+          deal_type?: Database["public"]["Enums"]["deal_type"] | null
+          id?: string
+          label: string
+          last_notified_at?: string | null
+          max_price?: number | null
+          min_price?: number | null
+          query?: string | null
+          subcategory_slug?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          alerts_enabled?: boolean
+          category_slug?: string | null
+          city?: string | null
+          country?: Database["public"]["Enums"]["country_code"] | null
+          created_at?: string
+          deal_type?: Database["public"]["Enums"]["deal_type"] | null
+          id?: string
+          label?: string
+          last_notified_at?: string | null
+          max_price?: number | null
+          min_price?: number | null
+          query?: string | null
+          subcategory_slug?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           active: boolean
@@ -763,6 +904,37 @@ export type Database = {
       }
     }
     Functions: {
+      admin_dashboard_stats: { Args: never; Returns: Json }
+      admin_list_users: {
+        Args: { _limit?: number; _search?: string }
+        Returns: {
+          account_expires_at: string
+          account_type: Database["public"]["Enums"]["account_type"]
+          city: string
+          country: Database["public"]["Enums"]["country_code"]
+          created_at: string
+          display_name: string
+          id: string
+          is_admin: boolean
+          listings_count: number
+          phone: string
+          suspended_at: string
+          verified: boolean
+          whatsapp: string
+        }[]
+      }
+      admin_set_listing_status: {
+        Args: {
+          _listing_id: string
+          _reason?: string
+          _status: Database["public"]["Enums"]["listing_status"]
+        }
+        Returns: undefined
+      }
+      admin_set_suspension: {
+        Args: { _reason?: string; _suspended: boolean; _user_id: string }
+        Returns: undefined
+      }
       auto_review_kyc_submissions: { Args: never; Returns: undefined }
       call_internal_hook: { Args: { _path: string }; Returns: undefined }
       expire_due_records: { Args: never; Returns: undefined }
@@ -837,6 +1009,7 @@ export type Database = {
         | "CM"
         | "GA"
         | "CD"
+      deal_type: "vente" | "troc" | "don"
       listing_status:
         | "draft"
         | "pending"
@@ -1001,6 +1174,7 @@ export const Constants = {
         "GA",
         "CD",
       ],
+      deal_type: ["vente", "troc", "don"],
       listing_status: [
         "draft",
         "pending",
