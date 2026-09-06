@@ -5,6 +5,7 @@ import { formatFcfa, getListing } from "@/data/catalog";
 import { MobileShell } from "@/components/MobileShell";
 import { ListingCard } from "@/components/ListingCard";
 import { ContactBar } from "@/components/ContactBar";
+import { trackListingEvent } from "@/lib/analytics";
 import { fetchListing, fetchPhotos, fetchSellerStats, fetchSimilarListings, type DbListing } from "@/lib/listings-client";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -114,6 +115,7 @@ function ListingDetail() {
         if (cancelled) return;
         if (l) {
           setListing(l);
+          void trackListingEvent(l.id, "view");
           setIsFav(l.isFavorite ?? false);
           const [ph, sim] = await Promise.all([
             fetchPhotos(id).catch(() => []),
@@ -159,6 +161,7 @@ function ListingDetail() {
         const { error } = await supabase.from("favorites").insert({ user_id: user.id, listing_id: listing.id });
         if (error) throw error;
         setIsFav(true);
+        void trackListingEvent(listing.id, "favorite");
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur favoris");
