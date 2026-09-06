@@ -26,6 +26,7 @@ import { Route as LegalRouteImport } from './routes/legal'
 import { Route as KycRouteImport } from './routes/kyc'
 import { Route as ExplorerRouteImport } from './routes/explorer'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AbonnementsRouteImport } from './routes/abonnements'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfilModifierRouteImport } from './routes/profil.modifier'
@@ -130,6 +131,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AbonnementsRoute = AbonnementsRouteImport.update({
   id: '/abonnements',
   path: '/abonnements',
@@ -216,6 +222,7 @@ const ApiPublicHooksPushBoostNudgeRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/abonnements': typeof AbonnementsRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/explorer': typeof ExplorerRoute
   '/kyc': typeof KycRoute
@@ -251,6 +258,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/abonnements': typeof AbonnementsRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/explorer': typeof ExplorerRoute
   '/kyc': typeof KycRoute
@@ -287,6 +295,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/abonnements': typeof AbonnementsRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/explorer': typeof ExplorerRoute
   '/kyc': typeof KycRoute
@@ -324,6 +333,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/abonnements'
+    | '/admin'
     | '/auth'
     | '/explorer'
     | '/kyc'
@@ -359,6 +369,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/abonnements'
+    | '/admin'
     | '/auth'
     | '/explorer'
     | '/kyc'
@@ -394,6 +405,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/abonnements'
+    | '/admin'
     | '/auth'
     | '/explorer'
     | '/kyc'
@@ -430,6 +442,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AbonnementsRoute: typeof AbonnementsRoute
+  AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   ExplorerRoute: typeof ExplorerRoute
   KycRoute: typeof KycRoute
@@ -575,6 +588,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/abonnements': {
@@ -736,6 +756,7 @@ const AnnoncesIdRouteWithChildren = AnnoncesIdRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AbonnementsRoute: AbonnementsRoute,
+  AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   ExplorerRoute: ExplorerRoute,
   KycRoute: KycRoute,
