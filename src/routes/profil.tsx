@@ -175,9 +175,12 @@ function ProfilPage() {
           </button>
           {isAdmin && (
             <Link to="/admin" className="row-link">
-              <Row icon={ShieldAlert} label="Administration" hint="Modération et pilotage" />
+              <span className="row-ico"><ShieldAlert className="size-4" /></span>
+              <span className="flex-1">Administration</span>
+              <span className="text-muted-foreground">→</span>
             </Link>
           )}
+
           <Link to="/plus" className="row-link">
             <span className="row-ico"><MoreHorizontal className="size-4" /></span>
             <span className="flex-1">Plus</span>
