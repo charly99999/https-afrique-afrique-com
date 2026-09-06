@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { MobileShell } from "@/components/MobileShell";
 import type { LucideIcon } from "lucide-react";
-import { Settings, Store, CreditCard, Bell, LogIn, LogOut, MoreHorizontal, UserCog, Share2, Eye, Heart, LayoutGrid } from "lucide-react";
+import { Settings, Store, CreditCard, Bell, LogIn, LogOut, MoreHorizontal, UserCog, Share2, Eye, Heart, LayoutGrid, ShieldAlert } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -24,6 +24,17 @@ function ProfilPage() {
   const navigate = useNavigate();
   const [stats, setStats] = useState<Stats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!user) { setIsAdmin(false); return; }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
+      if (!cancelled) setIsAdmin(data === true);
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
 
   useEffect(() => {
     if (!user) { setStats(null); return; }
@@ -162,6 +173,11 @@ function ProfilPage() {
             <span className="flex-1 text-left">Partager l'application</span>
             <span className="text-muted-foreground">→</span>
           </button>
+          {isAdmin && (
+            <Link to="/admin" className="row-link">
+              <Row icon={ShieldAlert} label="Administration" hint="Modération et pilotage" />
+            </Link>
+          )}
           <Link to="/plus" className="row-link">
             <span className="row-ico"><MoreHorizontal className="size-4" /></span>
             <span className="flex-1">Plus</span>
