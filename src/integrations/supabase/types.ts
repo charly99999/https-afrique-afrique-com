@@ -138,6 +138,47 @@ export type Database = {
         }
         Relationships: []
       }
+      listing_events: {
+        Row: {
+          created_at: string
+          day: string
+          id: string
+          kind: string
+          listing_id: string
+          owner_id: string
+          user_id: string | null
+          visitor_key: string
+        }
+        Insert: {
+          created_at?: string
+          day?: string
+          id?: string
+          kind: string
+          listing_id: string
+          owner_id: string
+          user_id?: string | null
+          visitor_key: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          id?: string
+          kind?: string
+          listing_id?: string
+          owner_id?: string
+          user_id?: string | null
+          visitor_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_events_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listing_photos: {
         Row: {
           created_at: string
@@ -739,6 +780,15 @@ export type Database = {
           whatsapp: string
         }[]
       }
+      get_my_listing_stats: {
+        Args: { _days?: number }
+        Returns: {
+          contacts: number
+          day: string
+          favorites: number
+          views: number
+        }[]
+      }
       get_seller_rating: {
         Args: { _seller_id: string }
         Returns: {
@@ -766,6 +816,10 @@ export type Database = {
       normalize_listings_bucket_path: {
         Args: { _url: string }
         Returns: string
+      }
+      record_listing_event: {
+        Args: { _kind: string; _listing_id: string; _visitor_key: string }
+        Returns: undefined
       }
     }
     Enums: {
