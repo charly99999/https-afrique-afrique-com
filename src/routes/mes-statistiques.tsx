@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { MobileShell } from "@/components/MobileShell";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { BarChart3, Eye, Heart, MessageCircle, Rocket, Megaphone } from "lucide-react";
+import { BarChart3, Eye, Heart, MessageCircle, Rocket, Megaphone, PhoneCall } from "lucide-react";
 import { resolveListingImages } from "@/lib/listing-images";
 
 export const Route = createFileRoute("/mes-statistiques")({
@@ -20,9 +20,12 @@ type Stats = {
   activeBoosts: number;
 };
 
+type DayStat = { day: string; views: number; contacts: number; favorites: number };
+
 function StatsPage() {
   const { user, loading } = useAuth();
   const [stats, setStats] = useState<Stats | null>(null);
+  const [series, setSeries] = useState<DayStat[] | null>(null);
   const [topListings, setTopListings] = useState<{ id: string; title: string; views_count: number; cover_url: string | null }[]>([]);
 
   useEffect(() => {
@@ -54,6 +57,18 @@ function StatsPage() {
         unreadMessages: msgCount.count ?? 0,
         activeBoosts: boostCount.count ?? 0,
       });
+      const { data: daily } = await supabase.rpc("get_my_listing_stats", { _days: 30 });
+      if (!cancelled) {
+        setSeries(
+          (daily ?? []).map((d) => ({
+            day: String(d.day),
+            views: d.views ?? 0,
+            contacts: d.contacts ?? 0,
+            favorites: d.favorites ?? 0,
+          }))
+        );
+      }
+
       const top = [...ls].sort((a, b) => (b.views_count ?? 0) - (a.views_count ?? 0)).slice(0, 5);
       const resolved = await resolveListingImages(top.map((l) => l.cover_url));
       setTopListings(top.map((l) => ({
@@ -92,9 +107,24 @@ function StatsPage() {
         <Card icon={<Heart className="size-4" />} label="Favoris reçus" value={stats?.favorites ?? "…"} />
         <Card icon={<MessageCircle className="size-4" />} label="Messages non lus" value={stats?.unreadMessages ?? "…"} />
         <Card icon={<Rocket className="size-4" />} label="Boosts actifs" value={stats?.activeBoosts ?? "…"} />
+        <Card icon={<PhoneCall className="size-4" />} label="Contacts (30 j)"
+          value={series ? series.reduce((s2, d) => s2 + d.contacts, 0) : "…"} />
         <Card icon={<BarChart3 className="size-4" />} label="Moy. vues / annonce"
           value={stats && stats.listings > 0 ? Math.round(stats.views / stats.listings) : "…"} />
       </div>
+
+      <section className="px-5 pb-6">
+        <h2 className="mb-3 text-xs font-extrabold uppercase tracking-widest text-muted-foreground">30 derniers jours</h2>
+        {series === null ? (
+          <div className="h-28 animate-pulse rounded-2xl bg-muted" />
+        ) : series.length === 0 ? (
+          <p className="rounded-2xl bg-muted py-8 text-center text-sm text-muted-foreground">
+            Aucune visite enregistrée pour le moment.
+          </p>
+        ) : (
+          <DailyChart data={series} />
+        )}
+      </section>
 
       <section className="px-5 pb-10">
         <h2 className="mb-3 text-xs font-extrabold uppercase tracking-widest text-muted-foreground">Top annonces</h2>
@@ -120,6 +150,28 @@ function StatsPage() {
         )}
       </section>
     </MobileShell>
+  );
+}
+
+function DailyChart({ data }: { data: DayStat[] }) {
+  const max = Math.max(1, ...data.map((d) => d.views));
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4">
+      <div className="flex h-28 items-end gap-1">
+        {data.map((d) => (
+          <div key={d.day} className="flex flex-1 flex-col items-center justify-end gap-0.5" title={`${d.day} — ${d.views} vue(s), ${d.contacts} contact(s)`}>
+            <div className="w-full rounded-t bg-brand-green/70" style={{ height: `${(d.views / max) * 100}%` }} />
+            {d.contacts > 0 && (
+              <div className="w-full rounded-b bg-brand-gold" style={{ height: `${Math.max(6, (d.contacts / max) * 100)}%` }} />
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 flex items-center gap-4 text-[11px] text-muted-foreground">
+        <span className="flex items-center gap-1"><i className="size-2 rounded-full bg-brand-green/70" /> Vues</span>
+        <span className="flex items-center gap-1"><i className="size-2 rounded-full bg-brand-gold" /> Contacts</span>
+      </div>
+    </div>
   );
 }
 
