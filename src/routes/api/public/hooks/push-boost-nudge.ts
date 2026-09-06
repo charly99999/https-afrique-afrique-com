@@ -8,11 +8,11 @@ export const Route = createFileRoute("/api/public/hooks/push-boost-nudge")({
     handlers: {
       POST: async ({ request }) => {
         // Auth: CRON_SECRET (server-only). Accept via Authorization: Bearer or x-cron-secret header.
-        const expected = process.env.CRON_SECRET;
+        const allowed = [process.env.CRON_SECRET, process.env.CRON_SECRET_INTERNAL].filter(Boolean);
         const auth = request.headers.get("authorization") ?? "";
         const bearer = auth.toLowerCase().startsWith("bearer ") ? auth.slice(7).trim() : "";
         const got = bearer || request.headers.get("x-cron-secret") || "";
-        if (!expected || got !== expected) {
+        if (!got || !allowed.includes(got)) {
           return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
         }
 

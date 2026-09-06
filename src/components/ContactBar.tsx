@@ -2,6 +2,7 @@ import { Phone, MessageCircle, Lock, FileText } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import type { DbListing } from "@/lib/listings-client";
 import { useAuth } from "@/hooks/use-auth";
+import { trackListingEvent } from "@/lib/analytics";
 
 export function ContactBar({
   listing,
@@ -15,6 +16,9 @@ export function ContactBar({
   isB2B?: boolean;
 }) {
   const { user } = useAuth();
+  const track = (kind: "click_phone" | "click_whatsapp" | "click_message") => {
+    void trackListingEvent(listing.id, kind);
+  };
 
   const wrapperCls =
     "fixed inset-x-0 bottom-[88px] z-40 mx-auto w-full max-w-[440px] px-4 md:max-w-3xl lg:max-w-5xl xl:max-w-7xl pb-[env(safe-area-inset-bottom)]";
@@ -58,6 +62,7 @@ export function ContactBar({
         {isB2B && wa && (
           <a
             href={`https://wa.me/${wa}?text=${devisMessage}`}
+            onClick={() => track("click_whatsapp")}
             target="_blank"
             rel="noreferrer"
             className="flex items-center justify-center gap-2 rounded-xl bg-brand-gold py-3.5 text-sm font-extrabold text-foreground"
@@ -69,6 +74,7 @@ export function ContactBar({
           {wa ? (
             <a
               href={`https://wa.me/${wa}?text=${waMessage}`}
+              onClick={() => track("click_whatsapp")}
               target="_blank"
               rel="noreferrer"
               className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#25D366] py-4 text-sm font-extrabold text-white"
@@ -76,19 +82,20 @@ export function ContactBar({
               <MessageCircle className="size-5" /> WhatsApp
             </a>
           ) : (
-            <button onClick={onMessage} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-foreground py-4 text-sm font-extrabold text-brand-gold">
+            <button onClick={() => { track("click_message"); onMessage(); }} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-foreground py-4 text-sm font-extrabold text-brand-gold">
               <MessageCircle className="size-5" /> Message
             </button>
           )}
           {phone ? (
             <a
               href={`tel:${phone}`}
+              onClick={() => track("click_phone")}
               className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-green py-4 text-sm font-extrabold text-primary-foreground"
             >
               <Phone className="size-5" /> Appeler le vendeur
             </a>
           ) : (
-            <button onClick={onMessage} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-green py-4 text-sm font-extrabold text-primary-foreground">
+            <button onClick={() => { track("click_message"); onMessage(); }} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-green py-4 text-sm font-extrabold text-primary-foreground">
               <MessageCircle className="size-5" /> Contacter
             </button>
           )}
