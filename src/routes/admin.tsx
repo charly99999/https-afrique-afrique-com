@@ -252,7 +252,7 @@ function ListingsTab() {
       const { error: err } = await supabase.rpc("admin_set_listing_status", {
         _listing_id: id,
         _status: next as never,
-        _reason: reason ?? null,
+        _reason: reason ?? undefined,
       });
       if (err) throw err;
       toast.success("Annonce mise à jour.");
@@ -349,7 +349,7 @@ function UsersTab() {
     setRows(null);
     setError(null);
     const { data, error: err } = await supabase.rpc("admin_list_users", {
-      _search: search || null,
+      _search: search || undefined,
       _limit: 100,
     });
     if (err) {
@@ -371,7 +371,7 @@ function UsersTab() {
       const { error: err } = await supabase.rpc("admin_set_suspension", {
         _user_id: u.id,
         _suspended: suspend,
-        _reason: suspend ? "Violation des règles de la marketplace" : null,
+        _reason: suspend ? "Violation des règles de la marketplace" : undefined,
       });
       if (err) throw err;
       toast.success(suspend ? "Compte suspendu." : "Compte réactivé.");
