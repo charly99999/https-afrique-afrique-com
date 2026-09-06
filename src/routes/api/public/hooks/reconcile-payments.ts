@@ -17,11 +17,11 @@ export const Route = createFileRoute("/api/public/hooks/reconcile-payments")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const expected = process.env.CRON_SECRET;
+        const allowed = [process.env.CRON_SECRET, process.env.CRON_SECRET_INTERNAL].filter(Boolean);
         const auth = request.headers.get("authorization") ?? "";
         const bearer = auth.toLowerCase().startsWith("bearer ") ? auth.slice(7).trim() : "";
         const got = bearer || request.headers.get("x-cron-secret") || "";
-        if (!expected || got !== expected) {
+        if (!got || !allowed.includes(got)) {
           return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
         }
 
