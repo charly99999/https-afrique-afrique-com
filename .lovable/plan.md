@@ -1,87 +1,69 @@
-# Mise à jour Afrique Business
+# Afrique-Business — Audit complet et plan de mise à niveau
 
-Toutes les pages ajoutées respectent le thème lumineux existant (brand-green, brand-gold, fond clair) et restent en français.
+## 1. Audit de l'existant (vérifié dans le code et la base)
 
-## 1. Partage de l'application (page d'accueil)
-- Ajouter un bouton icône `Share2` (lucide) en haut à gauche du header de `src/routes/index.tsx`.
-- Logique : utiliser `navigator.share` si disponible ; sinon copier le texte dans le presse-papiers + toast.
-- Message partagé exact :
-  > Rejoins moi sur Afrique Business, la plateforme pour acheter, vendre et gagner de l'argent facilement en Afrique de l'Ouest.
-  > 👉 afrique-afrique.com
+### Ce qui fonctionne réellement
+- **Annonces** : publication, édition, gestion (`publier`, `annonces/$id`, `annonces/$id/edit`, `mes-annonces`), 66 annonces actives en base, photos réelles dans le stockage privé avec liens signés.
+- **Recherche / filtres / catégories** : page Explorer avec catégories et sous-catégories, ville/commune, prix, pays ; historique de recherche ; géolocalisation.
+- **Messagerie** : temps réel opérationnel (abonnement live), états lu/non lu, fils par annonce. 4 messages seulement en base (peu d'usage, pas un bug).
+- **Favoris**, **profils vendeurs**, **boutique vendeur** (`boutique/$ownerId`), **avis vendeurs**, **KYC** avec vérification automatique toutes les 5 minutes.
+- **Paiements PayDunya** : création de facture, page de retour, webhook signé, activation abonnement/boost, journal des webhooks.
+- **Notifications Web Push** (abonnement + relance boost) et **publication Facebook** après boost payé.
+- **Sécurité** : RLS active partout, téléphone/WhatsApp protégés par fonctions dédiées, rôles admin dans une table séparée.
+- **SEO** : sitemaps par pays et catégorie, JSON-LD. **Mobile** : navigation basse, mode Lite, compression d'images.
 
-## 2. Bannière promotionnelle rouge (accueil)
-- Composant `PromoBanner` fermable (état persistant 24 h via `localStorage`).
-- Fond rouge `bg-red-600` + texte blanc, bouton blanc "DÉCOUVRIR NOS OFFRES" → `/abonnements`.
-- Bouton X en haut à droite, accessible (`aria-label="Fermer"`).
-- Texte : « Pour toutes questions concernant nos offres ou toutes autres informations, contactez-nous : +225 0565242349 »
+### Ce qui est incomplet, cassé ou absent
+1. **Compteur de vues jamais incrémenté** : aucune écriture de `views_count` dans le code, et une règle base bloque toute mise à jour côté client. Conséquence : « Mes statistiques » et « Mes annonces » affichent toujours 0 vue. Aucun suivi de clics ni de contacts.
+2. **Aucune interface d'administration** : pas de page admin (utilisateurs, annonces, signalements, paiements, abonnements, boosts, statistiques). Le rôle admin existe mais n'a aucun écran.
+3. **Signalements sans suite** : le formulaire de signalement existe (0 signalement en base), mais aucun écran de modération, pas de signalement de profil.
+4. **Pas d'inscription par téléphone + code SMS** : seulement e-mail + mot de passe ; le téléphone n'est qu'une info de profil.
+5. **Pas d'alertes de recherche** : aucune table ni écran ; les favoris ne déclenchent aucune notification (baisse de prix, annonce vendue).
+6. **Pas de type d'annonce vente / troc / don** : uniquement la vente avec prix.
+7. **Photos limitées à 8** au lieu de 10.
+8. **Aucune expiration automatique** : abonnements et boosts expirés ne sont jamais nettoyés (une seule tâche planifiée existe, pour le KYC). Les annonces n'expirent pas non plus.
+9. **Paiements bloqués** : 33 paiements restent « en attente » contre 2 confirmés. Le correctif du webhook est dans le code mais **n'a jamais été publié en production** — c'est la cause principale.
+10. **Adoption des notifications quasi nulle** : 1 seul abonnement push enregistré ; la demande d'autorisation est trop discrète.
+11. **Détail annonce** : pas de compteur d'appels/WhatsApp, pas d'annonces similaires, pas de partage de profil vendeur.
 
-## 3. Section « Plus » dans le profil
-Ajouter dans `src/routes/profil.tsx` une nouvelle carte « Plus » qui ouvre `/plus` (nouvelle route).
+## 2. Plan d'implémentation par étapes
 
-Page `/plus` (nouveau fichier `src/routes/plus.tsx`) :
-- **Mode Lite** : toggle (Switch shadcn) — stocké dans `localStorage` clé `afb-lite-mode`. Quand actif, on lit ce flag dans `ListingCard` pour ne pas charger les images (placeholder gris + bouton « Charger l'image »).
-- **Inviter ses amis** → réutilise la fonction partage du point 1.
-- **Nous contacter sur WhatsApp** → `https://wa.me/2250565242349`.
-- **Nous contacter par mail** → `mailto:contact@afrique-afrique.com`.
-- Liens vers les pages légales :
-  - `/legal/cgu` — Conditions Générales d'Utilisation
-  - `/legal/cgv` — Conditions Générales de Vente
-  - `/legal/confidentialite` — Politique de Confidentialité
-  - `/legal/regles-diffusion` — Règles de diffusion
-  - `/legal/securite` — Conseils de sécurité
+### Étape 1 — Débloquer l'argent et les fondations (critique)
+- Publier le correctif du webhook de paiement, puis rejouer les paiements en attente auprès de PayDunya et activer ceux réellement payés.
+- Rendre le webhook totalement idempotent (un paiement confirmé ne peut jamais être activé deux fois) et ajouter une vérification de secours automatique des paiements en attente de plus de 15 minutes.
+- Tâches planifiées : expiration des boosts, expiration des abonnements (retour au compte Gratuit), expiration des annonces anciennes.
 
-Chaque page légale a un contenu de base professionnel propre à Afrique Business (rédigé maintenant, pas un Lorem). Mise en page lisible (prose).
+### Étape 2 — Statistiques réelles
+- Enregistrer les vues (une par visiteur et par jour), les clics « Appeler » / « WhatsApp » / « Message » et les mises en favori.
+- Refondre « Mes statistiques » : vues, contacts, favoris, taux de contact, évolution sur 30 jours, classement des annonces.
 
-## 4. Profil utilisateur à onglets
-Refonte de `src/routes/mes-annonces.tsx` (ou nouveau composant en haut) :
-- 3 onglets principaux (`Tabs` shadcn) : **Annonces** / **Boosts** / **Achats**.
-- Onglet **Annonces** : 4 sous-onglets avec badges de compteur :
-  - En vente (`status='active'`)
-  - Vendues (`status='sold'`)
-  - Expirées (`status='expired'`)
-  - Rejetées (`status='rejected'`)
-- Onglet **Boosts** : liste des entrées de la table `boosts` de l'utilisateur (date, annonce, durée, statut).
-- Onglet **Achats** : liste des paiements `payments` de l'utilisateur (date, montant, type).
-- Compteurs récupérés en une seule requête `.select('status', { count: 'exact' })` groupée côté client.
+### Étape 3 — Administration et modération
+- Nouvelle section admin réservée au rôle admin : tableau de bord, utilisateurs (rôle, suspension, vérification), annonces (valider, suspendre, supprimer), signalements (traiter, motif, action), paiements et abonnements, boosts, statistiques globales.
+- Signalement de profil en plus du signalement d'annonce, avec file de traitement.
 
-## 5. Page « Modifier mon profil »
-Nouvelle route `/profil/modifier` (`src/routes/profil.modifier.tsx`) :
-- **Changer mes contacts** : formulaire téléphone + WhatsApp (update table `profiles`).
-- **Changer le mot de passe** : `supabase.auth.updateUser({ password })`.
-- **Gérer mes notifications** : toggle push (réutilise `PushOptIn`) + toggle e-mails promo (colonne `profiles.email_opt_in` à ajouter via migration).
-- Bouton **Se déconnecter** (style neutre).
-- Bouton **Supprimer le compte** (rouge, double confirmation) : appelle un nouveau server fn `deleteMyAccount` qui supprime via `supabaseAdmin.auth.admin.deleteUser(userId)`. Le compte de l'admin (`manassemandan0779@gmail.com`) est protégé : le server fn refuse si l'appelant a le rôle `admin`.
+### Étape 4 — Parité marketplace
+- Type d'annonce : Vente / Troc / Don, avec filtre dédié et prix masqué pour don/troc.
+- Jusqu'à 10 photos.
+- Alertes de recherche : enregistrer une recherche (catégorie + ville + prix) et recevoir une notification quand une annonce correspond.
+- Notifications favoris : baisse de prix et annonce vendue.
+- Annonces similaires sur la fiche, partage de la boutique vendeur.
 
-Lien ajouté dans `/profil` : « Modifier mon profil » en tête de liste.
+### Étape 5 — Inscription par téléphone + code SMS
+- Nécessite un fournisseur SMS. Variable d'environnement à ajouter côté serveur uniquement (nom exact fourni au moment de l'implémentation, par ex. `SMS_PROVIDER_API_KEY`) — aucune clé côté navigateur.
+- À défaut de fournisseur, l'e-mail reste la méthode principale et le téléphone est vérifié par code lors de la publication.
 
-## 6. CTA Abonnement dans le profil
-- Remplacer la carte sombre actuelle « 👑 Business » par une bannière lumineuse dorée :
-  - Titre : « Vendez plus vite et gagnez plus »
-  - Sous-titre : « grâce à nos abonnements Pro & Business »
-  - Bouton blanc « Découvrir » → `/abonnements`
-- Conserver les couleurs brand (gold + green).
+### Étape 6 — Finitions et tests
+- États de chargement, états vides et messages d'erreur homogènes sur tous les écrans.
+- Relecture des règles d'accès pour chaque nouvelle table.
+- Tests de bout en bout des 13 parcours demandés (visiteur, inscription, publication, gestion, favoris/alertes, messagerie, signalement, boutique, abonnement, boost, statistiques, admin, mobile).
 
-## Détails techniques
+## 3. Points techniques
+- Nouvelles tables prévues : `listing_events` (vues/clics/contacts), `saved_searches`, `profile_reports`, `admin_actions`. Chacune avec droits d'accès explicites et règles de sécurité.
+- Nouvelles colonnes : `listings.deal_type` (vente/troc/don), `profiles.suspended_at`.
+- Tâches planifiées via le planificateur déjà présent, appelant des points d'entrée protégés par le secret existant `CRON_SECRET`.
+- Aucun secret exposé côté navigateur ; toute clé reste lue côté serveur.
+- Aucune fonctionnalité existante supprimée : le thème Onyx & Or, l'éléphant 3D, le mode Lite, les pages légales, la bannière et les intégrations actuelles sont conservés.
 
-- **Migration unique** :
-  - Ajouter `email_opt_in boolean default true` à `profiles`.
-  - Ajouter les statuts `'sold'`, `'expired'`, `'rejected'` au check existant de `listings.status` si absents.
-- **Server function** : `src/lib/account.functions.ts` → `deleteMyAccount` (middleware auth requis ; charge `supabaseAdmin` à l'intérieur du handler ; bloque si rôle admin).
-- **Routes ajoutées** :
-  ```text
-  src/routes/plus.tsx
-  src/routes/legal.cgu.tsx
-  src/routes/legal.cgv.tsx
-  src/routes/legal.confidentialite.tsx
-  src/routes/legal.regles-diffusion.tsx
-  src/routes/legal.securite.tsx
-  src/routes/profil.modifier.tsx
-  ```
-- **Composants ajoutés** : `PromoBanner`, `ShareAppButton`, `LiteModeProvider` (contexte simple basé sur `localStorage`).
-- **Cron Web Push** : la précédente tentative `cron.schedule` a échoué (extension `pg_cron` non installée sur le projet). Je l'inclus dans cette mise à jour en activant `pg_cron` + `pg_net` via la migration avant la planification — ou, si l'activation échoue, je laisse l'endpoint `/api/public/hooks/push-boost-nudge` prêt et je documente l'appel manuel.
-- **Secret VAPID** : la clé privée VAPID reste à ajouter via `add_secret` (interrompue précédemment). Je relancerai la demande à la fin de l'implémentation.
-
-## Hors scope (à confirmer si tu les veux)
-- Refonte complète du design du profil au-delà des points listés.
-- Internationalisation des pages légales (uniquement FR pour l'instant).
-- Modération automatique des nouvelles annonces marquées `rejected`.
+## 4. Ce que je ne ferai pas sans votre accord
+- Rotation des clés PayDunya (recommandée, elles ont été exposées).
+- Réactivation du contrôle « mot de passe compromis » (désactivé à votre demande).
+- Ajout d'un fournisseur SMS payant.
