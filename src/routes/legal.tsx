@@ -18,6 +18,24 @@ export function LegalLayout({ title, lastUpdate = "Mise à jour : 2025", childre
 }
 
 export const Route = createFileRoute("/legal")({
+  head: () => ({
+    meta: [
+      { title: "Informations légales — Afrique-business" },
+      {
+        name: "description",
+        content:
+          "Conditions d'utilisation, confidentialité, règles de publication et conseils de sécurité de la marketplace Afrique-business.",
+      },
+      { property: "og:title", content: "Informations légales — Afrique-business" },
+      {
+        property: "og:description",
+        content:
+          "Conditions d'utilisation, confidentialité, règles de publication et conseils de sécurité de la marketplace Afrique-business.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: () => (
     <MobileShell>
       <div className="px-6 py-10 text-center">
